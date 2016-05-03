@@ -1,0 +1,109 @@
+#+BLOG: perlancar
+#+POSTID: 1278
+#+BLOG: perlancar
+#+DATE: [2016-05-03 Tue 14:18]
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl
+#+TAGS: perl
+#+DESCRIPTION:
+#+TITLE: Blogging with org2blog
+
+This post you're seeing is the first one posted using [[https://github.com/punchagan/org2blog][org2blog]]. Finally, I can
+blog from Emacs, yay!
+
+Frankly I'm not too fussy with my blog setup: any decent website will do as long
+as I can type text in, format stuffs, and the final page is readable. My
+previous blog was on [[http://blogs.perl.org][blogs.perl.org]], which I had to abandon because the login
+system was screwed up for many months, preventing me from even logging in, much
+less posting comments or new entries.
+
+My current blog, the site you're reading now hosted by WordPress, is not too
+bad. But there are two problems I'm having: first, the in-browser editor is
+limited and sometimes has annoying couple-of-second freezes every now and then.
+And second, the worse one, is that I've noticed the text changed at least twice.
+A few months ago I saw my Perl source code inside <pre> got HTML-escaped, so "$a
+> $b" becomes "$a &gt; $b". This does not happen to all posts, only some of
+them. But I'm just too lazy to check my posts one by one.
+
+Today I decide to give org2blog a try. I've heard about this tool like a couple
+of weeks ago and yesterday I had an idea for a blog post. Here are the general
+steps and some examples if you happen to be interested to follow suit.
+
+** Installation
+The first thing I had to do was put the ~*.el~ from the org2blog package under
+my ~$HOME/.emacs.d~ directory as ~M-x install-package~ didn't work out for me.
+(~$HOME/.emacs.d/lisp~ should be a better choice, but I haven't bothered to move
+my ~*.el~ files there.) I also had to drop ~xml-rpc.el~ and ~metaweblog.el~ from
+into this same directory. Those two are the requirements mentioned in the
+org2blog README.
+
+Then I put append these lines into my ~$HOME/.emacs~:
+
+: (require 'org2blog-autoloads)
+: (setq org2blog/wp-blog-alist
+:       '(("perlancar"
+:          :url "https://perlancar.wordpress.com/xmlrpc.php"
+:          :username "<censored>"
+:          :password "<censored>"
+:          :default-title "Post"
+:          :default-categories ("perl")
+:          :tags-as-categories nil)
+:          ))
+: (setq org2blog/wp-use-sourcecode-shortcode t)
+
+The README doesn't recommend putting the password right there along with the
+username, but for simplicity sake I just put it anyway.
+
+Then I restarted my Emacs.
+
+** Creating a new post
+To create a new post, ~M-x org2blog/wp-new-entry~. org2blog will create a new
+buffer containing something like this:
+
+: #+DATE: [2016-05-03 Tue 14:47]
+: #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+: #+CATEGORY: perl
+: #+TAGS:
+: #+DESCRIPTION:
+: #+TITLE: Post
+
+You can then edit the title, tags, or categories. And start writing. You can
+save the buffer anywhere. This post itself is saved in a [[https://github.com/perlancar/blog-perlancar-wordpress-com-2016/blob/master/01-blogging-with-org2blog.org][Git repository]].
+
+** Posting to WordPress
+To post the buffer as draft, ~M-x org2blog/wp-post-buffer~ (or ~C-c M-p d~). And
+to publish the buffer ~C-u M-x org2blog/wp-post-buffer~ (or ~C-c M-p p~).
+org2blog will also ask you whether you want to open the post in a browser.
+
+That's it, it's that simple. Now you can write in the cozy and powerful Emacs
+environment, and your source document is in Org format instead of the default
+bastardized HTML that WordPress uses.
+
+** Some formatting examples
+To see the Org source code that produces these result, see the abovementioned
+Git repository.
+
+This is a Perl code block:
+
+#+BEGIN_SRC perl
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Org::Parser;
+
+my $orgp = Org::Parser->new;
+my $doc = $orgp->parse_file("$ENV{HOME}/todo.org");
+#+END_SRC
+
+This is another Perl code block, which we set to begin from line 75 and have its
+lines 77-78 highlighted:
+
+#+ATTR_WP: :syntaxhl firstline=75 highlight=77,78
+#+BEGIN_SRC perl
+my @elems = $doc->select("Table:first TableCell:empty");
+for my $elem (@elems) {
+    $log->trace("Deleting empty element %s", $elem);
+    $elem->delete;
+}
+#+END_SRC
