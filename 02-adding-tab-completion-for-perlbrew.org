@@ -1,0 +1,32 @@
+#+BLOG: perlancar
+#+DATE: [2016-05-03 Tue 17:48]
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,bash
+#+TAGS: perl,bash
+#+DESCRIPTION:
+#+TITLE: Adding tab completion for perlbrew
+
+[[https://metacpan.org/pod/App::perlbrew][perlbrew]] is a command-line utility I'm using quite a bit recently, e.g. while
+developing [[https://metacpan.org/pod/Bencher][Bencher]] feature of benchmarking against multiple perls, for trying
+out [[http://perl11.org/cperl/][cperl]], or just updating to the latest perl release. So I thought it would be
+nice to add tab completion feature to perlbrew.
+
+The obvious choice for writing tab completion feature is bash, but I'm more
+comfortable with Perl. And besides, there are a few nice completion features in
+[[https://metacpan.org/pod/Complete::Util][Complete::Util]] I'd like to use. This post will describe how to (easily, I hope)
+add tab completion to a typical command-line program using Perl, so it will
+encourage more tab completion scripts to be written.
+
+This post will assume your shell is bash. Actually the same completion script
+can easily be used under a couple of other shells. Maybe I'll post something
+about this in a future post.
+
+...
+
+For example, I'd like to be able to type:
+
+: % perlbrew switch 10<tab>
+
+and it would complete to:
+
+: % perlbrew switch 5.10.1
