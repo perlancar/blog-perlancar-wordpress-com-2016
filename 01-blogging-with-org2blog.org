@@ -3,8 +3,8 @@
 #+BLOG: perlancar
 #+DATE: [2016-05-03 Tue 14:18]
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
-#+CATEGORY: perl
-#+TAGS: perl
+#+CATEGORY: perl,emacs
+#+TAGS: perl,emacs
 #+DESCRIPTION:
 #+TITLE: Blogging with org2blog
 
@@ -37,7 +37,7 @@ my ~*.el~ files there.) I also had to drop ~xml-rpc.el~ and ~metaweblog.el~ from
 into this same directory. Those two are the requirements mentioned in the
 org2blog README.
 
-Then I put append these lines into my ~$HOME/.emacs~:
+Then I appended these lines to my ~$HOME/.emacs~:
 
 : (require 'org2blog-autoloads)
 : (setq org2blog/wp-blog-alist
@@ -51,12 +51,17 @@ Then I put append these lines into my ~$HOME/.emacs~:
 :          ))
 : (setq org2blog/wp-use-sourcecode-shortcode t)
 
-The README doesn't recommend putting the password right there along with the
-username, but for simplicity sake I just put it anyway.
+I guess the README doesn't recommend putting the password right there along with
+the username, but for simplicity sake I just put it anyway.
+
+Also note that you can use an existing blog (as in my case). org2blog can add
+new posts or delete existing ones based on post ID's which you supply later.
 
 Then I restarted my Emacs.
 
 ** Creating a new post
+Each post is put in a separate buffer (file).
+
 To create a new post, ~M-x org2blog/wp-new-entry~. org2blog will create a new
 buffer containing something like this:
 
@@ -68,17 +73,24 @@ buffer containing something like this:
 : #+TITLE: Post
 
 You can then edit the title, tags, or categories. And start writing. You can
-save the buffer anywhere. This post itself is saved in a [[https://github.com/perlancar/blog-perlancar-wordpress-com-2016/blob/master/01-blogging-with-org2blog.org][Git repository]].
+save the buffer anywhere as regular files. This post itself is saved as an
+~.org~ file then put under a [[https://github.com/perlancar/blog-perlancar-wordpress-com-2016/blob/master/01-blogging-with-org2blog.org][Git repository]].
 
 ** Posting to WordPress
 To post the buffer as draft, ~M-x org2blog/wp-post-buffer~ (or ~C-c M-p d~). And
 to publish the buffer ~C-u M-x org2blog/wp-post-buffer~ (or ~C-c M-p p~).
-org2blog will also ask you whether you want to open the post in a browser.
+org2blog will also ask you whether you want to open the post in a browser to see
+how the final result looks like.
 
 That's it, it's that simple. Now you can write in the cozy and powerful Emacs
 environment, and your source document is in Org format instead of the default
 bastardized HTML that WordPress uses.
 
+After the first sending to the server, org2blog will add a ~#+POST_ID:~ line
+containing the post's ID. If you edit the buffer, then re-post, it will update
+the existing post since the buffer already specifies the post's ID. Editing your
+blog posts is now as simple as editing a file with an extra single command to
+push it to WordPress.
 ** Some formatting examples
 To see the Org source code that produces these result, see the abovementioned
 Git repository.
