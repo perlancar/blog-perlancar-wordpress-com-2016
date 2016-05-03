@@ -23,7 +23,11 @@ limited and sometimes has annoying couple-of-second freezes every now and then.
 And second, the worse one, is that I've noticed the text changed at least twice.
 A few months ago I saw my Perl source code inside <pre> got HTML-escaped, so "$a
 > $b" becomes "$a &gt; $b". This does not happen to all posts, only some of
-them. But I'm just too lazy to check my posts one by one.
+them. But I'm just too lazy to check my posts one by one. And more recently,
+suddenly all my "pericmd-tut" (with a lowercase i) tags became "perlcmd-tut"
+(with a lowercase ell), as if someone had ran an autocorrect on the tags
+database. I updated a few dozen posts this time, reverting the tags back to
+"pericmd-tut" and meanwhile starting to ponder for alternatives.
 
 Today I decide to give org2blog a try. I've heard about this tool like a couple
 of weeks ago and yesterday I had an idea for a blog post. Here are the general
