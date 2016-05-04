@@ -25,7 +25,7 @@ A few months ago I saw my Perl source code inside <pre> got HTML-escaped, so "$a
 > $b" becomes "$a &gt; $b". This does not happen to all posts, only some of
 them. But I'm just too lazy to check my posts one by one. And more recently,
 suddenly all my "pericmd-tut" (with a lowercase i) tags became "perlcmd-tut"
-(with a lowercase ell), as if someone had ran an autocorrect on the tags
+(with a lowercase ell), as if someone had run an autocorrect on the tags
 database. I updated a few dozen posts this time, reverting the tags back to
 "pericmd-tut" and meanwhile starting to ponder for alternatives.
 
