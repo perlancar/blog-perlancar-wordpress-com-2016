@@ -6,7 +6,7 @@
 #+CATEGORY: perl
 #+TAGS: perl
 #+DESCRIPTION:
-#+TITLE: Using monotoning versioning in Perl
+#+TITLE: Using monotonic versioning in Perl
 
 The [[http://blog.appliedcompscilab.com/monotonic_versioning_manifesto/][Monotonic Versioning Manifesto]] looks interesting. Here's the summary.
 Version is composed of only two numbers: X.Y. No leading zero is allowed for
