@@ -1,0 +1,41 @@
+#+BLOG: perlancar
+#+POSTID: 1285
+#+DATE: [2016-05-19 Thu 14:32]
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl
+#+TAGS: perl
+#+DESCRIPTION:
+#+TITLE: Using monotoning versioning in Perl
+
+The [[http://blog.appliedcompscilab.com/monotonic_versioning_manifesto/][Monotonic Versioning Manifesto]] looks interesting. Here's the summary.
+Version is composed of only two numbers: X.Y. No leading zero is allowed for
+both numbers (so you must start at 1.1, not 0.1 nor 1.0). X indicates
+compatibility and must be increased whenever you introduce a
+backward-incompatible change. Y is the release number and must always increase,
+even though X is increased. In other words, Y is never reset. In this aspect, Y
+is akin to build number often used in compiled projects.
+
+If you maintain two versions of your software, e.g. 7.5304 and 8.5822 and want
+to backport some feature/changes from version 8 to 7, you would release 7.5823.
+
+Oh, and one more thing: since the popular [[http://semver.org][semantic versioning scheme]] uses X.Y.Z,
+to aid interoperability X.Y.0 is allowed as an alternate display format and is
+identical to X.Y. Any other number for Z is not allowed.
+
+Sure, the numbering scheme won't be sufficient for larger/complex software, but
+for many Perl modules it could be a fit.
+
+The important thing is to decide the number of digits you will need for the
+release number. 1.1, 1.10, 1.100, and so on are all the same in Perl (this is
+according to version->parse(V1) == version->parse(V2)), so you cannot just start
+with 1.1 and expect to go more than 9 releases without increasing X.
+
+A sane choice is either 3 or 6 digits*). If 3 digits is enough for you, then go
+for it. A total of 900 releases, *ever*, sounds limiting at first but I don't
+think there is a CPAN distribution that has close to 900 releases, are there?
+Otherwise, go for 6.
+
+*) Because the way version number works in Perl, you should not choose e.g. 2
+or 4. Because version->parse("1.10") < version->parse("1.9") and
+version->parse("1.10010") < version->parse("1.1009").
