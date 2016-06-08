@@ -1,0 +1,176 @@
+#+BLOG: perlancar
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl
+#+TAGS: perl
+#+DESCRIPTION:
+#+TITLE: Running external programs from Perl
+
+* exec, system, readpipe
+
+Perl provides three builtin functions to run external programs: `exec`,
+`system`, and `readpipe` (which you usually access from the backtick operator).
+They are convenient especially for simple cases but not perfect. In my opinion,
+there are two major problems with this API.
+
+First, *you can't capture output without avoiding the shell*. This:
+
+#+BEGIN_SRC perl
+$output = `ls`;
+#+END_SRC
+
+always calls the shell. Also, you can't capture stderr (unless you use a shell
+construct like `2>&1`, but this means you can't capture stdout and stderr
+separately unless you use another shell construct like `2>/some/tmpfile` which
+is more cumbersome because you'll need to read the file using extra code).
+
+The capture problem is fixed by [[https://metacpan.org/pod/Capture::Tiny][Capture::Tiny]], but still it would be nice if
+Perl provides this feature builtin.
+
+Second, *the rule for using/avoiding shell in `system()` is confusing*
+especially to beginners. It goes like this: if the number of arguments is more
+than one, `system()` will not use a shell. But if the number of arguments is
+one, it will use the shell, unless you use a special incantation:
+
+#+BEGIN_SRC perl
+system {"cmd"} "cmd";
+system {$cmd[0]} @cmd;
+#+END_SRC
+
+which, I'm sure, many beginners will be unaware of or simply forget. This is
+usually okay until `"cmd"` or `$cmd[0]` comes from user's input which might be
+malicious.
+
+Perl 6 solves the shell/no-shell problem by providing two separate functions:
+`shell` and `run` ([[https://perl6advent.wordpress.com/2014/12/06/day-06-running-external-programs-from-perl-6/][see this 2014 advent article]]). This is good. Perl module
+[[https://metacpan.org/pod/IPC::System::Simple][IPC::System::Simple]] also tries to provide something similar by providing the
+no-shell version of `system()` and `capture()` as well as the shell version
+`systemx()` and `capturex()`.
+
+* Shell
+
+Using shell has some drawbacks: a bit of extra overhead, loss of portability,
+and security issues.
+
+The overhead of shell is usually negligible and not important, unless you need
+to call a program hundreds of times a second or more, and even this need usually
+indicates that you are probably doing something wrong.
+
+Loss of portability. Shells have different syntax for the same feature, or some
+shells simply do not have the feature, and some shells have entirely different
+quoting mechanism. Even popular Unix shells don't share the same basic feature
+set. For example, fish does not support the `ENV=value program` syntax to set
+environment variable before running a program.
+
+Security. A shell might interpret and substitute various things in your
+command-line: from variables (`$foo`), wildcard, command separator, output/input
+redirection, and loads others.
+
+Let's see the common use-cases of why people resort to shell and whether we can
+replace them with Perl/portable equivalent:
+
+** wildcard
+
+#+BEGIN_SRC perl
+system "rm *.bak";
+#+END_SRC
+
+This can replaced with:
+
+#+BEGIN_SRC perl
+system "rm", glob("*.bak");
+#+END_SRC
+
+** redirection
+
+The two most common cases are silencing errors (`2 > /dev/null`) and/or
+capturing errors (`2 >/tmp/somefile`). This can be replaced with using
+`Capture::Tiny`:
+
+#+BEGIN_SRC perl
+use Capture::Tiny;
+($stdout, $stderr, @result) = capture {
+    system "cmd";
+};
+#+END_SRC
+
+I also try providing a replacement for `system()` which supports capturing in
+[[https://metacpan.org/pod/IPC::System::Options][IPC::System::Options]]:
+
+#+BEGIN_SRC perl
+use IPC::System::Options 'system';
+system {capture_stdout => \$stdout, capture_stderr => \$stderr}, "cmd";
+#+END_SRC
+
+Another common need is to feed some input file:
+
+#+BEGIN_SRC perl
+system "foo < /path/to/inputfile";
+#+END_SRC
+
+This can be done with some modules, for example [[https://metacpan.org/pod/IPC::Run][IPC::Run]]:
+
+#+BEGIN_SRC perl
+use IPC::Run 'run';
+run \@cmd, '<', '/path/to/inputfile';
+#+END_SRC
+
+If you have the input in some Perl variable already,
+
+For more complex redirection needs, like duplicating file descriptors or process
+substitution, a more specialized API can be developed. But they are less common.
+
+** pipe
+
+#+BEGIN_SRC perl
+system "foo | bar";
+system "foo && bar || baz";
+#+END_SRC
+
+Again, `IPC::Run` is convenient here for the first command:
+
+#+BEGIN_SRC perl
+use IPC::Run 'run';
+run ["foo"], |, ["bar"];
+#+END_SRC
+
+but the second command showcases why shell is convenient.
+
+** setting environment variables
+
+#+BEGIN_SRC perl
+system "ENV1=val1 ENV2=val2 cmd";
+#+END_SRC
+
+This is simply not proper and not portable. The more proper way is to utilize
+`%ENV`:
+
+#+BEGIN_SRC perl
+local $ENV{ENV1} = 'val1';
+local $ENV{ENV2} = 'val2';
+system "cmd";
+#+END_SRC perl
+
+Again,[[https://metacpan.org/pod/IPC::System::Options][ IPC::System::Options]]'s `system()` provides a convenience:
+
+#+BEGIN_SRC perl
+use IPC::System::Options 'system';
+system { env => {ENV1=>'val1', ENV2=>'val2'} }, "cmd";
+#+END_SRC
+
+* More complex needs
+
+"Running an external program" is actually pretty broad class of task with lots
+of little details/options and extra stuffs related to it. Do you want to just
+run a program and never return (`exec`), or do you want to wait for a program to
+finish and get its output/exit status (`system`, `readpipe`)? Or do you want to
+start a program and resume control immediately without waiting for it to finish
+(but still want the ability to check the program from time to time or kill it
+later)?
+
+Do you want to feed input to the program?
+
+Do you want chroot/jail? Do you know that in Unix you can pass file descriptors
+to other processes using a named pipe or Unix socket? Which means there are
+security issues like possible leaking of information across chroot/jail
+environment.
