@@ -1,0 +1,86 @@
+#+BLOG: perlancar
+#+POSTID: 1289
+#+DATE: [2016-06-10 Fri 12:22]
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl
+#+TAGS: perl
+#+DESCRIPTION:
+#+TITLE: Cascade bumping of prerequisite version
+
+Introducing backward-incompatible change to a piece of code, especially if that
+code has a lot of dependants (i.e. located more upstream in the river, if we're
+using the [[http://neilb.org/2015/04/20/river-of-cpan.html][river of CPAN]] analogy), will cause pain. But sometimes you need or
+want to do it anyway.
+
+Suppose you have this tree of dependencies:
+
+: Aa (0.01)
+:     Bb (0.01, requires Aa=0)
+:     Cc (0.01, requires Aa=0)
+:         Dd (0.01, requires Cc=0)
+:         Ee (0.01, requires Cc=0)
+:             Ff (0.01, requires Ee=0)
+:             Gg (0.01, requires Ee=0)
+:     Hh (0.01, requires Aa=0.01)
+
+Now a backward-incompatible change is introduced in Aa, and you release Aa 0.02.
+Let's say this change happens to affect Bb and Cc but not Hh.
+
+If a system updates Aa to 0.02, suddenly Bb and Cc will break. And Dd, Ee, Ff,
+Gg will break too because Bb and Cc break. Aa can be updated due to a variety of
+causes, from manually for testing (like in a CPAN Testers machine) or because
+user installs something else like say Ii which needs Aa=0.02.
+
+So you now release Bb 0.02 and Cc 0.02 to cope with the changes introduced in
+Aa. And these updates are not backward-incompatible so users of Bb and Cc can
+still specify Bb=0 or Cc=0.01. The dependency tree becomes like this:
+
+: Aa (0.02)
+:     Bb (0.02, requires Aa=0.02)
+:     Cc (0.02, requires Aa=0.02)
+:         Dd (0.01, requires Cc=0)
+:         Ee (0.01, requires Cc=0)
+:             Ff (0.01, requires Ee=0)
+:             Gg (0.01, requires Ee=0)
+:     Hh (0.01, requires Aa=0.01)
+
+If a system happens to update just Bb or Cc, Aa will be correctly updated
+automatically to 0.02.
+
+If a system just updates Aa, the same situation still happens: Bb & Cc will break,
+Dd, Ee, Ff, Gh will break too because Bb and Cc break.
+
+Now suppose you add a new feature to Ff and release new version of Ff (0.02,
+requires Ee=0). Even though this does not have to do with backward-incompatible
+change of A 0.02, breakage might still happen. Let's say a CPAN Testers machine
+tries to install Ff 0.02. The machine won't automatically upgrade Bb and Cc
+because the specified dependency of Ff 0.02 doesn't require it too. Now the test
+will fail when there is a new Aa (0.02) installed but old versions of Bb and Cc.
+
+This is exactly what happens to me a few times, most recently in the case of
+[[https://metacpan.org/pod/Data::Sah][Data::Sah]] 0.79. After I released Data::Sah 0.79, and then a couple of weeks
+after that release some other distributions that do not directly depend on it,
+some CPAN Testers machines will start reporting failure for these distributions.
+This is because the machines happen to have the updated Data::Sah but some
+older direct dependants which break under the new Data::Sah.
+
+So back to our Aa example, to properly induce a cascade update, after we release
+Bb 0.02 and Cc 0.02, we also need to release Dd and Ee just to bump the
+prerequisite version of Cc to 0.02 *even though Dd and Ee don't exactly require
+Cc 0.02 (they can live with Cc 0.01)*. And repeat the process recursively:
+update Ff and Gg just to bump prerequisite version of Ee, and so on.
+
+Thus, if a system updates Gg 0.02, Ee will automatically be upgraded to 0.02, Cc
+automatically upgraded to 0.02, and Aa automatically upgraded to 0.02.
+
+To reiterate: after we introduce a backward-incompatible update to a module, we
+must update all the direct dependants of that module that are affected by the
+change, *and also recursively update all their dependants* just to bump the
+minimum prerequisite version and force pulling the module's and direct
+dependants' update.
+
+In the case of Data::Sah, this involves hundreds of distributions because
+[[https://metacpan.org/pod/Perinci::CmdLine::Lite][Perinci::CmdLine::Lite]] is a direct dependant that is affected. And
+Perinci::CmdLine::Lite (via [[https://metacpan.org/pod/Perinci::CmdLine::Any][Perinci::CmdLine::Any]]) is used by many of my App::
+distributions. But fortunately, on a production system, Data::Sah typically
+won't be updated without Perinci::CmdLine::Lite also being updated.
