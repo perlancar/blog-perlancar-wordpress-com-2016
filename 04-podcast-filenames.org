@@ -1,0 +1,62 @@
+#+BLOG: perlancar
+#+POSTID: 1292
+#+DATE: [2016-07-22 Fri 21:51]
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: organization
+#+TAGS: organization
+#+DESCRIPTION:
+#+TITLE: Podcast filenames
+
+Like many of you, I listen to some podcasts. There are various ways people get
+their episodes, but I do it manually on a PC: browse the podcast's website and
+download the MP3 files using the browser or ~wget~ or ~curl~. I listen on a
+variety of devices, including television and car audio which can only get the
+files via USB flashdisks, so I figure it's better to organize the files on the
+PC and transfer them to other devices as needed.
+
+Now there's this minor (or major, depending on how OCD you are) issue of the
+various inconsistent ways the podcasters like to name their MP3 files. Me, I'm
+standardizing on this: each filename should include, in the following order, 1)
+the podcast name (preferably short, a few letters, initials); 2) the episode
+number in the form of at least 000, or date in YYYYMMDD format; 3) episode title
+(one to a few words).
+
+This way, whenever I see a file lying around in some folder in some device I can
+immediately know which podcast this is and what the episode is all about
+(because on smartphones it's usually a pain to move files around). The order and
+the format of the number/date let the files get sorted nicely (because not all
+apps can do natural sorting). And the short podcast name/initials will prevent
+the annoyance of not being able to see the date/title on narrower screens
+(sometimes an app will scroll the filename horizontally a la stock ticker, but
+sometimes not).
+
+Oh, and I also stick to lowercase alphanumerical characters and
+dashes/underscores, avoiding whitespaces or other strange characters, for ease
+of typing, selecting, and tab-completioning.
+
+Here are some samples of filenames which I will definitely rename:
+
+- ~The Secret Emotional Life of Clothes.mp3~ (from [[http://www.npr.org/podcasts/510307/invisibilia][Invisibilia]]): spaces in
+  filename, no podcast name, no episode number/date. I'd rename it to
+  ~invisib-20160722-the_secret_emotional_life_of_clothes.mp3~.
+- ~obm20episode2016320-207_19_162C209.0420PM.mp3~ (from [[http://maximumfun.org/tags/shows/one-bad-mother][One Bad Mother]]): no
+  title, needless string ~episode~ as well as time of day, date not in YYYYMMDD
+  order, also the space got mangled into ~20~ (probably from ~%20~). I'd rename
+  it to ~obm-163-when_kids_share_a_room.mp3~.
+- ~ShmanQuestions.mp3~ (from [[http://maximumfun.org/tags/shows/shmanners][Shmanners]]): no episode number/date. I'd rename it
+  to ~shmanners-20160722-etiquette_catch_all.mp3~. Sometimes the title in the
+  filename doesn't match the title in the post, so I also correct that.
+- ~OhNoRossAndCarrie_47_RossAndCarrieRememberTonyAlamoPart1.mp3~ (from [[http://maximumfun.org/tags/shows/oh-no-ross-and-carrie][Oh No,
+  Ross and Carrie!]]): too long. I'd rename it to: ~onrac-047-tony_alamo_p1.mp3~.
+
+And here are some that are already good enough:
+
+- ~sm237_limabeans.mp3~ (from [[http://www.spilledmilkpodcast.com/episodes/][Spilled Milk]]). Although before it reaches episode
+  #10 and #100, it uses one and two digits for the episode number so I pad them
+  with leading zeroes.
+- ~Sawbones146Tea.mp3~ (from [[http://maximumfun.org/tags/shows/sawbones][Sawbones]]). All the pieces of information are
+  already there in the desired order, I just need to format and lowercase the
+  filename.
+
+How do you name your podcast files?
