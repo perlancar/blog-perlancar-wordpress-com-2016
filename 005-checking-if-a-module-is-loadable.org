@@ -1,0 +1,59 @@
+#+BLOG: perlancar
+#+POSTID: 1299
+#+DATE: [2016-08-02 Tue 18:46]
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl
+#+TAGS: perl
+#+DESCRIPTION:
+#+TITLE: Checking if a module is loadable (without actually loading it)
+
+One of the easiest ways to check if a module is loadable is simply by trying to
+load it:
+
+: if (eval { require Foo::Bar; 1 }) {
+:     # Foo::Bar is loadable
+: }
+
+However, when Foo::Bar is loadable, this actually loads the module. Which is not
+always desirable, for example in the cases of: 1) checking a lot of modules; 2)
+checking a module which is OS-specific and might not work under your OS when
+loaded; 3) checking a module which might conflict with another module that is
+already loaded.
+
+Another way to check is by trying to locate the module file by iterating over
+~@INC~ yourself or using something like [[https://metacpan.org/pod/Module::Path][Module::Path]] or [[https://metacpan.org/pod/Module::Path::More][Module::Path::More]].
+Those modules search for the module in directories specified in ~@INC~ like
+Perl's ~require~ would:
+
+: use Module::Path qw(module_path);
+: if (module_path "Foo::Bar") {
+:     # Foo::Bar is available
+: }
+
+However, this only works when ~Foo::Bar~ is indeed located on the filesystem and
+does not work when ~Foo::Bar~ is loaded using a require hook (coderef or object
+in ~@INC~), like in a [[https://metacpan.org/pod/App::FatPacker][fatpacked]] or [[https://metacpan.org/pod/App::depak][datapacked]] script. Also, it does not work
+nicely with other uses of require hooks, like emulating a missing module
+([[https://metacpan.org/pod/lib::filter][lib::filter]] or [[https://metacpan.org/pod/lib::disallow][lib::disallow]]).
+
+Hence, [[https://metacpan.org/pod/Module::Loadable][Module::Loadable]]:
+
+: use Module::Loadable qw(module_loadable);
+: if (module_loadable "Foo::Bar") {
+:     # Foo::Bar is available
+: }
+
+~module_loadable()~ emulates Perl's ~require()~ behavior of iterating over the
+entries in ~@INC~ to find the module. Aside from directory name, it can also
+handle require hooks. The only difference is that ~module_loadable~ does not
+actually load the Perl module.
+
+As a bonus, ~Module::Loadable~ also comes with ~module_source()~ which returns a
+module's source code.
+
+PS: I sure hope I didn't reinvent the wheel here, because this kind of
+functionality seems basic enough to warrant a wheel being invented years ago. My
+search against [[https://metacpan.org/pod/lcpan][lcpan]] database and on Google doesn't seem to indicate the case.
+This functionality *could* be included in something like [[https://metacpan.org/pod/Module::Runtime][Module::Runtime]],
+though.
