@@ -6,20 +6,21 @@
 #+CATEGORY: perl
 #+TAGS: perl
 #+DESCRIPTION:
-#+TITLE: Checking if a module is loadable (without actually loading it)
+#+TITLE: Checking if a module is installed (without actually loading it)
 
-One of the easiest ways to check if a module is loadable is simply by trying to
+One of the easiest ways to check if a module is installed is simply by trying to
 load it:
 
 : if (eval { require Foo::Bar; 1 }) {
 :     # Foo::Bar is loadable
 : }
 
-However, when Foo::Bar is loadable, this actually loads the module. Which is not
-always desirable, for example in the cases of: 1) checking a lot of modules; 2)
-checking a module which is OS-specific and might not work under your OS when
-loaded; 3) checking a module which might conflict with another module that is
-already loaded.
+However, when Foo::Bar happens to be installed, this actually loads the module.
+Which is not always desirable, for example in the cases of: 1) checking a lot of
+modules; 2) checking a module which is OS-specific and might not work under your
+OS when loaded; 3) checking a module which might conflict with another module
+that is already loaded; 4) wanting to avoid the security implication of
+executing the module's code.
 
 Another way to check is by trying to locate the module file by iterating over
 ~@INC~ yourself or using something like [[https://metacpan.org/pod/Module::Path][Module::Path]] or [[https://metacpan.org/pod/Module::Path::More][Module::Path::More]].
@@ -37,23 +38,42 @@ in ~@INC~), like in a [[https://metacpan.org/pod/App::FatPacker][fatpacked]] or 
 nicely with other uses of require hooks, like emulating a missing module
 ([[https://metacpan.org/pod/lib::filter][lib::filter]] or [[https://metacpan.org/pod/lib::disallow][lib::disallow]]).
 
-Hence, [[https://metacpan.org/pod/Module::Loadable][Module::Loadable]]:
+Perl core module [[https://metacpan.org/pod/Module::Load::Conditional][Module::Load::Conditional]] provides ~check_install~ which can
+handle both the cases of the module file is on the filesystem or the module is
+retrieved from the require hook:
 
-: use Module::Loadable qw(module_loadable);
-: if (module_loadable "Foo::Bar") {
+: use Module::Load::Conditional qw(check_install);
+: if (check_install(module => "Foo::Bar")) {
+:     # Foo::bar is available
+: }
+
+In addition to the above, ~check_install~ can also be instructed to check for
+minimum required version:
+
+: unless (check_install(module => "Foo::Bar", version=>"1.23")) {
+:     # Foo::Bar is not available, or its version is < 1.23
+: }
+
+Note that checking version number is not performed by loading the module and
+reading its ~$VERSION~, but instead by using [[https://metacpan.org/pod/Module::Metadata][Module::Metadata]] which tries to
+extract the version number from the module's source code (which might fail on
+some weird module that obfuscate its ~$VERSION~, but for normal cases should
+suffice).
+
+I also recently wrote [[https://metacpan.org/pod/Module::Installed::Tiny][Module::Installed::Tiny]] which does the same as
+~Module::Load::Conditional~'s ~check_install~ but with a bit less code and dependency:
+
+: use Module::Installed::Tiny qw(module_installed);
+: if (module_installed "Foo::Bar") {
 :     # Foo::Bar is available
 : }
 
-~module_loadable()~ emulates Perl's ~require()~ behavior of iterating over the
-entries in ~@INC~ to find the module. Aside from directory name, it can also
-handle require hooks. The only difference is that ~module_loadable~ does not
-actually load the Perl module.
+Note that ~check_install~ nor ~module_installed~ does not guarantee that the
+module will be loaded successfully, as there might be syntax errors in the
+module's code or runtime errors when running the code. All the routines do is
+check that the module's source code is available.
 
-As a bonus, ~Module::Loadable~ also comes with ~module_source()~ which returns a
-module's source code.
-
-PS: I sure hope I didn't reinvent the wheel here, because this kind of
-functionality seems basic enough to warrant a wheel being invented years ago. My
-search against [[https://metacpan.org/pod/lcpan][lcpan]] database and on Google doesn't seem to indicate the case.
-This functionality *could* be included in something like [[https://metacpan.org/pod/Module::Runtime][Module::Runtime]],
-though.
+*UPDATE [2016-08-03]*: This post is originally about Module::Loadable before I
+was made aware of ~Module::Load::Conditional~'s ~check_install~. In the original
+post I wrote that I hoped I didn't reinvent the wheel by writing
+Module::Loadable. I was happily proven wrong :-)
