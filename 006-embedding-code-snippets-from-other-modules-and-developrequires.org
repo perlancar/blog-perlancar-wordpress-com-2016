@@ -1,0 +1,51 @@
+# 2016-10-18: temporarily posted manually because i couldn't get org2blog to
+# work on my laptop
+
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl
+#+TAGS: perl
+#+DESCRIPTION:
+#+TITLE: Embedding code snippets from other modules and DevelopRequires
+
+Aside from use()-ing or require()-ing code from other modules, you can also
+embed code snippets directly into your module (a single function, variable
+declaration, or the whole module). I've done this several times. For example,
+one time I need to remove duplicate elements from an array. Instead of using
+[[https://metacpan.org/pod/List::MoreUtils][List::MoreUtils]], I copy-pasted the ~uniq~ function from [[https://metacpan.org/pod/List::MoreUtils::PP][List::MoreUtils::PP]] into
+my module's source code and add a note about it:
+
+#+BEGIN_SRC perl
+# BEGIN: stolen from List::MoreUtils::PP
+sub uniq (@)
+{
+    my %seen = ();
+    my $k;
+    my $seen_undef;
+    grep { defined $_ ? not $seen{ $k = $_ }++ : not $seen_undef++ } @_;
+}
+# END: stolen from List::MoreUtils::PP
+#+END_SRC
+
+I've also made a couple of Dist::Zilla plugins to help me automate this kind of
+process.
+
+By embedding, you avoid the end user's cost of having to install List::MoreUtils
+(which is still a non-core module at this time of writing). You also save a bit
+of startup/compile time by excluding the rest of the functions that you do not
+need. Of course, you should only do this in the special cases where you really
+want to minimize dependencies or startup overhead like in bootstrapping scripts
+or, often in my case, in tab completion scripts which must give answer fast
+after user presses the ~Tab~ key. And normally you should only do this for code
+that is already stable and proven, because the cost of having to update this
+embedded code is usually greater compared to if you simply depend on another
+module (a case in point: [[http://www.nntp.perl.org/group/perl.module-authors/2010/03/msg8339.html][Module::Install]]).
+
+Since this kind of code embedding is still a form of dependency (whenever the
+code in source module is updated, you might want to update the embedded code
+too), it is a good idea to express this dependency when you package your module
+as a Perl distribution. The appropriate phase and relationship to use for this
+kind of dependency is DevelopRequires. Modules listed in DevelopRequires
+dependency will not be installed when users install your module using a CPAN
+client, but the dependency will serve as a reminder/note that you still depend
+on the source module.

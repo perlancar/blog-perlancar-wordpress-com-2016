@@ -1,0 +1,64 @@
+# 2016-10-18: temporarily posted manually because i couldn't get org2blog to
+# work on my laptop
+
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,bash
+#+TAGS: perl,bash
+#+DESCRIPTION:
+#+TITLE: Adding tab completion for perlbrew
+
+[[https://metacpan.org/pod/App::perlbrew][perlbrew]] is a command-line utility I'm using quite a bit recently: while
+developing [[https://metacpan.org/pod/Bencher][Bencher]] feature of benchmarking against multiple perls, for trying
+out [[http://perl11.org/cperl/][cperl]], or just updating to the latest perl release. So I thought it would be
+nice to add tab completion feature to perlbrew.
+
+The obvious choice (for many people anyway) to write tab completion feature in
+is bash, but I'm more comfortable with Perl. And besides, there are a few nice
+completion features in [[https://metacpan.org/pod/Complete::Util][Complete::Util]] I'd like to use.
+
+The result is [[https://metacpan.org/pod/App::ShellCompleter::perlbrew][App::ShellCompleter::perlbrew]]. You install it by first installing
+[[https://metacpan.org/pod/App::shcompgen][App::shcompgen]] from CPAN and then:
+
+: % shcompgen init
+
+then install [[https://metacpan.org/pod/App::ShellCompleter::perlbrew][App::ShellCompleter::perlbrew]] from CPAN.
+
+Some of the things that the completion can do:
+
+* Complete subcommands, option names, option values, arguments
+For example:
+
+: % perlbrew un<tab>
+
+will complete to:
+
+: % perlbrew uninstall _
+
+The completion features "word-mode" matching, so you can also do something like
+this:
+
+: % perlbrew i-cp<tab>
+
+and it will complete to:
+
+: % perlbrew install-cpanm _
+* Display the list of available perls to install
+: % perlbrew install <tab>
+
+The first time you do this, it will take several seconds because the completion
+script will fetch the list of available perls from ~perlbrew available~. After
+that it should be instantaneous because the completion script caches the result
+in a temporary file.
+* Display the list of installed perls
+It can also do "char-mode" or "fuzzy" matching for increased convenience. For
+example, type this:
+
+: % perlbrew switch 10<tab>
+
+and it will complete to (assuming you have perl 5.10.1 installed):
+
+: % perlbrew switch 5.10.1
+* Source code
+The source code for ~_perlbrew~ is about 300 lines and I believe is fairly easy
+to write.
