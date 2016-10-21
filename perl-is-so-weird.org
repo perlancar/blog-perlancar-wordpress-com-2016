@@ -1,0 +1,27 @@
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl
+#+TAGS: perl
+#+DESCRIPTION:
+#+TITLE: PERL is so weird
+
+* how many young programmers stumbled upon perl ()
+* perl programmers are so old
+* length(@array) = BOOM
+* $foo != @foo != %foo
+* sintaks untuk access elements: $foo->{bar}
+* OO is weird, then Moose is startup heavy and installs like XXX dists
+* default cpan client is old
+* tutorials on the web is 1990s and CGI
+* autovivification
+* context
+* no boolean
+* no core
+3) no builtin clone() function. Data::Clone is not core, Clone::PP is not core,
+   Clone is not core, Storable is core but … JSON is too simplistic and not
+   core. YAML is not core. Data::Dumper is, well… Everything is slowish to
+   superslow to hyperslow. Sereal is not core. Perhaps at least make Sereal
+   core?
+* ref
+https://perlancar.wordpress.com/2015/02/28/things-that-are-so-last-decadecentury-and-annoying-that-i-encountered-recently-1/
+http://tuukkamerilainen.com/crazy-things-can-happend-dynamically-typed-languages-perl/
