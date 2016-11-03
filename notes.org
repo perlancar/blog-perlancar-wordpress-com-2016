@@ -1,0 +1,5 @@
+* journal
+** [2016-10-25] Article 008 "Adding support for fish, zsh, tcsh in compgen" was posted without using org2blog
+because I couldn't make it to work on laptop.
+** [2016-10-25] Article 009 "What's next for bash, completion-wise?" was posted without using org2blog
+because I couldn't make it to work on laptop.

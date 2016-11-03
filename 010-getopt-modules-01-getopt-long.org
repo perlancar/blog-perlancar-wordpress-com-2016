@@ -1,0 +1,53 @@
+# still can't get org2blog to work
+
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 01: Getopt::Long
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace).
+
+Today, our module is [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]]. I actually have reviewed it in a couple of my
+Perinci::CmdLine tutorial posts: [[https://perlancar.wordpress.com/2015/01/31/pericmd-002-getoptlong/][Getopt::Long]] and [[https://perlancar.wordpress.com/2015/02/01/pericmd-003-whats-wrong-with-getoptlong/][What's wrong with
+Getopt::Long]]. To recap: Getopt::Long is a core module that should be your go-to
+module for parsing command-line options.
+
+Two things to remember. First, you should start your code with something like
+this:
+
+#+BEGIN_SRC perl
+Getopt::Long::Configure("bundling", "no_ignore_case", "permute", "no_getopt_compat");
+#+END_SRC
+
+~bundling~ is to enable you to say ~-abc~ instead of ~-a -b -c~ if you happen to
+have these short options. Most Unix programs allow this. ~no_ignore_case~ is so
+that Getopt::Long differentiates ~-v~ and ~-V~. Most Unix programs also behave
+like this, they are not case-insensitive when it comes to command-line options.
+Since there are only so many Latin letters, very often the lowercase letter and
+uppercase letter are used for different purposes.
+
+~permute~ is to allow you to say ~--option val --flag arg1 arg2 --another-flag~.
+That is, you intersperse command-line options and arguments. For convenience,
+many Unix programs behave like this. For example, you can say ~ls -l A*~ or ~ls
+A* -l~. By default (under ~no_permute~ mode), Getopt::Options requires a user to
+specify all options first before any argument, which is rather inconvenient.
+
+~no_getopt_compat~ is to disable interpreting ~+foo~ the same as ~--foo~. Most
+programs nowaday do not interpret ~+~ as the start of command-line options
+anymore. Enabling ~getopt_compat~ (the default) only serves to interfere, for
+example if you have a filename like ~+foo~ then you'll have to write it as
+~./+foo~ to avoid it being parsed as command-line options.
+
+These modes should be the default, right? Just like ~use strict~ and ~use
+warnings~ should be the default in Perl. But for the sake of backward
+compatibility, they aren't.
+
+*Tab completion.* Another thing I want to add is: if you have a
+Getopt::Long-based CLI script, aside from modifying your script to use
+[[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]] instead, your users can now also use [[https://metacpan.org/pod/shcompgen][shcompgen]] to get tab
+completion, because shcompgen now supports detecting Getopt::Long-based scripts
+and activating tab completion for such scripts.

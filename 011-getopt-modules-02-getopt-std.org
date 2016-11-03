@@ -1,0 +1,35 @@
+# still can't get org2blog to work
+
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 02: Getopt::Std
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getopt-long/][First article is here]].
+
+Getopt::Std is the other core module that comes with Perl when it comes to
+parsing command-line options. The problem is, it only supports one-letter
+options. Since [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] also supports one-letter options, there is really
+little or no reason for you to use Getopt::Std.
+
+But Getopt::Std is still the second-most popular CPAN module when it comes to
+parsing command-line options, if you look at the number of reverse dependencies
+it has (167, after Getopt::Long which has 1127). This is probably because a lot
+of the older scripts are using it. Also note that since these two modules are
+core, some distributions do not specify them as dependencies. Which means that
+the number of reverse dependencies for these two are actually higher.
+
+One advantage of using Getopt::Std is its dead-simple API. You just call
+~getopts()~ and user-specified options will be collected in C<$opt_*> variables.
+Perfect if you have a short script that only accepts a few one-letter options.
+
+*Tab completion.* If you have a Getopt::Std-based CLI script, your users can use
+[[https://metacpan.org/pod/shcompgen][shcompgen]] to get tab completion, because shcompgen now supports detecting
+Getopt::Std-based scripts and activating tab completion for such scripts. It
+only supports completing option names though. To be more useful (completing
+option values and arguments) you will need to use one of the other Getopt
+modules, e.g. [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]].
