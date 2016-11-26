@@ -1,0 +1,433 @@
+* day 0 (prologue)
+*About this mini-article series.* Each day for 24 days, I will be reviewing an
+object system. This is the first article, the prologue, of the series. Link to
+the: [next] article.
+
+** Perl's OO
+As described in [[http://perldoc.perl.org/perlootut.html][perlootut]] and like most of us already know, Perl's OO feature is
+pretty minimal. And agreeing with many critics to the language, I'd likewise say
+that Perl's OO feature is clearly bolted on instead of designed into the
+language from the ground up. For example, not everything is (read: not many
+things are) an object in Perl. You cannot say, like in Ruby:
+
+: 10.modulo(3)
+: 3.14.to_i
+
+(Well, actually you can, with tricks like [[https://metacpan.org/pod/autobox::Core][autobox::Core]]. Try this one-liner:
+~perl -Mautobox::Core -E'say 10->mod(3); say 3.14->int'~)
+
+But that is okay. Performing operations on native data types using method call
+syntax is not the most important thing to have or the main point of having an
+OO system. Perl is a multiparadigm language, after all.
+
+Perl's OO system, minimal and bolted on as it is, works. You can already do
+classes, objects, (multiple) inheritance, polymorphism, and so on. Before the
+invention of Perl 6, [[https://metacpan.org/pod/Moose][Moose]] and the likes, people were doing OO in Perl all the
+time. But a few problems: 1) the Perl 5 OO syntax is a bit garish, or perhaps a
+bit too mechanical; 2) some concepts are lacking like attributes (including
+declaring setters and getters), roles, and so on, so one will have to create her
+own abstraction on top of it.
+
+** Object systems
+An object system, or OO system, is a module or framework that puts a layer of
+abstraction over Perl's built-in OO feature to improve the syntax and/or have
+higher-level concepts. Over the years, there have been many Perl OO systems
+being written. The rise of Moose didn't stop the continued proliferation of such
+systems: people who don't fancy the Moose syntax invent their own alternative
+syntax, and people who find Moose too heavy develop more lightweight or
+miniature versions of it.
+
+In a way, this is okay and good, as Perl embraces the TIMTOWTDI philosophy. The
+best OO system(s) will come out as winner(s) through the natural selection
+process while the others die off. Features will get borrowed (stolen) from one
+another and this encourages innovation. But on the other side, the multitude of
+OO systems, often incompatible with one another, is confusing to users.
+
+** The reviews
+In this series, I'll be reviewing simpler modules first before finally ending up
+with Moose and its variants. Since there are actually many more OO systems than
+24, not all modules I know will be reviewed. Some modules are just variants of
+another, so they will be mentioned together.
+
+Off we go!
+* day 1: Object::Tiny
+At the lower-end of the spectrum (the minimalist side) of OO systems, we find
+[[https://metacpan.org/pod/Object::Tiny][Object::Tiny]].
+
+** Summary
+
+: % lcpan mods -lx Object::Tiny
+: +--------------+---------+-------------------------------------+-------------+--------+----------------------+---------+
+: | module       | version | abstract                            | dist        | author | rel_mtime            | is_core |
+: +--------------+---------+-------------------------------------+-------------+--------+----------------------+---------+
+: | Object::Tiny | 1.08    | Class building as simple as it gets | Object-Tiny | ADAMK  | 2011-03-22T22:36:50Z | 0       |
+: +--------------+---------+-------------------------------------+-------------+--------+----------------------+---------+
+
+This module is written by Adam Kennedy ([[https://metacpan.org/pod/ADAMK][ADAMK]]) and was first released in 2007.
+Latest release is in 2011 (Adam has not been very active doing Perl in the last
+several years; last time he announced he was deep in .NET land). Adam also
+happens to be the one who first popularized the ::Tiny movement.
+
+The [[https://metacpan.org/source/ADAMK/Object-Tiny-1.08/lib/Object/Tiny.pm][implementation]] is only 30 lines of code. This module does not offer
+Moose-compatible syntax. This module is not a core module.
+
+Around 40 distributions on CPAN use Object::Tiny, a quarter of them are by ADAMK
+himself.
+
+: % lcpan rdeps Object::Tiny
+: +---------+----------+---------------------------------+-----------+--------------+-------------+
+: | phase   | rel      | dist                            | author    | dist_version | req_version |
+: +---------+----------+---------------------------------+-----------+--------------+-------------+
+: | runtime | requires | ADAMK-Release                   | ADAMK     | 0.02         | 1.01        |
+: | runtime | requires | AWS-CLI-Config                  | KEYAMB    | 0.01         | 0           |
+: | runtime | requires | Acme-DreamyImage                | GUGOD     | 1.1          | 0           |
+: | runtime | requires | AnyEvent-Superfeedr             | YANNK     | 0.04         | 0           |
+: | runtime | requires | App-Benchmark-Accessors         | MARCEL    | 2.00         | 0           |
+: | runtime | requires | App-Ylastic-CostAgent           | DAGOLDEN  | 0.006        | 0           |
+: | runtime | requires | Archive-Extract-Libarchive      | LBROCARD  | 0.38         | 0           |
+: | runtime | requires | Archive-Peek-Libarchive         | LBROCARD  | 0.37         | 0           |
+: | runtime | requires | AtomicParsley-Command           | ARJONES   | 1.153400     | 0           |
+: | runtime | requires | Bintray-API                     | MITHUN    | v1.0.2       | 0           |
+: | runtime | requires | CASCM-CLI                       | MITHUN    | v0.1.1       | 0           |
+: | runtime | requires | CPAN-Mini-Visit                 | ADAMK     | 1.15         | 1.06        |
+: | runtime | requires | CPANDB-Generator                | ADAMK     | 0.19         | 1.06        |
+: | runtime | requires | Chart-Timecard                  | GUGOD     | 0.02         | 1.08        |
+: | runtime | requires | ControlFreak                    | YANNK     | 1.0.0        | 0           |
+: | runtime | requires | DBIx-Export                     | ADAMK     | 0.01         | 1.06        |
+: | runtime | requires | Data-KeyDiff                    | RKRIMEN   | 0.021        | 0           |
+: | runtime | requires | Data-Rand-Obscure               | RKRIMEN   | 0.021        | 0           |
+: | runtime | requires | File-Assets                     | RKRIMEN   | 0.064        | 0           |
+: | runtime | requires | Finance-Card-Discover           | GRAY      | 0.05         | 0           |
+: | runtime | requires | GitHub-Extract                  | ADAMK     | 0.02         | 1.01        |
+: | runtime | requires | M3-ServerView                   | MARWIL    | 0.04         | 0           |
+: | runtime | requires | Module-CGI-Install              | ADAMK     | 0.07         | 1.02        |
+: | runtime | requires | Module-Changes-ADAMK            | ADAMK     | 0.11         | 1.03        |
+: | runtime | requires | Net-Amazon-Config               | DAGOLDEN  | 0.002        | 1.06        |
+: | runtime | requires | ORDB-CPANMeta-Generator         | ADAMK     | 0.12         | 1.06        |
+: | runtime | requires | Oz                              | ADAMK     | 0.01         | 1.01        |
+: | build   | requires | PDLx-DetachedObject             | DJERIUS   | 0.01         | 0           |
+: | runtime | requires | Perl-Dist                       | ADAMK     | 1.16         | 1.06        |
+: | runtime | requires | Pod-Site                        | DWHEELER  | 0.56         | 0           |
+: | runtime | requires | Portable-Dist                   | KMX       | 1.06         | 1.04        |
+: | runtime | requires | TMDB                            | MITHUN    | v1.2.0       | 1.03        |
+: | runtime | requires | Time-Verbal                     | GUGOD     | 1.0.0        | 0           |
+: | runtime | requires | VS-RuleEngine                   | CLAESJAC  | 0.09         | 0           |
+: | runtime | requires | VS-RuleEngine-Loader-XML        | CLAESJAC  | 0.05         | 0           |
+: | runtime | requires | WWW-ArsenalFC-TicketInformation | ARJONES   | 1.123160     | 0           |
+: | runtime | requires | WWW-XBoxLive                    | ARJONES   | 1.123160     | 0           |
+: | runtime | requires | WebService-IMDBAPI              | ARJONES   | 1.130150     | 0           |
+: | runtime | requires | WebService-PublicViewpoints     | GUGOD     | 0.01         | 1.06        |
+: | runtime | requires | Win32-Tracert                   | SDESEILLE | 0.011        | 1.08        |
+: +---------+----------+---------------------------------+-----------+--------------+-------------+
+
+** Features
+The only features that Object::Tiny offers are: shorthand for declaring
+attributes (you just pass a list of attribute names) and constructor creation
+(so you don't have to write your own ~new~). Example code:
+
+#+BEGIN_SRC perl
+# Define a class
+package Foo;
+
+use Object::Tiny qw{ bar baz };
+1;
+
+# Use the class
+my $object = Foo->new( bar => 1 );
+
+print "bar is " . $object->bar . "\n";
+#+END_SRC
+
+The generated constructor does not check the validity of arguments, so if you
+say:
+
+#+BEGIN_SRC perl
+my $object = Foo->new( whatever => 1, baz => 2 );
+#+END_SRC
+
+no warning or error will be raised.
+
+The generated attribute method is also only a getter and not a setter. This
+means you can do this:
+
+#+BEGIN_SRC perl
+$object->bar; # get the value of bar
+#+END_SRC
+
+but you cannot:
+
+#+BEGIN_SRC perl
+$object->bar(10); # sets bar to 10
+#+END_SRC
+
+These limitations have motivated some other people to release variants that do
+r/w attributes ([[https://metacpan.org/pod/Object::Tiny::RW][Object::Tiny::RW]]). Some also created XS versions for more speed
+([[https://metacpan.org/pod/Object::Tiny::XS][Object::Tiny::XS]] and [[https://metacpan.org/pod/Object::Tiny::RW::XS][Object::Tiny::RW::XS]]).
+** Performance
+Some benchmarks:
+
+: % bencher-module-startup-overhead Object::Tiny{,::RW,::XS,::RW::XS} Class::Accessor Class::Tiny
+: +----------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+: | participant          | proc_private_dirty_size (MB) | proc_rss_size (MB) | proc_size (MB) | time (ms) | mod_overhead_time (ms) | vs_slowest |  errors | samples |
+: +----------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+: | Class::Tiny          | 0.83                         | 4.4                | 19             |     11    |                   8.6  |       1    | 1.5e-05 |      20 |
+: | Object::Tiny::XS     | 1.4                          | 5.2                | 21             |      9.5  |                   7.1  |       1.2  |   3e-05 |      20 |
+: | Object::Tiny::RW::XS | 1.4                          | 5.2                | 21             |      9.3  |                   6.9  |       1.2  | 2.7e-05 |      20 |
+: | Class::Accessor      | 1.7                          | 5.49               | 21.6           |      8.77 |                   6.37 |       1.26 |   7e-06 |      20 |
+: | Object::Tiny::RW     | 1.4                          | 5.2                | 21             |      3.4  |                   1    |       3.2  | 2.4e-05 |      21 |
+: | Object::Tiny         | 0.86                         | 4.7                | 19             |      3.4  |                   1    |       3.3  | 1.9e-05 |      20 |
+: | perl -e1 (baseline)  | 0.86                         | 4.6                | 19             |      2.4  |                   0    |       4.7  | 1.4e-05 |      20 |
+: +----------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+
+: % bencher -m Accessors/Get --include-participant-pattern '(Object::Tiny.*|Class::Accessor|Class::Tiny|raw hash.*)$'
+: +----------------------+-----------+-----------+------------+---------+---------+
+: | participant          | rate (/s) | time (ns) | vs_slowest |  errors | samples |
+: +----------------------+-----------+-----------+------------+---------+---------+
+: | Class::Accessor      |   2251030 |   444.241 |       1    |   0     |      20 |
+: | Class::Tiny          |   6470000 |   155     |       2.87 | 9.7e-11 |      23 |
+: | Object::Tiny::RW     |   6790000 |   147     |       3.02 |   1e-10 |      20 |
+: | Object::Tiny         |   8830000 |   113     |       3.92 | 7.4e-11 |      20 |
+: | Object::Tiny::RW::XS |  14700000 |    67.9   |       6.55 |   5e-11 |      22 |
+: | Object::Tiny::XS     |  15000000 |    66     |       6.7  | 4.8e-10 |      20 |
+: | raw hash access      |  26900000 |    37.2   |      11.9  | 2.6e-11 |      20 |
+: +----------------------+-----------+-----------+------------+---------+---------+
+
+: % bencher -m Accessors/Set --include-participant-pattern '(Object::Tiny.*|Class::Accessor|Class::Tiny|raw hash.*)$'
+: +----------------------+-----------+-----------+------------+---------+---------+
+: | participant          | rate (/s) | time (ns) | vs_slowest |  errors | samples |
+: +----------------------+-----------+-----------+------------+---------+---------+
+: | Class::Accessor      |   1980000 |     505   |      1     | 2.1e-10 |      20 |
+: | Object::Tiny::RW     |   4580000 |     218.4 |      2.315 | 1.1e-11 |      20 |
+: | Class::Tiny          |   4920000 |     203   |      2.48  |   1e-10 |      21 |
+: | Object::Tiny::RW::XS |  11000000 |      88   |      5.8   |   2e-10 |      21 |
+: | raw hash access      |  19000000 |      52.6 |      9.6   | 1.2e-11 |      23 |
+: +----------------------+-----------+-----------+------------+---------+---------+
+
+** Conclusion
+Object::Tiny might be a bit too minimal for you (oftentimes we need setters).
+For that you have Object::Tiny::RW. Performance is good, and you can double it
+using the XS flavors.
+** See also
+Related module reviews: Class::Tiny, Class::Accessors
+
+Tools used in this article: [[https://metacpan.org/pod/lcpan][lcpan]] (from [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution), [[https://metacpan.org/pod/bencher][bencher]] (from
+[[https://metacpan.org/pod/Bencher][Bencher]] distribution), [[https://metacpan.org/pod/bencher-module-startup-overhead][bencher-module-startup-overhead]] (from [[https://metacpan.org/pod/App::BencherUtils][App::BencherUtils]]
+distribution).
+
+[[https://metacpan.org/pod/Bencher::Scenarios::Accessors][Bencher::Scenarios::Accessors]]
+* day 2: Class::Struct
+*About this mini-article series.* Each day for 24 days, I will be reviewing an
+object system. Link to the [first] article, [previous], [next].
+
+** Summary
+[[https://metacpan.org/pod/Class::Struct][Class::Struct]] is the only OO system module that is core (since perl 5.004 in
+1997). Over the years, people have been suggesting that Moose or perhaps Moo get
+included into core, but so far this has not happened and perhaps for good
+reasons.
+
+Class::Struct began from an idea by Tom Christiansen ([[https://metacpan.org/author/TOMC][TOMC]]) which then got
+implemented as [[https://metacpan.org/pod/Class::Template][Class::Template]] by Dan Roehrich ([[https://metacpan.org/pod/DMR][DMR]]). That module is still on
+CPAN too. Later, it received some treatments from Damian Conway ([[https://metacpan.org/pod/DCONWAY][DCONWAY]]).
+
+As this module predates Perl 6 and Moose, the syntax is not Moose-compatible.
+
+Only about 14 CPAN distributions currently depend on Class::Struct:
+
+: % lcpan rdeps Class::Struct
+: +---------+----------+----------------------------------+-----------+--------------+-------------+
+: | phase   | rel      | dist                             | author    | dist_version | req_version |
+: +---------+----------+----------------------------------+-----------+--------------+-------------+
+: | runtime | requires | Algorithm-Closest-NetworkAddress | TONVOON   | 0.1          | 0           |
+: | runtime | requires | CPANPLUS-Shell-Wx                | SKAMANSAM | 0.04         | 0.0         |
+: | runtime | requires | Java-JVM-Classfile               | LBROCARD  | 0.20         | 0           |
+: | runtime | requires | MarpaX-Languages-C-AST           | JDDPAUSE  | 0.45         | 0           |
+: | runtime | requires | MySQL-Handler                    | CSA       | 2.1          | 0           |
+: | runtime | requires | Net-IPTrie                       | CVICENTE  | 0.7          | 0.63        |
+: | runtime | requires | Net-RawIP                        | SAPER     | 0.25         | 0           |
+: | runtime | requires | POE-Component-ProcTerminator     | MNUNBERG  | 0.03         | 0           |
+: | runtime | requires | POE-Sugar-Attributes             | MNUNBERG  | 0.02         | 0           |
+: | runtime | requires | Postgres-Handler                 | CSA       | 2.2          | 0           |
+: | runtime | requires | Test-LectroTest                  | TMOERTEL  | 0.5001       | 0           |
+: | runtime | requires | Text-AutoCSV                     | MILLETSEB | 1.1.4        | 0           |
+: | runtime | requires | Text-DHCPLeases                  | CVICENTE  | 1.0          | 0.63        |
+: | runtime | requires | WWW-REST                         | AUDREYT   | 0.011        | 0           |
+: +---------+----------+----------------------------------+-----------+--------------+-------------+
+
+but since many distributions do not bother to list core dependencies, the number
+is probably higher.
+** Features
+Class::Struct deals only with attributes, so you declare methods with the usual
+~sub { ... }~ statements. But it does create the constructor named ~new~ for
+you. To declare attributes, you use the provided ~struct~ function:
+
+#+BEGIN_SRC perl
+package My::Class;
+use Class::Struct;
+struct attr1 => '$', attr2 => '@', attr3 => '%', attr4 => 'My::Other::Class';
+#+END_SRC
+
+or you can do it in one line with:
+
+#+BEGIN_SRC perl
+use Class::Struct 'My::Class' => [attr1 => '$', attr2 => '@', attr3 => '%', attr4 => 'My::Other::Class'];
+#+END_SRC
+
+You cannot have multiple ~struct~ statements: all your attributes must be
+declared in one go. You need to make sure that the attribute name is not weird
+(e.g. contains spaces), as Class::Struct does not check that for you.
+Class::Struct also doesn't check if your attribute is named ~new~.
+
+There is no way to declare that an attribute is required.
+
+The resulting object will be array-based, e.g. this:
+
+#+BEGIN_SRC perl
+my $obj = My::Class->new(attr1=>1, attr2=>[2]);
+#+END_SRC
+
+will result in this object:
+
+#+BEGIN_SRC perl
+bless([1, [2], {}], 'My::Class')
+#+END_SRC
+
+If you want your object to be the more common blessed hash reference, you have
+to use this syntax when declaring attributes:
+
+#+BEGIN_SRC perl
+use Class::Struct 'My::Class' => {attr1 => '$', attr2 => '@', attr3 => '%', attr4 => 'My::Other::Class'};
+#+END_SRC
+
+As can be guessed from the proto-like symbols, Class::Struct does some
+validation for you. ~attr1~ must be a scalar (or undef), ~attr2~ must be an
+arrayref (but cannot be undef, if unset will default to ~[]~), ~attr3~ must be a
+hashref (also cannot be undef, if unset will default to ~{}~). ~attr4~ must be
+an instance of the specified class (in this case, ~My::Other::Class~, but can
+also be a plain hashref which will be fed to ~My::Other::Class->new~ to create
+an instance of the class. There is no way to provide custom validation.
+
+Validation failure will throw an exception during object construction, but when
+you use a setter to set to an invalid value, e.g.:
+
+#+BEGIN_SRC perl
+$obj->attr2(4); # but attr2 should contain arrayref only?!
+#+END_SRC
+
+then the setting will be silently ignored and ~attr2~ will still retain its old
+value.
+
+In short, there are some (now) weird design choices here.
+
+** Performance
+: % bencher -m Accessors/Get --include-participant-pattern '(Object::Tiny::RW|Class::Tiny|Class::Struct|raw hash.*|raw array.*)$'
+: +------------------+-----------+-----------+------------+---------+---------+
+: | participant      | rate (/s) | time (ns) | vs_slowest |  errors | samples |
+: +------------------+-----------+-----------+------------+---------+---------+
+: | Class::Struct    |   4800000 |  210      |    1       | 4.2e-10 |      20 |
+: | Class::Tiny      |   6400000 |  160      |    1.3     | 4.1e-10 |      21 |
+: | Object::Tiny::RW |   6880000 |  145      |    1.42    |   9e-11 |      27 |
+: | raw hash access  |  27070300 |   36.9409 |    5.58862 |   0     |      21 |
+: | raw array access |  36000000 |   28      |    7.4     | 1.8e-10 |      20 |
+: +------------------+-----------+-----------+------------+---------+---------+
+:
+: % bencher -m Accessors/Set --include-participant-pattern '(Object::Tiny::RW|Class::Tiny|Class::Struct|raw hash.*|raw array.*)$'
+: +------------------+-----------+-----------+------------+---------+---------+
+: | participant      | rate (/s) | time (ns) | vs_slowest |  errors | samples |
+: +------------------+-----------+-----------+------------+---------+---------+
+: | Class::Struct    |   4370000 |     228.8 |       1    | 1.1e-11 |      20 |
+: | Object::Tiny::RW |   4850000 |     206   |       1.11 |   1e-10 |      20 |
+: | Class::Tiny      |   4920000 |     203   |       1.13 | 3.5e-11 |      20 |
+: | raw hash access  |  20000000 |      50   |       4.6  | 2.1e-10 |      20 |
+: | raw array access |  22000000 |      45   |       5.1  | 2.1e-10 |      20 |
+: +------------------+-----------+-----------+------------+---------+---------+
+:
+: % bencher-module-startup-overhead Object::Tiny::RW Class::Tiny Class::Struct
+: +---------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+: | participant         | proc_private_dirty_size (MB) | proc_rss_size (MB) | proc_size (MB) | time (ms) | mod_overhead_time (ms) | vs_slowest |  errors | samples |
+: +---------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+: | Class::Tiny         | 1.4                          | 5.1                | 19             |      11   |                    8.7 |        1   | 1.7e-05 |      20 |
+: | Class::Struct       | 0.83                         | 4.6                | 19             |       9.7 |                    7.4 |        1.1 | 3.2e-05 |      20 |
+: | Object::Tiny::RW    | 1.7                          | 5.4                | 22             |       3.5 |                    1.2 |        3.2 | 1.9e-05 |      20 |
+: | perl -e1 (baseline) | 0.86                         | 4.8                | 19             |       2.3 |                    0   |        4.8 | 9.2e-06 |      20 |
+: +---------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+** Conclusion
+It's weird and has so-so performance. Unless you need to use core modules only
+and your object has lots of fields, it's probably best to use other modules or
+roll your own attribute generator.
+* TODO day 2: Class::Tiny
+- already surpasses number of users on CPAN (44 versus 40)
+- hopes to be core someday, because David wants to use it for core modules
+  maintained by him.
+* TODO day: Class::Accessor and Class::XSAccessor
+* TODO day: Class::Accessor::Array and Class::XSAccessor::Array
+* TODO day: Object::Simple
+* TODO day: Class::Tiny::Antlers
+* TODO day: Simple::Accessor
+* TODO day: Class::InsideOut
+* TODO day: Role::Tiny
+* TODO day: Evo::Class
+- no need for autocleaners (namespace::clean)
+- ia sih, pake Moose itu provides shortcut/nicer syntax e.g. 'has' tapi juga
+  kita harus deal with new crap like __PACKAGE__->meta->make_immutable, 'use
+  namespace::clean'. (as with anything, it tries to solve a problem then creates
+  new problems).
+* ---10---
+* TODO day: Class::Std
+* TODO day: Class::Accessor::Tiny
+* TODO day: Class::Accessor::Lvalue
+* TODO day: Class::Base
+* TODO day: Class::Builder
+* TODO day: Class::Declare
+* TODO day: Class::Easy
+* TODO day: Mojo::Base and Mojo::Base::XS
+* ---20---
+* TODO day: Mo
+* TODO day: Moo
+* TODO day: Moos
+- belum optimized constructor-nya, very slow compared to others (lihat benchmark
+  Accessors/Construction).
+* TODO day: Mouse
+* TODO day: Moose
+* TODO day: Moops
+* TODO day 25: epilogue
+inside-out classes:
+  - in general will be slower when constructing?
+  - also slower when get/set
+
+other minimalist class builders: Object::Properties
+
+per-object accessors: Object::Accessor ... Object::Method
+
+Class::Generate & Class::GenSource
+
+Modules that don't make the cut: more Class::Accessor flavors...
+
+Class::Std variants
+
+Class::Inner (per-object method)
+
+Class::Maker
+
+Class::Multimethods
+
+Class::Simple
+
+Class::Simpleton
+
+Class::Spiffy
+
+Class::Tiny variants: ::Chained, Antlers
+
+mentions: Data::Object, autobox, ...
+
+framework-specific OO system:
+
+MooX, MooseX, MoopsX, ...
+
+My::Object
+
+Object::Botox, Object::Declare,
+
+Class::Build::Array::Glob?
+
+(epilog) I've also made a few:
