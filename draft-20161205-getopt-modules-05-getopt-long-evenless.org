@@ -1,0 +1,91 @@
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 05: Getopt::Long::EvenLess
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getopt-long/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Long::EvenLess][Getopt::Long::EvenLess]] (GLEL for short) is another one of my experiments beside
+[[https://metacpan.org/pod/Getopt::Long::Less][Getopt::Long::Less]] (GLL for short) which I covered in the previous article.
+Compared to Getopt::Long::Less, Getopt::Long::EvenLess strips even more stuffs
+from Getopt::Long (GL for short) and is an experiment of just how little code is
+needed for proper options parsing. The result is a minimalistic options parsing
+module which is still forward-compatible with Getopt::Long: only 175 lines of
+code (only about 12% of Getopt::Long) and starts several times faster than
+Getopt::Long.
+
+: % bencher-module-startup-overhead Getopt::Long Getopt::Long::Less Getopt::Long::EvenLess
+: +------------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+: | participant            | proc_private_dirty_size (MB) | proc_rss_size (MB) | proc_size (MB) | time (ms) | mod_overhead_time (ms) | vs_slowest |  errors | samples |
+: +------------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+: | Getopt::Long           | 1.1                          | 4.9                | 25             |       9.3 |                    8   |        1   | 1.9e-05 |      20 |
+: | Getopt::Long::Less     | 0.91                         | 4.6                | 23             |       3.2 |                    1.9 |        2.9 | 1.2e-05 |      20 |
+: | Getopt::Long::EvenLess | 0.83                         | 4.6                | 23             |       1.9 |                    0.6 |        4.9 | 6.3e-06 |      20 |
+: | perl -e1 (baseline)    | 2                            | 5.8                | 24             |       1.3 |                    0   |        6.9 | 3.8e-06 |      20 |
+: +------------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+
+To squeeze out as much startup overhead as possible, I do not use Exporter
+(reimplemented exporting with a few lines of code) or strict/warnings (enabled
+it only during development/testing).
+
+Compared to GL and GLL (from the POD):
+
+- GLEL does not have Configure(). There is nothing to configure, no different
+  modes of operation.
+- GLEL does not support increment ("foo+")
+- there is no type checking ("foo=i", "foo=f", "foo=s" all accept any string).
+- GLEL does not support optional value ("foo:s"), only no value ("foo") or
+  required value ("foo=s").
+- GLEL does not support desttypes ("foo=s@").
+- GLEL does not support handler other than coderef (so no ""foo=s" => \$scalar",
+  ""foo=s" => \@ary", only ""foo=s" => sub { ... }"). Also, in coderef handler,
+  code will get a simple hash instead of a "callback" object as its first
+  argument.
+- GLEL does not support hashref as first argument.
+- GLEL does not support bool/negation (no "foo!", so you have to declare both
+  "foo" and "no-foo" manually).
+
+It's rather painful to use, instead of something like:
+
+#+BEGIN_SRC perl
+use Getopt::Long;
+GetOptions(
+    'foo=i' => \$foo,
+    'bar=s' => \@bar,
+    'baz'   => \$baz,
+);
+#+END_SRC
+
+you always need to provide a coderef:
+
+#+BEGIN_SRC perl
+use Getopt::Long::EvenLess;
+Getopt::Long::EvenLess::GetOptions(
+    'foo=i' => sub { $foo = $_[1] },
+    'bar=s' => sub { push @bar, $_[1] },
+    'baz'   => sub { $baz = 1 },
+);
+#+END_SRC
+
+But at least, compared to many other non-Getopt::Long-based options parsing
+modules, GLEL supports option bundling, permute, as well as auto_abbrev.
+
+It might be useful if you want to be minimalistic or want to embed options
+parsing functionality in a fatpacked script while trying to minimize the number
+of lines.
+
+Tip: if you _really_ want to be minimalistic, you can use this single line of
+code to parse options:
+
+#+BEGIN_SRC perl
+@ARGV = grep { /^--([^=]+)(=(.*))?/ ? ($opts{$1} = $2 ? $3 : 1, 0) : 1 } @ARGV;
+#+END_SRC
+
+and you're already able to extract "--flag" or "--opt=val" from @ARGV. But you
+also lose a lot of stuffs like autoabbreviation, "--opt val" syntax support
+syntax (which is more common, but requires you specify an option spec), custom
+handler, etc.

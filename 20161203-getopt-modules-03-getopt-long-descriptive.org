@@ -1,3 +1,4 @@
+#+POSTID: 1466
 # still can't get org2blog to work
 
 #+BLOG: perlancar

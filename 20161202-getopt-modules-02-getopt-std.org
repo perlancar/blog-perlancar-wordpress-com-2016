@@ -1,3 +1,4 @@
+#+POSTID: 1464
 # still can't get org2blog to work
 
 #+BLOG: perlancar
@@ -23,9 +24,15 @@ of the older scripts are using it. Also note that since these two modules are
 core, some distributions do not specify them as dependencies. Which means that
 the number of reverse dependencies for these two are actually higher.
 
-One advantage of using Getopt::Std is its dead-simple API. You just call
-~getopts()~ and user-specified options will be collected in C<$opt_*> variables.
-Perfect if you have a short script that only accepts a few one-letter options.
+The fact that the only two core modules for command-line options parsing,
+Getopt::Long and Getopt::Std, also happen to be the most used by CPAN
+distributions looks good. It can confirm that the needs of option parsing for
+many people have been met by the core modules.
+
+One advantage of using Getopt::Std over Getopt::Long is its dead-simple API. You
+just call ~getopts()~ and user-specified options will be collected in ~$opt_*~
+variables. Perfect if you have a short script that only accepts a few one-letter
+options.
 
 *Tab completion.* If you have a Getopt::Std-based CLI script, your users can use
 [[https://metacpan.org/pod/shcompgen][shcompgen]] to get tab completion, because shcompgen now supports detecting

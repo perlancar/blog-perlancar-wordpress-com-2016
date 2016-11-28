@@ -1,0 +1,55 @@
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 04: Getopt::Long::Less
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getopt-long/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Long::Less][Getopt::Long::Less]] is one of my two experiments of reimplementing [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]]
+(the other is [[https://metacpan.org/pod/Getopt::Long::EvenLess][Getopt::Long::EvenLess]] which will be covered in the next article).
+Getopt::Long is over 1500 lines long and its startup overhead is ~8-15ms. It has
+a lot of configuration options, some of them seldom used nowadays, and while
+overall it works fine I was curious about how much less code options parsing can
+be done with. Also, as I am always trying to minimize startup overhead in many
+of my CLI scripts, I am also interested in reducing the startup overhead of
+options parsing.
+
+: % bencher-module-startup-overhead Getopt::Long Getopt::Long::Less Getopt::Long::EvenLess
+: +------------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+: | participant            | proc_private_dirty_size (MB) | proc_rss_size (MB) | proc_size (MB) | time (ms) | mod_overhead_time (ms) | vs_slowest |  errors | samples |
+: +------------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+: | Getopt::Long           | 1.1                          | 4.9                | 25             |       9.3 |                    8   |        1   | 1.9e-05 |      20 |
+: | Getopt::Long::Less     | 0.91                         | 4.6                | 23             |       3.2 |                    1.9 |        2.9 | 1.2e-05 |      20 |
+: | Getopt::Long::EvenLess | 0.83                         | 4.6                | 23             |       1.9 |                    0.6 |        4.9 | 6.3e-06 |      20 |
+: | perl -e1 (baseline)    | 2                            | 5.8                | 24             |       1.3 |                    0   |        6.9 | 3.8e-06 |      20 |
+: +------------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
+
+Getopt::Long::Less only supports some features of Getopt::Long: the features
+that I use regularly, to be exact. Copying straight from its POD:
+
+Only three functions are implemented: ~GetOptions~, ~GetOptionsFromArray~, and
+~Configure~.
+
+No configuring from ~use~ statement. No OO interface.
+
+Much much less modes/configuration. No support for POSIXLY_CORRECT. We always do
+bundling (this is not Getopt::Long's default), we never ignore case (this is not
+Getopt::Long's default), we always permute, we always autoabbreviate, we always
+do GNU compatibility (allow ~--opt=VAL~ in addition to ~--opt VAL~). Basically
+currently there's no mode you can configure (although ~pass_through~ might be
+added in the future).
+
+No autoversion, no autohelp. No support to configure prefix pattern.
+
+Currently no support for arrayref handler (e.g. ""foo=s" => \@ary"). No support
+for array desttype ("'foo=s@' => ...").
+
+Also, this module requires 5.010.
+
+There is generally no practical need to use this module over Getopt::Long, and I
+currently do not use it either in any of my distributions. I use
+Getopt::Long::EvenLess in a couple of my distributions, though.

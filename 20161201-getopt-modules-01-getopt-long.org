@@ -1,5 +1,4 @@
-# still can't get org2blog to work
-
+#+POSTID: 1462
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt
