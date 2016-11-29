@@ -11,12 +11,11 @@ module that parses command-line options (such module is usually under the
 
 [[https://metacpan.org/pod/Getopt::Long::EvenLess][Getopt::Long::EvenLess]] (GLEL for short) is another one of my experiments beside
 [[https://metacpan.org/pod/Getopt::Long::Less][Getopt::Long::Less]] (GLL for short) which I covered in the previous article.
-Compared to Getopt::Long::Less, Getopt::Long::EvenLess strips even more stuffs
-from Getopt::Long (GL for short) and is an experiment of just how little code is
-needed for proper options parsing. The result is a minimalistic options parsing
-module which is still forward-compatible with Getopt::Long: only 175 lines of
-code (only about 12% of Getopt::Long) and starts several times faster than
-Getopt::Long.
+Compared to GLL, GLEL strips even more stuffs from Getopt::Long (GL for short)
+and is an experiment of just how little code is needed for proper options
+parsing. The result is a minimalistic options parsing module which is still
+forward-compatible with Getopt::Long weighing at only 175 lines of code (about
+12% that of GL) and starts several times faster than GL.
 
 : % bencher-module-startup-overhead Getopt::Long Getopt::Long::Less Getopt::Long::EvenLess
 : +------------------------+------------------------------+--------------------+----------------+-----------+------------------------+------------+---------+---------+
@@ -30,9 +29,8 @@ Getopt::Long.
 
 To squeeze out as much startup overhead as possible, I do not use Exporter
 (reimplemented exporting with a few lines of code) or strict/warnings (enabled
-it only during development/testing).
-
-Compared to GL and GLL (from the POD):
+it only during development/testing). There are no modes, so no ~Configure~ or
+other options. Compared to GL and GLL (from the POD):
 
 - GLEL does not have Configure(). There is nothing to configure, no different
   modes of operation.
@@ -49,7 +47,7 @@ Compared to GL and GLL (from the POD):
 - GLEL does not support bool/negation (no "foo!", so you have to declare both
   "foo" and "no-foo" manually).
 
-It's rather painful to use, instead of something like:
+It's rather more painful to use than GL, instead of something like:
 
 #+BEGIN_SRC perl
 use Getopt::Long;
@@ -64,7 +62,7 @@ you always need to provide a coderef:
 
 #+BEGIN_SRC perl
 use Getopt::Long::EvenLess;
-Getopt::Long::EvenLess::GetOptions(
+GetOptions(
     'foo=i' => sub { $foo = $_[1] },
     'bar=s' => sub { push @bar, $_[1] },
     'baz'   => sub { $baz = 1 },
@@ -76,7 +74,8 @@ modules, GLEL supports option bundling, permute, as well as auto_abbrev.
 
 It might be useful if you want to be minimalistic or want to embed options
 parsing functionality in a fatpacked script while trying to minimize the number
-of lines.
+of lines. I use GLEL in a few of my distributions, most notably my CLI framework
+[[https://metacpan.org/pod/Perinci::CmdLine::Inline][Perinci::CmdLine::Inline]].
 
 Tip: if you _really_ want to be minimalistic, you can use this single line of
 code to parse options:
