@@ -1,0 +1,93 @@
+#+POSTID: 1481
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 07: Getopt::Long::Subcommand
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Long::Subcommand][Getopt::Long::Subcommand]] is an option parsing module which I created for cases
+when [[Getopt::Long::Complete]] does not suffice. Namely, when the CLI script is
+supposed to accept (nested) subcommands.
+
+It is not a drop-in replacement for Getopt::Long, the interface needs to be
+somewhat different because Getopt::Long itself does not recognize the subcommand
+concept. Here's an example of how one uses Getopt::Long::Subcommand:
+
+#+BEGIN_SRC perl
+use Getopt::Long::Subcommand; # exports GetOptions
+
+my %opts;
+my $res = GetOptions(
+    summary => 'Summary about your program ...',
+    # common options recognized by all subcommands
+    options => {
+        'help|h|?' => {
+            summary => 'Display help message',
+            handler => sub {
+                my ($cb, $val, $res) = @_;
+                if ($res->{subcommand}) {
+                    say "Help message for $res->{subcommand} ...";
+                } else {
+                    say "General help message ...";
+                }
+                exit 0;
+            },
+        'version|v' => {
+            summary => 'Display program version',
+            handler => sub {
+                say "Program version $main::VERSION";
+                exit 0;
+            },
+        'verbose' => {
+            handler => \$opts{verbose},
+        },
+    },
+
+    # list your subcommands here
+    subcommands => {
+        subcmd1 => {
+            summary => 'The first subcommand',
+            # subcommand-specific options
+            options => {
+                'foo=i' => {
+                    handler => \$opts{foo},
+                },
+            },
+        },
+        subcmd1 => {
+            summary => 'The second subcommand',
+            options => {
+                'bar=s' => \$opts{bar},
+                'baz'   => \$opts{baz},
+            },
+        },
+    },
+
+    # tell how to complete option value and arguments. see
+    # Getopt::Long::Complete for more details, the arguments are the same
+    # except there is an additional 'subcommand' that gives the subcommand
+    # name.
+    completion => sub {
+        my %args = @_;
+        ...
+    },
+
+);
+die "GetOptions failed!\n" unless $res->{success};
+say "Running subcommand $res->{subcommand} ...";
+#+END_SRC
+
+So basically, for the main program as well as for each subcommand, you supply
+options specification which in turn is like what you would supply to
+Getopt::Long's ~GetOptions~. Internally, Getopt::Long::Subcommand does parses
+the options using Getopt::Long, it just tries to extract the subcommand names
+first.
+
+There are far fewer CLI's that need to support subcommands compared to ones that
+don't. So far, I've used Getopt::Long::Subcommand to create a completer for
+[[https://metacpan.org/pod/perlbrew][perlbrew]]. I posted about this in a previous [[https://perlancar.wordpress.com/2016/10/18/adding-tab-completion-for-perlbrew/][blog post]].

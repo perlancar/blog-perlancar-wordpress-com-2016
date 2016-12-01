@@ -1,0 +1,92 @@
+#+POSTID: 1481
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 99: Getopt::Declare, Getopt::Euclid, Docopt
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+In 2012, the Python option parsing library [[http://docopt.org][docopt]] made its first appearance and
+took the world by storm, so to speak. It was regarded by many as a fresh
+approach that is quite revolutionary. [[https://github.com/docopt/][Ports]] for other languages follow, from PHP
+to Ruby, from Haskell to Go, from C/C++ to Rust. The npm port itself boasts [[https://www.npmjs.com/package/docopt][500
+dependents]]. Docopt also eventually inspires a few forks or projects that aim to
+extend the expressive power of the DSL. Oh, and a [[https://metacpan.org/pod/Docopt][Perl port]] exists too of
+course, written by Tokuhiro Matsuno ([[https://metacpan.org/author/TOKUHIROM][TOKUHIROM]]). Sadly, Docport.pm still has the
+"still under development" label from the author and hasn't been updated since
+2013, although it already works at least for a subset of specification.
+
+Meanwhile, the concept is not new nor invented in the Python community. As far
+back as 1998 (14 years earlier), Damian Conway ([[https://metacpan.org/author/DCONWAY][DCONWAY]]) released
+[[https://metacpan.org/pod/Getopt::Declare][Getopt::Declare]] on CPAN which has the same basic idea: parse options based on a
+documentation-like or usage-message-like specification. And I'm pretty sure the
+Perl folks stole this concept from some other older languages too. In 2005, the
+[[https://en.wikipedia.org/wiki/Perl_Best_Practices][Perl Best Practices]] book (also by Damian Conway) came out. In it, a
+then-yet-unwritten new module called Getopt::Clade is mentioned. Unfortunately,
+that module never got written. But [[https://metacpan.org/pod/Getopt::Euclid][Getopt::Euclid]] was born instead with a
+similar but slightly different concept: instead of using a usage-message-like
+specification, the specification is read from the POD. You might feel that
+Getopt::Euclid is more Perlish.
+
+How popular are these modules? None of them are very. Getopt::Declare only has 4
+CPAN distributions depending on it, while Getopt::Euclid is slightly better
+at 10. If I have to pick betwen the two, I choose Getopt::Euclid. If you are
+creating a documentation for your CLI program, you might as well write a POD for
+it and list your options there.
+
+: % lcpan rdeps Getopt::Declare
+: +---------+----------+-----------------------+----------+--------------+-------------+
+: | phase   | rel      | dist                  | author   | dist_version | req_version |
+: +---------+----------+-----------------------+----------+--------------+-------------+
+: | runtime | requires | Finnigan              | SELKOVJR | 0.0206       | 1.13        |
+: | runtime | requires | MKDoc-Text-Structured | BPOSTLE  | 0.83         |             |
+: | runtime | requires | SVN-Churn             | RCLAMP   | 0.02         | 0           |
+: | runtime | requires | Task-MasteringPerl    | BDFOY    | 1.002        | 0           |
+: +---------+----------+-----------------------+----------+--------------+-------------+
+:
+: % lcpan rdeps Getopt::Euclid
+: +---------+----------+------------------------------+-----------+--------------+-------------+
+: | phase   | rel      | dist                         | author    | dist_version | req_version |
+: +---------+----------+------------------------------+-----------+--------------+-------------+
+: | runtime | requires | Audio-MPD                    | JQUELIN   | 2.004        | 0           |
+: | runtime | requires | Games-RailRoad               | JQUELIN   | 1.101330     | 0           |
+: | runtime | requires | MARC-Record-Stats            | CRUSOE    | v0.0.4       | 0           |
+: | runtime | requires | Module-Install-PodFromEuclid | FANGLY    | 0.01         | 0.3.4       |
+: | runtime | requires | NetHack-PriceID              | SARTAK    | 0.05         | 0           |
+: | runtime | requires | Task-Cpanel-Internal         | CPANEL    | 11.36.001    | 0           |
+: | runtime | requires | Test-Approvals               | JRCOUNTS  | v0.0.5       | 0           |
+: | runtime | requires | VSGDR-StaticData             | DEDMEDVED | 0.31         | 0           |
+: | runtime | requires | VSGDR-TestScriptGen          | DEDMEDVED | 0.16         | 0           |
+: | runtime | requires | VSGDR-UnitTest-TestSet       | DEDMEDVED | 1.34         | 0           |
+: +---------+----------+------------------------------+-----------+--------------+-------------+
+
+But if I have to pick between the abovementioned two and Docopt, I pick Docopt.
+Using these modules means learning yet another DSL and you might as well learn
+Docopt's flavor which has implementations in many languages. Getopt::Declare's
+DSL has some issues including: the use of Tab character. The specification is
+not exactly a usage message, it mixes in some Perl code in { ... } blocks. But a
+proper usage message can be generated from the specification. Both
+Getopt::Declare and Getopt::Euclid also do not seem to (easily) support
+declaring dependencies between options, like which options are mutually
+exclusives to the other (e.g. ~(--verbose | --debug | --quiet)~) or when some
+options need to be all present together, or when some options are dependent to
+other options (e.g. ~--debug-file~ is only relevant when ~--debug~ is
+specified).
+
+Buuut, if I have to pick between the Docopt UI-first approach and the "normal"
+approach (something like Getopt::Long::Descriptive or App::Options, where a
+structured specification is specified to generate usage/documentation instead of
+the other way around), I'd pick the latter. True, with Docopt we can tune the
+exact formatting of the usage message. But I usually prefer my usage message to
+be generated automatically anyway. Using Perl data structure as the
+specification is better because the syntax can be checked by your usual IDE (on
+the other hand, I'm sure someone could create or have created a docopt Emacs
+mode or something.)
+
+And, unless for simpler scripts, I also usually want an option parser module to
+have the ability to read configuration files (and environment variables). So
+far, no such Docopt-style modules have been written. Anyone?

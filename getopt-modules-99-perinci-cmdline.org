@@ -1,0 +1,147 @@
+#+POSTID: 1481
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 99: Perinci::CmdLine
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+Perinci::CmdLine (currently in the form of 3 implementations/flavors, from
+lightweight to heavy, from least featured to full-featured:
+[[https://metacpan.org/pod/Perinci::CmdLine::Inline][Perinci::CmdLine::Inline]], [[https://metacpan.org/pod/Perinci::CmdLine::Lite][Perinci::CmdLine::Lite]], [[https://metacpan.org/pod/Perinci::CmdLine::Classic][Perinci::CmdLine::Classic]]) is
+my approach for doing option parsing and writing CLI scripts. I've written a
+whole [[https://perlancar.wordpress.com/category/pericmd-tut/][article series]] for it in 2015.
+
+For option parsing, Perinci::CmdLine currently uses Getopt::Long behind the
+scene (Perinci::CmdLine::Inline uses [[https://metacpan.org/pod/Getopt::Long::EvenLess][Getopt::Long::EvenLess]] to create smaller
+scripts), although this can be changed later. Users do not write Getopt::Long
+options specification directly. They just specify _function arguments_ in the
+Rinci metadata, e.g.:
+
+#+BEGIN_SRC perl
+package App::phpbb3;
+...
+$SPEC{phpbb3_post} = {
+    v => 1.1,
+    summary => 'Post to a phpBB3-based forum site',
+    description => <<'_',
+
+...
+
+_
+    args => {
+        base_url => {
+            summary => 'Address of phpBB3 site',
+            schema => 'str*',
+            req => 1,
+        },
+        username => {
+            summary => 'Username to login to phpBB3 site',
+            schema => 'str*',
+            req => 1,
+        },
+        password => {
+            summary => 'Password to login to phpBB3 site',
+            schema => 'str*',
+            req => 1,
+        },
+        forum_id => {
+            schema => 'posint*', # can also be ['int*', min=>0]
+            req => 1,
+        },
+        topic_id => {
+            schema => 'posint*',
+            req => 1,
+        },
+        bbcode => {
+            summary => 'Whether to interpret BBCode in the posting',
+            schema => 'bool*',
+        },
+        obfuscate_link => {
+            schema => 'bool*',
+        },
+        delay => {
+            summary => 'Number of seconds to sleep between posting',
+            schema => 'duration*',
+            default => 4,
+            cmdline_aliases => {d=>{}},
+        },
+        posts => {
+            'x.name.is_plural' => 1,
+            summary => 'The posts',
+            description => <<'_',
+
+Blah blah blah.
+
+...
+
+_
+            schema => ['array*', of=>'str*'],
+            cmdline_src => 'stdin_or_files',
+            req => 1,
+            pos => 0,
+            greedy => 1, # means slurpy
+        },
+    },
+};
+sub phpbb3_post {
+    my %args = @_;
+    ...
+}
+#+END_SRC
+
+(Contrast this with the sample App::Options specification in [this
+mini-article], they are rather equivalent.)
+
+These functions are arguments specification contain enough information to be
+translated into command-line options specification. Each function argument will
+become command-line option(s), for example ~username~ will be supplied from
+~--username~, ~base_url~ from ~--base-url~, ~bbcode~ from either ~--bbcode~ or
+~--no-bbcode~, ~posts~ from repeatable ~--post~ (or from command-line
+arguments), and so on. This specification is also used to check valid parameters
+in configuration file.
+
+The schema properties in each argument allows for validation. There are coercion
+rules that can convert e.g. "--delay '0.5 min'" into number of seconds (or
+DateTime::Duration object, if desired).
+
+The specification is also used for shell completion (my article series on
+Perinci::CmdLine has several posts that discuss advanced shell completion in
+more detail).
+
+The same specification is also used to generate usage message and POD. Thus, DRY
+principle is very much applied here. I don't have to specify in two separate
+places.
+
+Unlike the other Getopt::* modules or CLI frameworks, the specification itself
+is not CLI-specific. They are perfectly usable to be used in Perl context, as
+they are merely specification for function arguments. For example, a wrapper
+exists to wrap the ~phpbb3_post()~ function so when one calls the function, the
+arguments are checked against the specification. The function can also be served
+in a web form context, and tools have been written to check the form submission
+against the specification. This maximizes reusability. Want to provide an API
+for your application? The specification is already there. Want to create a CLI?
+Just use the same specification.
+
+Using this framework, I've created literally hundreds of CLI scripts with
+minimal efforts. Often, what I need to do to create the CLI scripts are just two
+lines in the ~dist.ini~:
+
+: [GenPericmdScript]
+: url=/App/phpbb3/phpbb3_post
+
+This will generate a CLI script using specification in
+~$App::phpbb3::SPEC{phpbb3_post}~.
+
+* Drawbacks
+
+Currently one of the drawbacks if you use Perinci::CmdLine is that the framework
+has quite a lot of dependencies. Perinci::CmdLine::Lite has 26 non-core direct
+dependencies, 93 non-core recursive dependencies. Perinci::CmdLine::Classic has
+even more. I hope to reduce this in the long run. It's possible to create
+applications that are free-standing (do not need any non-core modules) using
+Perinci::CmdLine::Inline or via fatpacking.

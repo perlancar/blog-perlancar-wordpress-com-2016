@@ -1,0 +1,131 @@
+#+POSTID: 1481
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 99: App::Options
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/App::Options][App::Options]] is a module by Stephen Adkins ([[https://metacpan.org/author/SPADKINS][SPADKINS]]. The first release is in
+2004 and the latest release as of this writing is version 1.12 in 2010. Like
+[[https://metacpan.org/pod/Smart::Options][Smart::Options]], it combines command-line options parsing with reading of options
+from configuration file (as well as from environment variable).
+
+Modules like App::Options are terribly convenient. You just need one
+specification of list of options you want to accept and the module will parse
+the values from various sources, in specific order like you would expect in a
+typical Unix program. You are then presented with the final result in a hash. In
+the case of App::Options, the final hash is ~%App::options~.
+
+Here's an example of how to use App::Options, taken from one of my scripts
+called ~phpbb3-post~:
+
+#+BEGIN_SRC perl
+use App::Options (
+    option => {
+        base_url => { type => 'string', required => 1, description => 'Address of phpBB3 site'},
+        username => { type => 'string', required => 1, description => 'Username to login to phpBB3 site'},
+        password => { type => 'string', required => 1, description => 'Password to login to phpBB3 site'},
+
+        forum_id => { type => 'int', required => 1, },
+        # one must be specified. if topic_id is not specified, posting
+        # will start a new topic, otherwise it will be a topic reply
+        topic_id => { type => 'int', required => 0, },
+        delay => { type => 'int', required => 0, default => 4, description => 'Number of seconds to wait between posting'},
+        bbcode => { type => 'bool', required => 0, default => 0, description => 'Whether to interpret BBCode'},
+        log_level => { type => 'string', required => 0, default => 'DEBUG' },
+        obfuscate_link => { type => 'bool', require => 0, default => 0, },
+    },
+);
+#+END_SRC
+
+If you run the script:
+
+: % phpbb3-post --help
+: Error: "base_url" is a required option but is not defined
+: Error: "forum_id" is a required option but is not defined
+: Error: "password" is a required option but is not defined
+: Error: "username" is a required option but is not defined
+: Usage: phpbb3-post [options] [args]
+: --help                             print this message (also -?)
+: --base_url=<value>                 [undef] (string) Address of phpBB3 site
+: --bbcode=<value>                   [0] (bool) Whether to interpret BBCode
+: --delay=<value>                    [4] (int) Number of seconds to wait between posting
+: --forum_id=<value>                 [undef] (int)
+: --log_level=<value>                [DEBUG] (string)
+: --obfuscate_link=<value>           [0] (bool)
+: --password=<value>                 [undef] (string) Password to login to phpBB3 site
+: --topic_id=<value>                 [undef] (int)
+: --username=<value>                 [undef] (string) Username to login to phpBB3 site
+
+The values of the options can be specified directly from the command-line, e.g.:
+
+: % phpbb3-post --base_url=https://example.com/forum/ --username=foo --password=secret \
+:     --forum_id=10 < post.txt
+
+or, some of them can be stored in a configuration file (like ~password~, which
+is not apt to be specified via command-line). App::Options by default searches
+in several locations, from per-user directory ~$HOME/.app/prog.conf~,
+~$HOME/.app/app.conf~, to program directory ~$PROGDIR/PROGNAME.conf~,
+~$PROGDIR/app.conf~, until global directory ~/etc/app/app.conf~. The location of
+configuration file can be changed via ~--option_file~ command-line option or
+disabled via ~--no_option_file~.
+
+The configuration file is INI-like, and there is a concept of config profiles to
+let you store multiple sets of options in a single file which can be selected
+via ~--profile~.
+
+The module has some peculiarities though that over the years finally made me
+develop my own solution and abandon it.
+
+First of all, it encourages putting the specification in the ~use~ statement at
+compile-time phase, which interferes with ~perl -c~. You suddenly cannot check
+your script simply with ~perl -c YOURSCRIPT~ anymore, as options checking is
+still done. You'll still need to provide all the required options.
+
+This can be remedied by changing the code from:
+
+#+BEGIN_SRC perl
+use App::Options (option => { ... });
+#+END_SRC
+
+into:
+
+#+BEGIN_SRC perl
+use App::Options ();
+App::Options->import(option => { ... });
+#+END_SRC
+
+which delays the option parsing to the runtime phase. This is not documented:
+instead the documentation seems to be out-of-date and mentions the ~init()~
+method, which does not exist in the code.
+
+Second, you need to use this syntax to provide an option value on the
+command-line:
+
+: --name=VALUE
+
+This syntax (despite being much more common) is not accepted and the error
+message does not indicate this:
+
+: --name VALUE
+
+The third is more minor and purely personal preference: I prefer the option like
+~foo_bar~ to become ~--foo-bar~ on the command-line (that is, the underscores
+become dashes). Or at least support both ~--foo-bar~ and ~--foo_bar~.
+App::Options only supports the later.
+
+The fourth is also minor: I don't like the default location of configuration
+files to be in ~$HOME/.app/~ or ~/etc/app/~. I'd prefer it to be in ~$HOME~ or
+~$HOME/.config/~ or just ~/etc/~.
+
+The second peculiarity is the one that annoyed me the most and caused me to
+utter curses, as I often would type ~--foo val~ only to have to type again
+~--foo=val~. *While all the other programs I usually use accept --foo val*.
+
+Due to the above reasons, I'd recommend [[https://metacpan.org/pod/Smart::Options][Smart::Options]] instead or my
+Perinci::CmdLine framework.

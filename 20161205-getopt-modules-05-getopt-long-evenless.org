@@ -1,3 +1,4 @@
+#+POSTID: 1477
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt
@@ -7,7 +8,7 @@
 
 *About this mini-article series.* Each day for 24 days, I will be reviewing a
 module that parses command-line options (such module is usually under the
-~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getopt-long/][First article is here]].
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
 [[https://metacpan.org/pod/Getopt::Long::EvenLess][Getopt::Long::EvenLess]] (GLEL for short) is another one of my experiments beside
 [[https://metacpan.org/pod/Getopt::Long::Less][Getopt::Long::Less]] (GLL for short) which I covered in the previous article.
@@ -86,5 +87,5 @@ code to parse options:
 
 and you're already able to extract "--flag" or "--opt=val" from @ARGV. But you
 also lose a lot of stuffs like autoabbreviation, "--opt val" syntax support
-syntax (which is more common, but requires you specify an option spec), custom
-handler, etc.
+(which is more common, but requires you specify an option spec), custom handler,
+etc.

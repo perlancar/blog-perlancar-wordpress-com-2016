@@ -1,3 +1,4 @@
+#+POSTID: 1475
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt
@@ -7,7 +8,7 @@
 
 *About this mini-article series.* Each day for 24 days, I will be reviewing a
 module that parses command-line options (such module is usually under the
-~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getopt-long/][First article is here]].
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
 [[https://metacpan.org/pod/Getopt::Long::Less][Getopt::Long::Less]] is one of my two experiments of reimplementing [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]]
 (the other is [[https://metacpan.org/pod/Getopt::Long::EvenLess][Getopt::Long::EvenLess]] which will be covered in the next article).

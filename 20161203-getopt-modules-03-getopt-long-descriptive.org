@@ -10,7 +10,7 @@
 
 *About this mini-article series.* Each day for 24 days, I will be reviewing a
 module that parses command-line options (such module is usually under the
-~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getopt-long/][First article is here]].
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
 Note that from this day on, all the discussed modules are non-core.
 

@@ -1,0 +1,108 @@
+#+POSTID: 1479
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 06: Getopt::Long::Complete
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]] is a module that can be used as a drop-in replacement
+(well, in most cases) for [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]], but provides shell tab completion
+support. It's basically a wrapper for Getopt::Long, because to do actual option
+parsing it delegates to Getopt::Long.
+
+Getopt::Long::Complete is my option parsing module which so far gets the most
+positive reception, judging from the number of pluses I received on MetaCPAN.
+Although, so far no CPAN distribution from other authors is spotted depending on
+the module. I myself use this module to create some completer scripts for
+popular utilities like [[https://www.gnu.org/s/emacs][emacs]], [[https://metacpan.org/pod/cpanm][cpanm]], or [[https://mpv.io][mpv]], as well as for some CLI utilities
+in which I deem my usual CLI framework Perinci::CmdLine is too heavy.
+
+: % lcpan rdeps Getopt::Long::Complete
+: +---------+----------+--------------------------------+-----------+--------------+-------------+
+: | phase   | rel      | dist                           | author    | dist_version | req_version |
+: +---------+----------+--------------------------------+-----------+--------------+-------------+
+: | runtime | requires | App-CompleteUtils              | PERLANCAR | 0.13         | 0           |
+: | runtime | requires | App-PerinciUtils               | PERLANCAR | 0.09         | 0           |
+: | runtime | requires | App-ShellCompleter-CpanUpload  | PERLANCAR | 0.05         | 0           |
+: | runtime | requires | App-ShellCompleter-YoutubeDl   | PERLANCAR | 0.10         | 0           |
+: | runtime | requires | App-ShellCompleter-cpanm       | PERLANCAR | 0.17         | 0           |
+: | runtime | requires | App-ShellCompleter-emacs       | PERLANCAR | 0.04         | 0.24        |
+: | runtime | requires | App-ShellCompleter-mpv         | PERLANCAR | 0.05         | 0           |
+: | runtime | requires | App-genlines                   | PERLANCAR | 0.003        | 0           |
+: | runtime | requires | App-linespeed                  | PERLANCAR | 0.001        | 0           |
+: | runtime | requires | App-manwrap-pm                 | PERLANCAR | 0.001        | 0           |
+: | runtime | requires | App-numspeed                   | PERLANCAR | 0.001        | 0           |
+: | runtime | requires | App-shcompgen                  | PERLANCAR | 0.29         | 0           |
+: | runtime | requires | App-tabify                     | PERLANCAR | 0.01         | 0           |
+: | runtime | requires | Bencher-Scenario-GetoptModules | PERLANCAR | 0.04         | 0           |
+: | runtime | requires | ShellCompleter-Util            | PERLANCAR | 0.02         | 0           |
+: +---------+----------+--------------------------------+-----------+--------------+-------------+
+
+To use Getopt::Long::Complete, if you have an existing script which uses
+Getopt::Long, you can just replace ~use Getopt::Long~ statement with ~use
+Getopt::Long::Complete~. Then, to activate tab completion, on your shell:
+
+: % complete -C YOURSCRIPT YOURSCRIPT
+
+Make sure that your script is put in a directory that is mentioned in ~PATH~.
+
+* How Getopt::Long::Complete works
+
+First of all, we need to understand how tab completion works. bash can be
+instructed to consult to an external program (in this case, the CLI script
+itself) to get completion answer. When you press Tab after:
+
+: % YOURSCRIPT <tab>
+
+bash will execute YOURSCRIPT (the program mentioned in the ~-C~ argument, which
+is YOURSCRIPT itself) with at least the following environment variables set:
+~COMP_LINE~ (the whole command-line as a single string), ~COMP_POINT~ (the
+position of the cursor in the command-line). It will then except the program to
+output completion answer, one item per line.
+
+The ~GetOptions~ function that ~Getopt::Long::Complete~ exports will first
+detect the existence of these environment variables. If they exist it means the
+script is being executed by bash for tab completion. The environment variable is
+then parsed, the completion answer is printed to STDOUT, and the script exits.
+Otherwise, if the environment variables are not set, Getopt::Long::Complete will
+just delegate to ~Getopt::Long~'s ~GetOptions~.
+
+The options specification, like Getopt::Long, is something like this:
+
+#+BEGIN_SRC perl
+GetOptions(
+    "foo|F=s" => sub { ... },
+    "bar!"  => \$bar,
+    "baz=i" => \$baz,
+);
+#+END_SRC
+
+From this specification, we can list the option names (`--foo`, `-F`, `--bar`,
+`--no-bar` or `--nobar`, `--baz`). When user presses Tab in this:
+
+: % YOURSCRIPT -<tab>
+
+Getopt::Long::Complete will know how to complete with the option names. But in
+the other cases (the first of the two is completing arguments, and the second is
+completing option value):
+
+: % YOURSCRIPT <tab>
+: % YOURSCRIPT --foo <tab>
+
+there is not enough information in the options specification to provide any
+completion. Therefore, ~Getopt::Long::Complete~ also provides an additional
+function ~GetOptionsWithCompletion~ which is just like ~GetOptions~ but accepts
+an additional coderef as the first argument. The coderef will be consulted when
+~Getopt::Long::Complete~ wants to complete arguments or option values. With this
+coderef, you can provide a more complete completion answer. For example, a list
+of Unix usernames, PIDs, or whatever.
+
+* Subcommands
+
+Getopt::Long doesn't deal with subcommands though, and that's why I also created
+[[https://metacpan.org/pod/Getopt::Long::Subcommand][Getopt::Long::Subcommand]] which I will cover in the next mini-article.
