@@ -1,0 +1,69 @@
+#+POSTID: 1481
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 99: Getopt::Compact
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Compact][Getopt::Compact]] is a module that was first released in 2004 by Andrew Stewart
+Williams ([[https://metacpan.org/pod/ASW][ASW]]) and last updated in 2006. It manages to have 7 CPAN distributions
+depending on it.
+
+Like Getopt::Long::Descriptive, this module is basically a wrapper for
+Getopt::Long mainly to allow users to specify summary string for each option as
+that's what is lacking in Getopt::Long to produce a useful usage/help message.
+Getopt::Compact also tries to present a different interface that claims to be
+more compact if you have a lot of (flag) options. For example, this code using
+Getopt::Long:
+
+#+BEGIN_SRC perl
+GetOptions(
+    "--flag1" => \$opts{flag1},
+    "--flag2" => \$opts{flag1},
+    "--flag3" => \$opts{flag1},
+    "--flag4" => \$opts{flag1},
+    "--val1|1=s"  => \$opts{val1},
+    "--val2|2=i"  => \$opts{val2},
+    "--val3=s@"   =>  $opts{val3},
+);
+#+END_SRC
+
+into:
+
+#+BEGIN_SRC perl
+my $opts = Getopt::Compact->new(
+    modes  => [qw/flag1 flag2 flag3 flag4/],
+    struct => [
+        [["val1", "1"], "Value1 blah blah"],
+        [["val2", "2"], "Value2 blah blah", "=i"],
+        ["val3"       , "Value3 blah blah", "=s@"],
+    ],
+)->opts;
+#+END_SRC
+
+But if you always put option values into hash, ~GetOptions~ can also accept
+hashref as first argument for a more compact syntax:
+
+#+BEGIN_SRC perl
+GetOptions(
+    \%opts,
+    [qw/--flag1 --flag2 --flag3 --flag4
+        --val1|1=s --val2|2=i --val3=s@/],
+);
+#+END_SRC
+
+So basically what Getopt::Compact does is accepting an option specification in
+split parts: ~["val1","1"]~ instead of ~val1|1~, ~"=i"~ or ~"=s@"~ (the type and
+desttype part of a Getopt::Long option specification) in the third element of a
+3-element array. It just shuffles things around and users still very much need
+to learn about Getopt::Long specification (read: leaky abstraction).
+
+I recommend using Getopt::Long::Descriptive (GLD) instead of this. GLD doesn't
+pretend to (half-heartedly) hide Getopt::Long behind its interface. Plus, GLD
+allows specifying default value for each option and expressing that an option is
+required, two things that Getopt::Compact doesn't offer.

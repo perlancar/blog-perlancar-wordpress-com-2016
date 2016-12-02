@@ -19,10 +19,10 @@ little or no reason for you to use Getopt::Std.
 
 But Getopt::Std is still the second-most popular CPAN module when it comes to
 parsing command-line options, if you look at the number of reverse dependencies
-it has (167, after Getopt::Long which has 1127). This is probably because a lot
-of the older scripts are using it. Also note that since these two modules are
-core, some distributions do not specify them as dependencies. Which means that
-the number of reverse dependencies for these two are actually higher.
+it has (167, after Getopt::Long which has 1127). Maybe this is because some
+people prefer to have only short options. Also note that since these two modules
+are core, some distributions do not specify them as dependencies. Which means
+that the number of reverse dependencies for these two are actually higher.
 
 The fact that the only two core modules for command-line options parsing,
 Getopt::Long and Getopt::Std, also happen to be the most used by CPAN
