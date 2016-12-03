@@ -1,4 +1,3 @@
-#+POSTID: 1475
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt

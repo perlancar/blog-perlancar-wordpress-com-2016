@@ -1,10 +1,10 @@
-#+POSTID: 1481
+#+POSTID: 1508
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt
 #+TAGS: perl,cli,getopt
 #+DESCRIPTION:
-#+TITLE: Getopt modules 99: Getopt::Compact
+#+TITLE: Getopt modules 04: Getopt::Compact
 
 *About this mini-article series.* Each day for 24 days, I will be reviewing a
 module that parses command-line options (such module is usually under the
@@ -14,12 +14,11 @@ module that parses command-line options (such module is usually under the
 Williams ([[https://metacpan.org/pod/ASW][ASW]]) and last updated in 2006. It manages to have 7 CPAN distributions
 depending on it.
 
-Like Getopt::Long::Descriptive, this module is basically a wrapper for
-Getopt::Long mainly to allow users to specify summary string for each option as
-that's what is lacking in Getopt::Long to produce a useful usage/help message.
-Getopt::Compact also tries to present a different interface that claims to be
-more compact if you have a lot of (flag) options. For example, this code using
-Getopt::Long:
+Like Getopt::Long::Descriptive, this module is a wrapper for Getopt::Long mainly
+to allow users to specify summary string for each option as that's what is
+lacking in Getopt::Long to produce a useful usage/help message. Getopt::Compact
+also tries to present a different interface that claims to be more compact if
+you have a lot of (flag) options. For example, this code using Getopt::Long:
 
 #+BEGIN_SRC perl
 GetOptions(
@@ -33,7 +32,7 @@ GetOptions(
 );
 #+END_SRC
 
-into:
+will become like this when using Getopt::Compact:
 
 #+BEGIN_SRC perl
 my $opts = Getopt::Compact->new(
@@ -46,8 +45,10 @@ my $opts = Getopt::Compact->new(
 )->opts;
 #+END_SRC
 
-But if you always put option values into hash, ~GetOptions~ can also accept
-hashref as first argument for a more compact syntax:
+But if you always put option values into hash elements (instead of sometimes
+assigning an option handler), ~GetOptions~ provides an alternative interface in
+which you specify hashref as first argument. This makes for a more compact
+syntax:
 
 #+BEGIN_SRC perl
 GetOptions(
@@ -57,13 +58,12 @@ GetOptions(
 );
 #+END_SRC
 
-So basically what Getopt::Compact does is accepting an option specification in
-split parts: ~["val1","1"]~ instead of ~val1|1~, ~"=i"~ or ~"=s@"~ (the type and
-desttype part of a Getopt::Long option specification) in the third element of a
-3-element array. It just shuffles things around and users still very much need
-to learn about Getopt::Long specification (read: leaky abstraction).
+So basically what Getopt::Compact makes you do is specifying option in split
+parts: ~--name|a=s@~ in Getopt::Long becomes:
 
-I recommend using Getopt::Long::Descriptive (GLD) instead of this. GLD doesn't
-pretend to (half-heartedly) hide Getopt::Long behind its interface. Plus, GLD
-allows specifying default value for each option and expressing that an option is
-required, two things that Getopt::Compact doesn't offer.
+: [["name","a"], "summary", "=s@"]
+
+I recommend using Getopt::Long::Descriptive (GLD) instead of this because: 1)
+the interface is slightly nicer (no split option specification so more familiar
+to Getopt::Long users); 2) GLD allows specifying default value for options; 3)
+GLD allows expressing that an option is required.

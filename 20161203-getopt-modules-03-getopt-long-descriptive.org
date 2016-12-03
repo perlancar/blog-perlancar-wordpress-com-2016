@@ -1,6 +1,4 @@
-#+POSTID: 1466
-# still can't get org2blog to work
-
+#+POSTID: 1506
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt
@@ -12,12 +10,32 @@
 module that parses command-line options (such module is usually under the
 ~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
-Note that from this day on, all the discussed modules are non-core.
+Note that from this day on, all the reviewed modules are non-core since only
+[[https://metacpan.org/pod/Getopt::Std][Getopt::Std]] and [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] are core modules. The choice of using these
+modules must take into account this factor, as your user must bear an additional
+cost of installing the module from CPAN (unless your application bundles the
+module).
 
-Judging from the number of reverse dependencies, [[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]] is
-the fourth most popular on CPAN with 64 reverse dependencies (after Getopt::Long
-with 1127, Getopt::Std with 167, and MooseX::Getopt with 134). I also have
-actually reviewed Getopt::Long::Descriptive in [[https://perlancar.wordpress.com/2015/02/04/pericmd-005-getoptlongdescriptive/][one of my Perinci::CmdLine tutorial posts]].
+Some of these modules are wrappers for Getopt::Long, either because the author
+wants to offer a different interface and/or add some missing features. Some of
+the modules are higher-level: they are more than mere option parsing modules,
+usually a CLI framework.
+
+Among the missing features often added is the ability to generate usage message
+(and the other common one is the ability to parse commands/subcommands). When
+using Getopt::Long, one already specifies a list of options. But there is no way
+to add a summary string for each option, making it impossible to create a
+useful/nice usage message. The modules solve this problem either by allowing
+user to specify the per-option summary string, or using/parsing user-supplied
+usage text/POD.
+
+[[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]] is one such module: it allows you to specify
+per-option summary string, as well as default value for an option and whether an
+option is required. Judging from the number of reverse dependencies,
+[[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]] is the fourth most popular option parsing module on
+CPAN with 64 reverse dependencies (after Getopt::Long with 1127, Getopt::Std
+with 167, and MooseX::Getopt with 134). I also have actually reviewed
+Getopt::Long::Descriptive in [[https://perlancar.wordpress.com/2015/02/04/pericmd-005-getoptlongdescriptive/][one of my Perinci::CmdLine tutorial posts]].
 
 Aside my minor nitpick as described in the linked post, there are two additional
 notes: Getopt::Long::Descriptive depends on another non-core module
@@ -30,7 +48,8 @@ Sub::Exporter, and its startup is ~twice that of Getopt::Long:
 : | Getopt::Std               |       3.8 |                    1.7 |
 : | perl -e1 (baseline)       |       2.1 |                      0 |
 
-Not that this should be a concern to most.
+Not that this should be a concern to most. If you use Getopt::Long,
+Getopt::Long::Descriptive is pretty recommended.
 
 *Tab completion.* if you have a Getopt::Long::Descriptive-based CLI script, your
 users can now also use [[https://metacpan.org/pod/shcompgen][shcompgen]] to get tab completion, because shcompgen now
