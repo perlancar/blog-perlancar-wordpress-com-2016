@@ -11,7 +11,7 @@ module that parses command-line options (such module is usually under the
 ~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
 [[https://metacpan.org/pod/Getopt::Compact][Getopt::Compact]] is a module that was first released in 2004 by Andrew Stewart
-Williams ([[https://metacpan.org/pod/ASW][ASW]]) and last updated in 2006. It manages to have 7 CPAN distributions
+Williams ([[https://metacpan.org/author/ASW][ASW]]) and last updated in 2006. It manages to have 7 CPAN distributions
 depending on it.
 
 Like Getopt::Long::Descriptive, this module is a wrapper for Getopt::Long mainly
