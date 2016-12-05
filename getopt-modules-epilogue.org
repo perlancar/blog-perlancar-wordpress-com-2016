@@ -26,10 +26,15 @@ unconventional or seemingly odd approach that they take, or the specific
 features that they offer. Not all of them are worth using, but at least they
 provide perspectives and some lessons for us to learn.
 
-I haven't got the chance to deeply look into how option parsing is done in other
-languages, but at least we looked at node's [[https://www.npmjs.com/package/optimist][optimist]]/[[https://www.npmjs.com/package/minimist][minimist]] and Python's
-[[http://docopt.org][docopt]] and [[https://docs.python.org/3/library/argparse.html][argparse]] when we reviewed their Perl ports. Among the other languages
-is Perl's own sister [[https://perl6.org][Perl 6]], which offers [[https://perl6advent.wordpress.com/2010/12/02/day-2-interacting-with-the-command-line-with-main-subs/][built-in command-line option parsing]].
+Unfortunately I haven't got the chance to deeply look into how option parsing is
+done in other languages, but at least we looked at node's [[https://www.npmjs.com/package/optimist][optimist]]/[[https://www.npmjs.com/package/minimist][minimist]] and
+Python's [[http://docopt.org][docopt]] and [[https://docs.python.org/3/library/argparse.html][argparse]] when we reviewed their Perl ports. Among the other
+languages is Perl's own sister [[https://perl6.org][Perl 6]], which offers [[https://perl6advent.wordpress.com/2010/12/02/day-2-interacting-with-the-command-line-with-main-subs/][built-in command-line option
+parsing]]. This endeavor could potentially offer more lessons and perspectives.
+
+On the other hand, Perl's Getopt::Long also sees its ports in [[https://github.com/PaulWay/PHP-Console-GetoptLong][some]] [[https://www.npmjs.com/package/node-getopt-long][languages]]
+(although some "getopt long" libraries might be inspired directly by the GNU C
+library function ~getopt_long()~ instead of Perl's treatment of it).
 
 Of course, many modules are not covered simply because there are many more than
 24 of such modules. Chad Granum ([[https://metacpan.org/author/EXODIST][EXODIST]]) did some releases of Getopt::Again, a
