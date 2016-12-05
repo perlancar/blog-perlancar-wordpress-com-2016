@@ -1,0 +1,140 @@
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 99: Opt::Imistic
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+Option parsing modules can be categorized into two: those that require you to
+write a specification and those that do not. Modules that accept a usage text as
+input like Docopt or POD as input like Getopt::Euclid are included in the first
+category. Modules in the second category are usually modules in this category
+are meant for shorter, simpler scripts. (Actually there's a third category:
+modules that allow you to do both.)
+
+Modules that don't accept a specification face an ambiguity problem when it
+comes to this syntax:
+
+: --foo bar
+
+Is this a flag option ~--foo~ (an option that does not require a value) followed
+by a command-line argument ~bar~, or a option ~--foo~ with its value ~bar~?
+
+Some modules resolve this by disallowing the ambiguous syntax. Option value must
+always be specified using:
+
+: --foo=bar
+
+Other modules resolve this by simply assuming that all ~--foo bar~ means option
+~--foo~ with value of bar (in other words, user must be careful not to put an
+argument after a flag option, usually using ~--~ to separate options and
+arguments).
+
+Some other ambiguity:
+
+: --foo bar --foo baz
+
+If we regard ~--foo~ as an option that takes value, does this mean user wants to
+collect the two values (an array option) or just the latest value?
+
+Aside from the abovementioned approaches to solve the ambiguity without spec,
+there are other approaches possible. One such approach is by looking at _how the
+option value is used in the program_. Using a pragma like [[https://metacpan.org/pod/overload][overload]], we can trap
+boolean, string, even array/hash operations. For example:
+
+#+BEGIN_SRC perl
+package OptionObject;
+
+use overload
+    '""'   => sub { $_[0]{type} = 'scalar'; $_[0]{values}[0] },
+    'bool' => sub { $_[0]{type} = 'bool'  ; @{$_[0]{values}} ? 1:0 },
+    '@{}'  => sub { $_[0]{type} = 'array' ; $_[0]{values} },
+    ;
+
+sub new {
+    my $class = shift;
+    bless {@_}, $class;
+}
+#+END_SRC perl
+
+Then:
+
+#+BEGIN_SRC perl
+my $opt1 = OptionObject->new(value => ["a", "b"]); # e.g. after user specifies --opt1 a --opt1 b
+my $opt2 = OptionObject->new(value => ...);
+my $opt3 = OptionObject->new(value => ...);
+
+if ($opt1 =~ /foo/) {
+    # this is regex matching, meaning user wants opt1 to be a string/scalar option
+}
+
+if ($opt2) {
+    # this is boolean testing, meaning user wants opt2 to be a flag option
+}
+
+for (@$opt3) {
+    # user array-deferences, she probably wants opt3 to be an array option
+}
+#+END_SRC perl
+
+In the above example code, the overloading mechanism will trigger to let us know
+that user wants ~--opt1~ to be a string/scalar option, ~--opt2~ a flag option,
+and ~--opt3~ an array option.
+
+CPAN module [[https://metacpan.org/pod/Opt::Imistic][Opt::Imistic]] offers this approach. The module was written by
+Alastair McGowan-Douglas ([[https://metacpan.org/author/ALTREUS][ALTREUS]]) in 2010, and it sees a new release in 2014
+and 2015. It does not yet have any CPAN distribution depending on it.
+
+To use Opt::Imistic to parse command-line options, you only have to do this:
+
+#+BEGIN_SRC perl
+use Opt::Imistic;
+#+END_SRC
+
+This will cause the module to parse ~@ARGV~ and put the result in ~%ARGV~. For
+example, if your script is called like this:
+
+: % myapp --foo bar --foo baz --qux 1 2 3
+
+Then you'll have ~$ARGV{foo}~ and ~$ARGV{qux}~ available for you. All options are
+assumed to take values. The remaining arguments in ~@ARGV~ will be ~[2, 3]~.
+
+~$ARGV{foo}~ and ~$ARGV{qux}~ are actually overloaded objects. If you use them
+in a scalar context, then you will get a scalar, for example:
+
+#+BEGIN_SRC perl
+open my $fh, "<", $ARGV{foo}; # here, foo is used in scalar context
+#+END_SRC
+
+then ~$ARGV{foo}~ will return the value ~baz~ (the last specified). But
+actually, Opt::Imistic stores all option values as array. If you use it as an
+array, you can:
+
+#+BEGIN_SRC perl
+for my $file (@{ $ARGV{foo} }) { ... }
+#+END_SRC
+
+Opt::Imistic could go one step further. If it combined this with lazy/delayed
+parsing, it could resolve the ambiguous ~--foo bar~ syntax. For example, if it
+didn't parse until it sees:
+
+#+BEGIN_SRC perl
+if ($ARGV{foo}) {
+    ...
+}
+#+END_SRC
+
+then it would know that ~--foo~ is meant to be a flag option and thus does not
+take value. Then Opt::Imistic could parse options and not slurp ~bar~ as the
+option for ~--foo~. This can be repeated, command-line can be reparsed whenever
+a new hint is encountered.
+
+I am tempted to write such a proof-of-concept. But in general, I am more
+interested in option parsing that uses specification. Writing specification is
+not that much of a pain anyway, and it offers so much more, like the ability to
+check for unknown options, auto-abbreviation, autogeneration of usage messages,
+and so on.

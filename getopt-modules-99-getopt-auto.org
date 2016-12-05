@@ -1,0 +1,66 @@
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 99: Getopt::Auto
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Auto][Getopt::Auto]] is a module that was first written in 2003 by Simon Cozens ([[https://metacpan.org/author/SIMON][SIMON]])
+then revived in 2011, 2014 by Geoffrey Leach ([[https://metacpan.org/author/GLEACH][GLEACH]]). There is currently only
+one CPAN distribution depending on this module.
+
+: % lcpan rdeps Getopt::Auto
+: +---------+----------+--------------+--------+--------------+-------------+
+: | phase   | rel      | dist         | author | dist_version | req_version |
+: +---------+----------+--------------+--------+--------------+-------------+
+: | runtime | requires | Pod-HtmlEasy | GLEACH | v1.1.11      | 1.009006    |
+: +---------+----------+--------------+--------+--------------+-------------+
+
+Like [[https://metacpan.org/pod/Opt::Imistic][Opt::Imistic]] or [[https://metacpan.org/pod/Smart::Options][Smart::Options]], it does not require you to write an options
+spec. You can just do:
+
+#+BEGIN_SRC perl
+use Getopt::Auto;
+#+END_SRC
+
+and your command-line options will be collected in ~main~'s ~%options~ (you can
+also define option subroutine named like the option, e.g. ~foo()~ which will be
+called when the option is encountered, this is like supplying an option handler
+in Getopt::Long, except not global-clean). Of course, this approach of not using
+a spec comes with the usual issue of syntax ambiguity. Getopt::Auto resolves
+this by assuming all options in the form of ~--foo~ as flag options that do not
+take values, and options that want to take value must use the ~--foo=value~
+syntax.
+
+Like Smart::Options, this module accepts spec if you want to supply one, in the
+form of POD (like [[https://metacpan.org/pod/Getopt::Euclid][Getopt::Euclid]]). However, unlike Getopt::Euclid, the rules are
+fewer and simpler. You just provide a header (it can be ~=head2~, ~=head3~, or
+some other level) in this format:
+
+: =head2 -a, --add - Some summary
+
+That's it. There's no way of specifying that an option always/never takes value,
+or whether an option is required, or its default value.
+
+Getopt::Auto offers another way of supplying the spec: via import argument. For
+example:
+
+#+BEGIN_SRC perl
+use Getopt::Auto ([
+    ['--add', 'Add integer to count', "The integer argument is not checked.\n", \&add],
+    ['-a', 'Add integer to count', "The integer argument is not checked.\n", \&add],
+    ['--inc', 'Bump count by 1', undef, undef],
+]);
+#+END_SRC
+
+For some reason, when it accepts spec this way, you must specify each alias
+separately. This should probably be rectified in the future. Other peculiarity
+is that option subroutine must accept argument in ~$ARGV[0]~ instead of $_[0].
+
+* Conclusion
+Getopt::Auto has potentials but is still plagued with enough eccentricities that
+prevents me from recommending it for general use. bermain dengan stages.

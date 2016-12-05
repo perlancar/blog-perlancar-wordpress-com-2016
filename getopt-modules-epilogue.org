@@ -1,0 +1,52 @@
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules: Epilogue
+
+*About this mini-article series.* For each of the past 24 days, I have reviewed
+a module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+This series was born out of my experimentations with option parsing and tab
+completion, and more broadly of my interest in doing CLI with Perl. Aside from
+this writing, I've released modules related to option parsing, some of them are
+experimental in nature and some are already used in production.
+
+In general, I'd say that you should probably try to stick with [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]]
+first. As far as option parsing is concerned, it's packed with features already,
+and it has the advantage of being a core module. But if you are creating a more
+complex CLI application, particularly as soon as you want to introduce
+(sub)commands, you might want to reach out for other modules or higher-level CLI
+frameworks.
+
+It has been interesting evaluating the various other modules: the sometimes
+unconventional or seemingly odd approach that they take, or the specific
+features that they offer. Not all of them are worth using, but at least they
+provide perspectives and some lessons for us to learn.
+
+I haven't got the chance to deeply look into how option parsing is done in other
+languages, but at least we looked at node's [[https://www.npmjs.com/package/optimist][optimist]]/[[https://www.npmjs.com/package/minimist][minimist]] and Python's
+[[http://docopt.org][docopt]] and [[https://docs.python.org/3/library/argparse.html][argparse]] when we reviewed their Perl ports. Among the other languages
+is Perl's own sister [[https://perl6.org][Perl 6]], which offers [[https://perl6advent.wordpress.com/2010/12/02/day-2-interacting-with-the-command-line-with-main-subs/][built-in command-line option parsing]].
+
+Of course, many modules are not covered simply because there are many more than
+24 of such modules. Chad Granum ([[https://metacpan.org/author/EXODIST][EXODIST]]) did some releases of Getopt::Again, a
+module that is rather similar to David Golden's [[https://metacpan.org/pod/Getopt::Lucid][Getopt::Lucid]] in interface but
+has explicit support for options that take filenames/pathnames as values. The
+effort has been scrapped, though.
+
+I've avoided reviewing my own modules, which include [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]]
+(Getopt::Long wrapper which adds tab completion), [[https://metacpan.org/pod/Getopt::Long::Subcommand][Getopt::Long::Subcommand]]
+(Getopt::Long wrapper, with support for subcommands), [[https://metacpan.org/pod/Getopt::Long::More][Getopt::Long::More]] (my
+most recent Getopt::Long wrapper which adds tab completion and other features),
+[[https://metacpan.org/pod/Getopt::Long::Less][Getopt::Long::Less]] & [[https://metacpan.org/pod/Getopt::Long::EvenLess][Getopt::Long::EvenLess]] (two leaner versions of Getopt::Long
+for the specific goal of reducing startup overhead), [[https://metacpan.org/pod/Getopt::Panjang][Getopt::Panjang]] (a break
+from Getopt::Long interface compatibility to explore new possibilities), and
+[[https://metacpan.org/pod/Perinci::CmdLine::Lite][Perinci::CmdLine]] (CLI framework which currently uses Getopt::Long but plans to
+switch backend in the long run; the framework for which I've written a [[https://perlancar.wordpress.com/tag/pericmd-tut/][whole
+series]] of tutorial posts).
+
+I hope this series is of use to some people. Merry christmas and happy holidays
+to everybody.
