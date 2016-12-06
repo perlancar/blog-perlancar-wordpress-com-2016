@@ -26,6 +26,25 @@ unconventional or seemingly odd approach that they take, or the specific
 features that they offer. Not all of them are worth using, but at least they
 provide perspectives and some lessons for us to learn.
 
+| name                      | GL-based | GL-like interface | spec     | validation | required | default | deps | (sub)command | autohelp |
+|---------------------------+----------+-------------------+----------+------------+----------+---------+------+--------------+----------|
+| Getopt::Long              | n/a      | n/a               | y        | y          | n        | n       | n    | n            | n        |
+| Getopt::Std               | n        | n                 | y        | n          | n        | n       | n    | n            | n        |
+| Getopt::Long::Descriptive | y        | partial           | y        | y          | y        | y       | n    | n            | y        |
+| Getopt::Compact           | y        | partial           | y        | y          |          |         |      |              |          |
+| Smart::Options            | n        | n                 | optional | y          |          |         |      |              |          |
+| Opt::Imistic              | n        | n                 | n        | n          |          |         |      |              |          |
+|                           |          |                   |          |            |          |         |      |              |          |
+
+GL-based (Getopt::Long-based): whether the module delegates the actual option
+parsing to Getopt::Long. This means the module only acts as a wrapper/front-end
+for Getopt::Long.
+
+GL-like interface: whether the module presents an interface that is identical or
+similar to Getopt::Long. When it only adopts the option spec syntax (e.g.
+~filename=s@~ or ~delay=i~) but not the ~GetOptions~ interface, I put in
+"partial" in the column.
+
 Unfortunately I haven't got the chance to deeply look into how option parsing is
 done in other languages, but at least we looked at node's [[https://www.npmjs.com/package/optimist][optimist]]/[[https://www.npmjs.com/package/minimist][minimist]] and
 Python's [[http://docopt.org][docopt]] and [[https://docs.python.org/3/library/argparse.html][argparse]] when we reviewed their Perl ports. Among the other
@@ -52,6 +71,16 @@ from Getopt::Long interface compatibility to explore new possibilities), and
 [[https://metacpan.org/pod/Perinci::CmdLine::Lite][Perinci::CmdLine]] (CLI framework which currently uses Getopt::Long but plans to
 switch backend in the long run; the framework for which I've written a [[https://perlancar.wordpress.com/tag/pericmd-tut/][whole
 series]] of tutorial posts).
+
+| name                     | GL-based | GL-like interface | spec | validation | required | default | deps    | autohelp |
+|--------------------------+----------+-------------------+------+------------+----------+---------+---------+----------|
+| Getopt::Long::Complete   | y        | y                 | y    |            |          |         |         |          |
+| Getopt::Long::Subcommand | y        | n                 | y    |            |          |         |         |          |
+| Getopt::Long::Less       | n        | y                 | y    |            |          |         |         |          |
+| Getopt::Long::EvenLess   | n        | y                 | y    |            |          |         |         |          |
+| Getopt::Long::More       | y        | y                 | y    | y          | y        | y       | planned | y        |
+| Perinci::CmdLine         | y        | n                 | y    | y          | y        | y       | y       | y        |
+| Getopt::Panjang          | n        | n                 | y    | y          |          |         |         |          |
 
 I hope this series is of use to some people. Merry christmas and happy holidays
 to everybody.
