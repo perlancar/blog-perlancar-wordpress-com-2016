@@ -1,20 +1,24 @@
+#+POSTID: 1513
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt
 #+TAGS: perl,cli,getopt
 #+DESCRIPTION:
-#+TITLE: Getopt modules 99: Opt::Imistic
+#+TITLE: Getopt modules 06: Opt::Imistic
 
 *About this mini-article series.* Each day for 24 days, I will be reviewing a
 module that parses command-line options (such module is usually under the
 ~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
 Option parsing modules can be categorized into two: those that require you to
-write a specification and those that do not. Modules that accept a usage text as
-input like Docopt or POD as input like Getopt::Euclid are included in the first
-category. Modules in the second category are usually modules in this category
-are meant for shorter, simpler scripts. (Actually there's a third category:
-modules that allow you to do both.)
+write a specification and those that do not (actually there's a third category:
+those that allow you to choose to supply a spec or not). Modules that accept a
+usage text as input like [[https://metacpan.org/pod/Docopt][Docopt]], or POD like [[https://metacpan.org/pod/Getopt::Euclid][Getopt::Euclid]], or some other form,
+count into the first category. Modules in the second category are usually
+modules in this category are meant for shorter and simpler scripts. (And the
+modules are often simple themselves with short implementation, too simple to
+contain something worth babbling about. Most of them just collect anything that
+looks like an option in ~@ARGV~ then put them in a hash, done!)
 
 Modules that don't accept a specification face an ambiguity problem when it
 comes to this syntax:
@@ -22,29 +26,25 @@ comes to this syntax:
 : --foo bar
 
 Is this a flag option ~--foo~ (an option that does not require a value) followed
-by a command-line argument ~bar~, or a option ~--foo~ with its value ~bar~?
+by a command-line argument ~bar~, or an option ~--foo~ with its value ~bar~?
 
 Some modules resolve this by disallowing the ambiguous syntax. Option value must
 always be specified using:
 
 : --foo=bar
 
+But this is inconvenient to (some) users and is not how most Unix programs
+behave.
+
 Other modules resolve this by simply assuming that all ~--foo bar~ means option
-~--foo~ with value of bar (in other words, user must be careful not to put an
+~--foo~ with value of ~bar~. In other words, user must be careful not to put an
 argument after a flag option, usually using ~--~ to separate options and
 arguments).
 
-Some other ambiguity:
-
-: --foo bar --foo baz
-
-If we regard ~--foo~ as an option that takes value, does this mean user wants to
-collect the two values (an array option) or just the latest value?
-
-Aside from the abovementioned approaches to solve the ambiguity without spec,
-there are other approaches possible. One such approach is by looking at _how the
-option value is used in the program_. Using a pragma like [[https://metacpan.org/pod/overload][overload]], we can trap
-boolean, string, even array/hash operations. For example:
+Aside from the abovementioned two, other approaches are possible. One such
+approach is by looking at _how the option value is used in the program_. Using a
+pragma like [[https://metacpan.org/pod/overload][overload]], we can trap boolean, string, even array/hash operations.
+For example:
 
 #+BEGIN_SRC perl
 package OptionObject;
@@ -59,7 +59,7 @@ sub new {
     my $class = shift;
     bless {@_}, $class;
 }
-#+END_SRC perl
+#+END_SRC
 
 Then:
 
@@ -79,17 +79,28 @@ if ($opt2) {
 for (@$opt3) {
     # user array-deferences, she probably wants opt3 to be an array option
 }
-#+END_SRC perl
+#+END_SRC
 
 In the above example code, the overloading mechanism will trigger to let us know
-that user wants ~--opt1~ to be a string/scalar option, ~--opt2~ a flag option,
-and ~--opt3~ an array option.
+that user wants ~--opt1~ to be a string/scalar option, ~--opt2~ a flag option
+(which does not take value), and ~--opt3~ an array option.
 
-CPAN module [[https://metacpan.org/pod/Opt::Imistic][Opt::Imistic]] offers this approach. The module was written by
-Alastair McGowan-Douglas ([[https://metacpan.org/author/ALTREUS][ALTREUS]]) in 2010, and it sees a new release in 2014
-and 2015. It does not yet have any CPAN distribution depending on it.
+CPAN module [[https://metacpan.org/pod/Opt::Imistic][Opt::Imistic]] offers something like this approach, although it
+doesn't push it that far. The module was written by Alastair McGowan-Douglas
+([[https://metacpan.org/author/ALTREUS][ALTREUS]]) in 2010, and it sees a new release in 2014 and 2015. It does not yet
+have any CPAN distribution depending on it.
 
-To use Opt::Imistic to parse command-line options, you only have to do this:
+Opt::Imistic tries to solve this other ambiguity that non-spec-using modules
+also faces. When we receive this in the command-line:
+
+: --foo bar --foo baz
+
+sometimes ~--foo~ is not meant to accept multiple values, but user might specify
+the option multiple times due to mistake or some other cause. With a spec, we
+can detect this. Without spec, Opt::Imistic tries to detect this by looking at
+how the option value is used by the program.
+
+To use Opt::Imistic to parse command-line options, you do this:
 
 #+BEGIN_SRC perl
 use Opt::Imistic;
@@ -100,8 +111,8 @@ example, if your script is called like this:
 
 : % myapp --foo bar --foo baz --qux 1 2 3
 
-Then you'll have ~$ARGV{foo}~ and ~$ARGV{qux}~ available for you. All options are
-assumed to take values. The remaining arguments in ~@ARGV~ will be ~[2, 3]~.
+Then you'll have ~$ARGV{foo}~ and ~$ARGV{qux}~ available for you. All options
+are assumed to take values. The remaining arguments in ~@ARGV~ will be ~[2, 3]~.
 
 ~$ARGV{foo}~ and ~$ARGV{qux}~ are actually overloaded objects. If you use them
 in a scalar context, then you will get a scalar, for example:
@@ -118,9 +129,9 @@ array, you can:
 for my $file (@{ $ARGV{foo} }) { ... }
 #+END_SRC
 
-Opt::Imistic could go one step further. If it combined this with lazy/delayed
-parsing, it could resolve the ambiguous ~--foo bar~ syntax. For example, if it
-didn't parse until it sees:
+If this were combined this with lazy/delayed parsing, the module could even
+resolve the ambiguous ~--foo bar~ syntax. For example, if it didn't parse until
+it sees:
 
 #+BEGIN_SRC perl
 if ($ARGV{foo}) {

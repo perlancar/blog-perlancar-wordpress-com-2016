@@ -1,0 +1,55 @@
+#+POSTID: 1519
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 05: Getopt::Valid
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Valid][Getopt::Valid]] is yet another module that wraps Getopt::Long to try to add some
+features (examples of modules like these that have been reviewed are
+[[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]] and [[https://metacpan.org/pod/Getopt::Compact][Getopt::Compact]]). The module starts with a single
+specific goal (even the name already reflects that goal nicely), which is to add
+extended validation. Getopt::Long admittedly only allows for expressing limited
+validation, e.g. that something needs to be an integer (~--name=i~) or a
+floating point number (~--name=f~). Everything else is not validated, except by
+ourselves if we assign an option to an option handler (coderef) instead of
+scalar reference or array/hash reference.
+
+The actual design of Getopt::Valid, however, breaks down in places. The main
+thing that pops up the most to me is the inconsistency of names, reflecting the
+lack of design clarity. The top-level structure to be passed to the
+~GetOptionsValid()~ routine is called ~$validation_ref~, but it's not exactly a
+validation specification: it's the program's specification with its list of
+options. The options are called "params" in one place, "arguments" in another
+places. The ~collect_argv~ method is described as a method to collect "args"
+(arguments). For an option parsing module which must differentiate between
+option, arguments (before and after the options are parsed), the convoluted
+naming really turns me off.
+
+The OO interface also leaves something to be desired. After instantiation, first
+you have to ~collect_argv()~ which again is a misleading name because it
+actually call ~Getopt::Long::GetOptions()~ to do the actual parsing. Then we
+have to manually call ~validate()~ to do the extra validation. Then, we have to
+manuall call another method ~valid_args()~ to get the validated arguments, er,
+options.
+
+The validators themselves can be in the form of a coderef:
+
+#+BEGIN_SRC perl
+    'name=s' => sub { ... }
+#+END_SRC
+
+or for more simpler cases, a regex object:
+
+#+BEGIN_SRC perl
+    'name=s' => qr/^blah.+/,
+#+END_SRC
+
+Fine by me. But then, a third case is allowed which is a string to mean... a
+description of the option instead of something related to validation as the
+former two cases.

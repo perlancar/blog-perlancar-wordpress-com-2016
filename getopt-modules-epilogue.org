@@ -56,10 +56,25 @@ On the other hand, Perl's Getopt::Long also sees its ports in [[https://github.c
 library function ~getopt_long()~ instead of Perl's treatment of it).
 
 Of course, many modules are not covered simply because there are many more than
-24 of such modules. Chad Granum ([[https://metacpan.org/author/EXODIST][EXODIST]]) did some releases of Getopt::Again, a
+24 of such modules. I tried to cover at least the "must-know"'s, core and
+popular ones. Other than that, it's pretty much random. I covered what's
+interesting to me or what I can make some points about, or what's bad design.
+
+is an area where each programmer might have his/her own idea of ...
+
+wtf moments.
+
+others are too weird or wtf, but i won't name names here.
+
+Chad Granum ([[https://metacpan.org/author/EXODIST][EXODIST]]) did some releases of Getopt::Again, a
 module that is rather similar to David Golden's [[https://metacpan.org/pod/Getopt::Lucid][Getopt::Lucid]] in interface but
 has explicit support for options that take filenames/pathnames as values. The
 effort has been scrapped, though.
+
+Some modules are quickly skipped for various reasons. Most simple . One module
+was skipped because it uses Moose (probably to utilize Moose type system)
+causing the startup overhead of script loading this module alone to be above
+200-300ms.
 
 I've avoided reviewing my own modules, which include [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]]
 (Getopt::Long wrapper which adds tab completion), [[https://metacpan.org/pod/Getopt::Long::Subcommand][Getopt::Long::Subcommand]]
