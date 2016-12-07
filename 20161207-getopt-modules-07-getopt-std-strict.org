@@ -1,0 +1,77 @@
+#+POSTID: 1522
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 07: Getopt::Std::Strict
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Std::Strict][Getopt::Std::Strict]] is a module written by Leo Charre ([[https://metacpan.org/author/LEOCHARRE][LEOCHARRE]]) in 2008. The
+author is using this module in several of his CPAN distributions, but no one
+else on CPAN seems to be using it. More "recent" option parsing modules, such as
+those written after the mid-2000's, even including [[https://metacpan.org/pod/Docopt][Docopt]] (port of a popular
+Python library) do not see much adoption on CPAN. This could be caused by
+various factors, the speculation of which I don't intend to get into right now.
+But I can say that there are two exceptions: [[https://metacpan.org/pod/Getopt::Lucid][Getopt::Lucid]] and
+[[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]], and this might have something to do with the
+reputation of their authors.
+
+Back to our module of the day. There are not a lot of wrappers for or "forks" of
+[[https://metacpan.org/pod/Getopt::Std][Getopt::Std]], simply due to the fact that the module is so simple already. But
+the author of Getopt::Std::Strict has an itch to scratch. First, when we are in
+strict mode, instead of this:
+
+#+BEGIN_SRC perl
+getopts('oif:');
+#+END_SRC
+
+or:
+
+#+BEGIN_SRC perl
+getopts('oif:', \%opts);
+#+END_SRC
+
+one has to do this instead:
+
+#+BEGIN_SRC perl
+use vars qw($opt_o $opt_i $opt_f);
+getopts('oif:');
+#+END_SRC
+
+or:
+
+#+BEGIN_SRC perl
+my %opts;
+getopts('oif:', \%opts);
+#+END_SRC
+
+which the author probably finds annoying. So he wrote a module to declare the
+variable(s) for you. And to do this, the option specification needs to be
+passed/processed at compile time. Thus:
+
+#+BEGIN_SRC perl
+use Getopt::Std::Strict 'oif:', 'opt'; # will declare the $opt_* for you
+if ($opt_o) { ... } # so $opt_o can be used without you declaring it
+#+END_SRC
+
+This is rather nice because if you mistype ~$opt_o~ to ~$opt_p~ (an unknown
+option), this mistake will be caught at compile-time.
+
+As a bonus, the module also provides you ~%OPT~ and ~opt()~ function. You can
+access for example the ~-o~ option via ~$OPT{o}~, or via ~opt('o')~. The former
+won't catch a typo e.g. when you type ~$OPT{p}~ but the later will (~opt('p')~
+will die).
+
+I personally find all this rather unnecessary: I probably would just bear the
+cost of typing ~my %opts;~ or ~my ($opt_o, $opt_i, $opt_f);~ and be more
+explicit.
+
+But I have a couple of suggestions. First, it might be nice if the module dies
+when user specifies unknown option (to be more inline with the "Strict" spirit
+in the name). And second, the bonuses are additional cognitive burdens that I'd
+personally do without. Or, if they are to stay, to be more strict the ~%OPT~ can
+be made to die too when fed unknown options too, e.g. using tie mechanism.

@@ -1,0 +1,76 @@
+#+POSTID: 1525
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 08: Getopt::Tiny
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Tiny][Getopt::Tiny]] is a module written in 1999-2002 by David Muir Sharnoff ([[https://metacpan.org/author/MUIR][MUIR]]).
+David is a veteran Perl programmer who also programs in several other languages
+like Go, Python, node, Java. This module is admittedly among his earlier works,
+and the age shows e.g. it only recognizes "old" style long option with a single
+dash prefix (~-foo~) instead of "new" one with double dash prefix (~--foo~). But
+there are a couple of things I want to highlight.
+
+Getopt::Tiny is not a Getopt::Long wrapper; it implements its own parsing. The
+code is short and simple, as the name ::Tiny would suggest, at around only 115
+lines. It currently does not have any CPAN distributions depending on it.
+
+The feeling that I get looking at this module is that it tries to be less
+redundant than Getopt::Long. For example, instead of option spec being something
+like ~name=s~ or ~name=s@~ or ~name=s%~, this module guesses the destination
+type from the type of references the option is paired with:
+
+#+BEGIN_SRC perl
+    opt1 => \$str,  # a scalar/string
+    opt2 => \@ary,  # an array
+    opt3 => \%hash, # a hash
+#+END_SRC
+
+Getting a bit quirky, when generating usage message, instead of letting user
+specify a summary string like some other modules (e.g.
+[[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]], [[https://metacpan.org/pod/Getopt::Simple][Getopt::Simple]], [[https://metacpan.org/pod/Getopt::Long::More][Getopt::Long::More]]) or from POD/usage
+like some (e.g. [[https://metacpan.org/pod/Getopt::Euclid][Getopt::Euclid]], [[https://metacpan.org/pod/Getopt::Declare][Getopt::Declare]], [[https://metacpan.org/pod/Docopt][Docopt]]) this module searches from
+comment in source code. The comment must be particularly formatted, i.e.:
+
+#+BEGIN_SRC perl
+# begin usage info
+my %flags = (
+    opt1 => \$str,  # description for opt1
+    opt2 => \@ary,  # description for opt2
+    opt3 => \%hash, # description for opt3
+);
+my %switches = (
+    switch1 => \$switch1,  # description for switch1
+);
+# end usage info
+getopt(\@ARGV, \%flags, \%switches);
+#+END_SRC
+
+Another rather quirky thing, also as the result of trying (a bit too hard) to be
+compact, the fourth option to its ~getopt()~ option is a string that will be
+used in the usage message for symbolizing the arguments, e.g. "files", which
+will generate a usage message e.g.:
+
+: Usage: myprog [flags] [switches] files
+
+This means, it's okay if ~@ARGV~ contains arguments after the options (flags,
+switches) have been stripped, e.g.:
+
+: % myprog --opt1 val --opt2 val --opt2 val foo bar
+
+But, if the fourth argument is not specified, the usage message is simply:
+
+: Usage: myprog [flags] [switches]
+
+And the command-line is not allowed to have extra arguments (~foo, bar~). On the
+other hand, there's no way to express that command-line arguments are required.
+Or whether a flag is required. Or default value.
+
+But at least the code is compact as well as very straightforward, which is
+better than some other modules that I looked at.
