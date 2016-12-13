@@ -55,10 +55,12 @@ On the other hand, Perl's Getopt::Long also sees its ports in [[https://github.c
 (although some "getopt long" libraries might be inspired directly by the GNU C
 library function ~getopt_long()~ instead of Perl's treatment of it).
 
-Of course, many modules are not covered simply because there are many more than
-24 of such modules. I tried to cover at least the "must-know"'s, core and
-popular ones. Other than that, it's pretty much random. I covered what's
-interesting to me or what I can make some points about, or what's bad design.
+Of course, many modules are not covered simply because there are a lot more than
+24 of such modules ([[https://metacpan.org/pod/lcpan][lcpan]] tells me that there are 180 packages in the ~Getopt::~
+namespace alone, with 94 distributions having the name ~Getopt-*~). I tried to
+cover at least the "must-know"'s, core and popular ones. Other than that, it's
+pretty much random. I covered what's interesting to me or what I can make some
+points about, or what's bad design.
 
 is an area where each programmer might have his/her own idea of ...
 

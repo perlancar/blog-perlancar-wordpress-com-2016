@@ -3,16 +3,21 @@
 #+CATEGORY: perl,cli,getopt
 #+TAGS: perl,cli,getopt
 #+DESCRIPTION:
-#+TITLE: Getopt modules 99: App::Options
+#+TITLE: Getopt modules 13: App::Options
 
 *About this mini-article series.* Each day for 24 days, I will be reviewing a
 module that parses command-line options (such module is usually under the
 ~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
-[[https://metacpan.org/pod/App::Options][App::Options]] is a module by Stephen Adkins ([[https://metacpan.org/author/SPADKINS][SPADKINS]]. The first release is in
-2004 and the latest release as of this writing is version 1.12 in 2010. Like
-[[https://metacpan.org/pod/Smart::Options][Smart::Options]], it combines command-line options parsing with reading of options
-from configuration file (as well as from environment variable).
+In the previous article, I've reviewed [[https://metacpan.org/pod/Getopt::ArgvFile][Getopt::ArgvFile]] which enables you to
+read options from config file. There's another module which used to be my
+favorite when it comes to reading options from command-line as well as config
+files and environment: [[https://metacpan.org/pod/App::Options][App::Options]].
+
+App::Options is a module by Stephen Adkins ([[https://metacpan.org/author/SPADKINS][SPADKINS]]. The first release is in
+2004 and the latest release as of this writing is version 1.12 in 2010. Unlike
+Getopt::ArgvFile which must be combined with [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]], App::Options does it
+all alone.
 
 Modules like App::Options are terribly convenient. You just need one
 specification of list of options you want to accept and the module will parse
@@ -31,13 +36,11 @@ use App::Options (
         password => { type => 'string', required => 1, description => 'Password to login to phpBB3 site'},
 
         forum_id => { type => 'int', required => 1, },
-        # one must be specified. if topic_id is not specified, posting
-        # will start a new topic, otherwise it will be a topic reply
         topic_id => { type => 'int', required => 0, },
         delay => { type => 'int', required => 0, default => 4, description => 'Number of seconds to wait between posting'},
         bbcode => { type => 'bool', required => 0, default => 0, description => 'Whether to interpret BBCode'},
         log_level => { type => 'string', required => 0, default => 'DEBUG' },
-        obfuscate_link => { type => 'bool', require => 0, default => 0, },
+        obfuscate_link => { type => 'bool', required => 0, default => 0, },
     },
 );
 #+END_SRC
@@ -67,11 +70,11 @@ The values of the options can be specified directly from the command-line, e.g.:
 :     --forum_id=10 < post.txt
 
 or, some of them can be stored in a configuration file (like ~password~, which
-is not apt to be specified via command-line). App::Options by default searches
-in several locations, from per-user directory ~$HOME/.app/prog.conf~,
-~$HOME/.app/app.conf~, to program directory ~$PROGDIR/PROGNAME.conf~,
-~$PROGDIR/app.conf~, until global directory ~/etc/app/app.conf~. The location of
-configuration file can be changed via ~--option_file~ command-line option or
+is not apt to be specified via command-line). App::Options searches config files
+in several locations, from per-user ~.app~ directory (~$HOME/.app/prog.conf~,
+~$HOME/.app/app.conf~), to program directory (~$PROG_DIR/PROGNAME.conf~,
+~$PROG_DIR/app.conf~), until global directory ~/etc/app/app.conf~. The location
+of configuration file can be changed via ~--option_file~ command-line option or
 disabled via ~--no_option_file~.
 
 The configuration file is INI-like, and there is a concept of config profiles to

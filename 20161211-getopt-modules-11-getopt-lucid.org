@@ -1,0 +1,73 @@
+#+POSTID: 1536
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 11: Getopt::Lucid
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Lucid][Getopt::Lucid]] is David Golden's ([[https://metacpan.org/author/DAGOLDEN][DAGOLDEN]]) take on option parsing. It was first
+released in 2005 and still sees updates from time to time. The last release is
+in Aug 2016. Around 20 CPAN distributions use it (some of them are David's),
+making it moderately popular (behind [[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]] or things like
+[[https://metacpan.org/pod/MooseX::Getopt][MooseX::Getopt]] and [[https://metacpan.org/pod/MooX::Options][MooX::Options]]).
+
+| phase   | rel      | dist                           | author    | dist_version | req_version |
+|---------+----------+--------------------------------+-----------+--------------+-------------|
+| runtime | requires | Acme-PDF-rescale               | HERVE     |          0.2 |        0.16 |
+| runtime | requires | App-CPAN-Mini-Visit            | DAGOLDEN  |        0.008 |        0.16 |
+| runtime | requires | App-StaticImageGallery         | RBO       |        0.002 |           0 |
+| runtime | requires | App-Taskflow                   | FARHAD    |          1.0 |           0 |
+| runtime | requires | App-Ylastic-CostAgent          | DAGOLDEN  |        0.006 |           0 |
+| runtime | requires | App-Zapzi                      | RUPERTL   |        0.017 |        1.05 |
+| runtime | requires | App-grindperl                  | DAGOLDEN  |        0.004 |           0 |
+| runtime | requires | App-mymeta_requires            | DAGOLDEN  |        0.006 |           0 |
+| runtime | requires | Bencher-Scenario-GetoptModules | PERLANCAR |         0.04 |           0 |
+| runtime | requires | Decl                           | MICHAEL   |         0.11 |           0 |
+| runtime | requires | Paludis-UseCleaner             | KENTNL    |   0.01000307 |           0 |
+| runtime | requires | Pod-ROBODoc                    | MGRIMM    |          0.3 |           0 |
+| runtime | requires | Pod-WikiDoc                    | DAGOLDEN  |         0.20 |        0.14 |
+| runtime | requires | String-Dump                    | PATCH     |         0.09 |           0 |
+| runtime | requires | Task-BeLike-DAGOLDEN           | DAGOLDEN  |        1.010 |           0 |
+| runtime | requires | Task-BeLike-RJRAY              | RJRAY     |        0.009 |           0 |
+| runtime | requires | Task-MasteringPerl             | BDFOY     |        1.002 |           0 |
+| runtime | requires | VJF-Emphase                    | HERVE     |         0.11 |        0.16 |
+| runtime | requires | VJF-MITDT                      | HERVE     |         1.01 |        0.16 |
+
+Getopt::Lucid implements its own parsing and does not depend on [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]]. It
+presents a more OO interface and avoids using symbols like Getopt::Long's ~:s~
+or ~=s@~. Compared to [[https://metacpan.org/pod/Smart::Options][Smart::Options]] which also uses method chaining style, I
+find Getopt::Lucid clearer because the method chains are done on a per-option
+basis instead of for the whole options set.
+
+Compared to Getopt::Long, Getopt::Lucid supports: specifying an option's default
+value, specifying that an option is required, and specifying extra validation
+rule for each option. It does not allow specifying per-option summary string for
+nicer generation of usage message, although with its interface, adding such
+feature should be easily done. It does not offer automatic ~--help~ or
+~--version~ message. It does not support auto-abbreviation.
+
+Getopt::Lucid also allows you to express dependencies between options, a feature
+not usually found in other option parsing modules. Although currently the
+dependency relationship supported is just one form: ~Param('foo')->needs('bar')~
+means that when ~--foo~ is specified then ~--bar~ also needs to appear. There is
+no support to express mutual exclusiveness, for example.
+
+Getopt::Lucid comes with its own peculiarities. For example, a long option can
+be specified as ~--foo~ but can also as ~foo~. I haven't found a Unix program
+that behaves like this. I also notice that it does not allow an option named
+~-?~. And, case-sensitivity of option is regulated on a per-option basis.
+
+There is no built-in support for config files, but the documentation shows how
+to do it. Basically, Getopt::Lucid wants to allow the user to customize how
+values from config files should be merged with values from the command-line
+options.
+
+*Conclusion:* The ability to express dependency between options is useful,
+especially if the other dependency relationships (like mutual exclusiveness)
+were supported. Otherwise, I'd probably still reach for modules that allow
+automatic generation of usage/help/version message.
