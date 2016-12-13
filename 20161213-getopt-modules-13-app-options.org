@@ -1,3 +1,4 @@
+#+POSTID: 1544
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt
@@ -9,12 +10,12 @@
 module that parses command-line options (such module is usually under the
 ~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
-In the previous article, I've reviewed [[https://metacpan.org/pod/Getopt::ArgvFile][Getopt::ArgvFile]] which enables you to
+In the previous article, I reviewed [[https://metacpan.org/pod/Getopt::ArgvFile][Getopt::ArgvFile]] which enables you to
 read options from config file. There's another module which used to be my
 favorite when it comes to reading options from command-line as well as config
 files and environment: [[https://metacpan.org/pod/App::Options][App::Options]].
 
-App::Options is a module by Stephen Adkins ([[https://metacpan.org/author/SPADKINS][SPADKINS]]. The first release is in
+App::Options is a module by Stephen Adkins ([[https://metacpan.org/author/SPADKINS][SPADKINS]]). The first release is in
 2004 and the latest release as of this writing is version 1.12 in 2010. Unlike
 Getopt::ArgvFile which must be combined with [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]], App::Options does it
 all alone.
@@ -71,25 +72,34 @@ The values of the options can be specified directly from the command-line, e.g.:
 
 or, some of them can be stored in a configuration file (like ~password~, which
 is not apt to be specified via command-line). App::Options searches config files
-in several locations, from per-user ~.app~ directory (~$HOME/.app/prog.conf~,
-~$HOME/.app/app.conf~), to program directory (~$PROG_DIR/PROGNAME.conf~,
+in several locations, from per-user ~.app~ directory (~$HOME/.app/PROG_NAME.conf~,
+~$HOME/.app/app.conf~), to program directory (~$PROG_DIR/PROG_NAME.conf~,
 ~$PROG_DIR/app.conf~), until global directory ~/etc/app/app.conf~. The location
 of configuration file can be changed via ~--option_file~ command-line option or
 disabled via ~--no_option_file~.
 
-The configuration file is INI-like, and there is a concept of config profiles to
-let you store multiple sets of options in a single file which can be selected
-via ~--profile~.
+The configuration file is INI-like but with some differences. There is a concept
+of config profiles to let you store multiple sets of options in a single file
+which can be selected via ~--profile~. For example:
 
-The module has some peculiarities though that over the years finally made me
-develop my own solution and abandon it.
+: [profile=site1]
+: site=https://SITE1/
+: username=USER1
+: password=PASS1
+:
+: [profile=site2]
+: site=https://SITE2/
+: username=USER2
+: password=PASS2
+
+However, the module has its own peculiarities that over the years finally made
+me develop my own solution to replace it.
 
 First of all, it encourages putting the specification in the ~use~ statement at
 compile-time phase, which interferes with ~perl -c~. You suddenly cannot check
 your script simply with ~perl -c YOURSCRIPT~ anymore, as options checking is
-still done. You'll still need to provide all the required options.
-
-This can be remedied by changing the code from:
+still done and you'll still need to provide all the required options or supply a
+config file. This can be remedied by changing the code from:
 
 #+BEGIN_SRC perl
 use App::Options (option => { ... });
@@ -102,32 +112,34 @@ use App::Options ();
 App::Options->import(option => { ... });
 #+END_SRC
 
-which delays the option parsing to the runtime phase. This is not documented:
-instead the documentation seems to be out-of-date and mentions the ~init()~
-method, which does not exist in the code.
+which delays the option parsing to the runtime phase. This is not documented
+though (instead the documentation seems to be out-of-date and mentions the
+~init()~ method which no longer exists in the code).
 
 Second, you need to use this syntax to provide an option value on the
 command-line:
 
 : --name=VALUE
 
-This syntax (despite being much more common) is not accepted and the error
-message does not indicate this:
+The more common syntax:
 
 : --name VALUE
+
+is not accepted and the error message is not clear when you do this.
 
 The third is more minor and purely personal preference: I prefer the option like
 ~foo_bar~ to become ~--foo-bar~ on the command-line (that is, the underscores
 become dashes). Or at least support both ~--foo-bar~ and ~--foo_bar~.
 App::Options only supports the later.
 
-The fourth is also minor: I don't like the default location of configuration
-files to be in ~$HOME/.app/~ or ~/etc/app/~. I'd prefer it to be in ~$HOME~ or
-~$HOME/.config/~ or just ~/etc/~.
+The fourth: I don't like the order that App::Options searches configuration
+files. Since I deploy applications as Perl distributions, I'd much prefer the
+config files to be in the usual ~$HOME/.config/~ or ~$HOME~ or finally ~/etc~.
+I'd hate my applications to become "special" or "different" and need to have
+their configs put in ~$HOME/.app~ or ~/etc/app~. The ordering is currently fixed
+and cannot be customized.
 
-The second peculiarity is the one that annoyed me the most and caused me to
-utter curses, as I often would type ~--foo val~ only to have to type again
-~--foo=val~. *While all the other programs I usually use accept --foo val*.
-
-Due to the above reasons, I'd recommend [[https://metacpan.org/pod/Smart::Options][Smart::Options]] instead or my
-Perinci::CmdLine framework.
+My [[https://metacpan.org/pod/Perinci::CmdLine][Perinci::CmdLine]] steals a few ideas from App::Options, mainly the INI-like
+configuration format and the concept of config profiles. But with all my itches
+scratched. You can also try [[https://metacpan.org/pod/Smart::Options][Smart::Options]] (to be reviewed later) which also
+supports config files, plus subcommands.
