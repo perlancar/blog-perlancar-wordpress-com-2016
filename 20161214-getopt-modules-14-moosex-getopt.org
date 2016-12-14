@@ -1,0 +1,117 @@
+#+POSTID: 1547
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 14: MooseX::Getopt
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+After you parse command-line options, you usually end up with a hash of option
+names and values (or something similar). These options are then passed to other
+parts, e.g. to function as arguments or to object constructors. Some modules
+exist to let you map directly between command-line options and these other
+entities. I'll review one today, [[https://metacpan.org/pod/MooseX::Getopt][MooseX::Getopt]], and get to a couple others in
+the following days.
+
+MooseX::Getopt is a role to let you set your [[https://metacpan.org/pod/Moose][Moose]] object's attributes from
+command-line options. It uses [[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]] (which in turn uses
+[[https://metacpan.org/pod/Getopt::Long][Getopt::Long]]) as the options parser, but you don't need to explicitly specify an
+options specification: the role will instead figure out the names of options and
+various rules for you as much as possible.
+
+It's first released in 2007 by the original author of Moose, Stevan Little
+([[https://metacpan.org/author/STEVAN][STEVAN]]), not too long after Moose is released in 2006. Over the years, some
+people have maintained it and since 2012 Karen Etheridge ([[https://metacpan.org/author/ETHER][ETHER]]) is the primary
+maintainer. Karen currently also maintains a lot of other modules in the Moose
+ecosystem.
+
+About 94 CPAN distributions depend on this module, making it possibly the most
+popular way to quickly create CLI script from a (Moose-based) class. Meanwhile,
+for creating CLI scripts with subcommands, [[https://metacpan.org/pod/App::Cmd][App::Cmd]] (together with
+[[https://metacpan.org/pod/MooseX::App::Cmd][MooseX::App::Cmd]]) looks to be the most popular way.
+
+To use MooseX::Getopt, you include this role in your class. Then, instead of
+using ~new~ to construct your object, you use ~new_with_options~ instead.
+
+#+BEGIN_SRC perl
+package My::App;
+use Moose;
+
+with 'MooseX::Getopt';
+
+has 'foo' => (is => 'rw', isa => 'Str', required => 1);
+has 'bar' => (is => 'rw', isa => 'Int', default => 10);
+has 'baz' => (is => 'rw', isa => 'ArrayRef', documentation => 'one or more files');
+#+END_SRC
+
+Your CLI script is simply something like:
+
+#+BEGIN_SRC perl
+#!perl
+use My::App;
+my $app = My::App->new_with_options;
+# perhaps do something with the $app
+#+END_SRC
+
+When you call your CLI script:
+
+: % myapp --foo blah --baz a --baz b
+
+your object will have its ~foo~ set to ~"blah"~, ~bar~ set to the default ~10~,
+and ~baz~ set to ~["a", "b"]~.
+
+If you do not specify option for required attributes (like not specifying
+~--foo~), or specify special option ~--usage~ or ~--help~, then an automatically
+generated usage message will be printed. The usage message will use the
+attributes' ~documentation~ option:
+
+: % myapp -h
+: usage: myapp [-?h] [long options...]
+:         -h -? --usage --help  Prints this usage information.
+:         --foo STR
+:         --bar STR
+:         --baz STR...          one or more files
+
+A ~--version~ handler is also provided:
+
+: % myapp --version
+: /home/u1/test/moosex-getopt/myapp
+: (Getopt::Long::GetOptions version 2.48; Perl version 5.24.0)
+
+Some types like ~Str~, ~Float~, and ~Int~ can be mapped easily into Getopt::Long
+option specification dest type, respectively ~--opt=s~, ~--opt=f~, and
+~--opt=i~. Arrayrefs and hashrefs are also mapped to ~=s@~ and ~=s%~. For other
+types, you can provide a mapping between Moose type and Getopt::Long
+specification (like mapping between ~ArrayOfInts~ with ~=i@~ shown in the
+documentation). Since Moose also supports coercion, this also makes it possible
+to do something like:
+
+: % myapp --since '2016-01-01'
+
+and your object's attribute will become a [[https://metacpan.org/pod/DateTime][DateTime]] object.
+
+If you want config file support, there's a separate role [[https://metacpan.org/pod/MooseX::ConfigFromFile][MooseX::ConfigFromFile]]
+or [[https://metacpan.org/pod/MooseX::SimpleConfig][MooseX::SimpleConfig]]. The latter combines MooseX::ConfigFromFile with
+[[https://metacpan.org/pod/Config::Any][Config::Any]] so you can read any configuration format that Config::Any supports
+(which includes INI, JSON, YAML, Apache-style, or Perl code). MooseX::Getopt
+supports these kinds of roles so all you have to do is include them into your
+class, then you can do:
+
+: % myapp -h --configfile /etc/myapp.yaml --other-opts=val
+
+Default location of config files can also be set. And you can control the
+mapping of attributes to options, for example there's a variant
+[[https://metacpan.org/pod/MooseX::Getopt::Strict][MooseX::Getopt::Strict]] which only creates command-line options for object
+attributes that have the "Getopt" attribute. The default is to provide all
+non-private attributes with their options.
+
+In short, this module is DRY, DWIM, simple to use so it's hard to complain
+about. Of course, normally I wouldn't use a startup-heavy Moose object for a CLI
+script but choose a more lightweight object system or don't use objects at all.
+And my nitpick is that it doesn't translate underscore to dash, e.g. your
+attribute ~foo_bar~ becomes ~--foo_bar~ instead of ~--foo-bar~ but this is a
+matter of personal preference.

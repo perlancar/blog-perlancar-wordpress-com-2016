@@ -1,0 +1,100 @@
+#+POSTID: 1554
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 15: MooX::Options
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]]. [[https://perlancar.wordpress.com/2016/12/14/getopt-modules-14-moosexgetopt/][Previous article]].
+
+[[https://metacpan.org/pod/MooX::Options][MooX::Options]] (written by [[https://metacpan.org/author/celogeek][celogeek]] in 2011 and still being actively maintained)
+is roughly equivalent to [[https://metacpan.org/pod/MooseX::Getopt][MooseX::Getopt]] (or more correctly to
+[[https://metacpan.org/pod/MooseX::Getopt::Strict][MooseX::Getopt::Strict]]).
+
+Here are the users of the module on CPAN (34, not as many as MooseX::Getopt at
+94, but MooseX::Getopt has a 4 year lead):
+
+: % lcpan rdeps MooX::Options
+: +---------+----------+-------------------------------------+-----------+--------------+-------------+
+: | phase   | rel      | dist                                | author    | dist_version | req_version |
+: +---------+----------+-------------------------------------+-----------+--------------+-------------+
+: | runtime | requires | Acme-CatFS                          | PACMAN    | 0.002        | 0           |
+: | runtime | requires | App-Antigen                         | TBSLIVER  | 0.001        | 0           |
+: | runtime | requires | App-DuckPAN                         | DDG       | 1013         | 0           |
+: | runtime | requires | App-Duppy                           | BHSERROR  | 0.05         | 0           |
+: | runtime | requires | App-KeePass2                        | CELOGEEK  | 0.04         | 0           |
+: | runtime | requires | App-Lingua-BO-Wylie-Transliteration | DBR       | 0.1.0        | 0           |
+: | runtime | requires | App-Math-Tutor                      | REHSACK   | 0.005        | 4.000       |
+: | runtime | requires | App-OS-Detect-MachineCores          | DBR       | 1.2.3        | 0           |
+: | runtime | requires | App-PAUSE-CheckPerms                | NEILB     | 0.05         | 0           |
+: | runtime | requires | App-Procapult                       | MSTROUT   | 0.009001     | 4           |
+: | runtime | requires | App-SFDC-Command-ExecuteAnonymous   | ABRETT    | 0.15         | 0           |
+: | runtime | requires | App-SFDC-Metadata                   | TMINNEY   | 0.21         | 0           |
+: | runtime | requires | App-Software-License                | ETHER     | 0.11         | 0           |
+: | runtime | requires | App-assh                            | DBR       | 1.1.2        | 0           |
+: | runtime | requires | App-codefork                        | GETTY     | 0.001        | 0           |
+: | runtime | requires | App-jt                              | GUGOD     | 0.43         | 0           |
+: | runtime | requires | BioX-Map                            | PEKINGSAM | 0.0.12       | 0           |
+: | runtime | requires | ExtJS-Generator-DBIC                | ABRAXXA   | 0.003        | 4.022       |
+: | runtime | requires | ExtUtils-BundleMaker                | REHSACK   | 0.006        | 4.000       |
+: | runtime | requires | GID                                 | GETTY     | 0.004        | 3.73        |
+: | runtime | requires | Games-Cellulo                       | SKAUFMAN  | 0.22         | 0           |
+: | runtime | requires | GitHub-MergeVelocity                | OALDERS   | 0.000007     | 0           |
+: | runtime | requires | Jedi                                | CELOGEEK  | 1.008        | 4.012       |
+: | runtime | requires | Map-Tube-CLI                        | MANWAR    | 0.20         | 4.018       |
+: | runtime | requires | MarpaX-Languages-M4                 | JDDPAUSE  | 0.017        | 0           |
+: | runtime | requires | MooX-Cmd-ChainedOptions             | DJERIUS   | 0.03         | 0           |
+: | test    | suggests | MooX-ConfigFromFile                 | REHSACK   | 0.007        | 4.001       |
+: | runtime | requires | MooX-Ipc-Cmd                        | CAZADOR   | 1.2.1        | 0           |
+: | test    | suggests | MooX-Roles-Pluggable                | REHSACK   | 0.003        | 4.001       |
+: | runtime | requires | Movies-Organizer                    | CELOGEEK  | 1.3          | 0           |
+: | runtime | requires | OrePAN2                             | OALDERS   | 0.45         | 0           |
+: | runtime | requires | PAUSE-Permissions                   | NEILB     | 0.16         | 0           |
+: | runtime | requires | RTx-ToGitHub                        | DROLSKY   | 0.07         | 0           |
+: | runtime | requires | Task-BeLike-GETTY                   | GETTY     | 20150205.000 | 0           |
+: +---------+----------+-------------------------------------+-----------+--------------+-------------+
+
+Unlike in MooseX::Getopt, where the role creates command-line options
+automatically for your object attributes, "everything is explicit" as the
+MooX::Options' documentation says. Instead of the usual ~has~ keyword to declare
+attributes, you declare attributes that have options with the ~option~ keyword.
+The keyword is the same as ~has~ but accepts some extra parameters that are
+relevant for CLI apps:
+
+#+BEGIN_SRC perl
+package MyApp;
+use Moo;
+use MooX::Options;
+
+option 'filename' => (
+    is => 'ro',
+    format => 's',
+    required => 1,
+    doc => 'the file to process',
+);
+
+1;
+#+END_SRC
+
+~format~, as you can guess, is a [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] option specification and will be
+passed to [[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]] as that is what MooX::Options uses under the
+hood to parse the options.
+
+You can create your CLI similar to when you're using MooseX::Getopt:
+
+#+BEGIN_SRC perl
+use MyApp;
+my $app = MyApp->new_with_options;
+# perhaps do something with $app
+#+END_SRC
+
+For config file support, similar to in MooseX::Getopt, there's a
+[[https://metacpan.org/pod/MooX::ConfigFromFile][MooX::ConfigFromFile]] (created by Jens Rehsack ([[https://metacpan.org/author/REHSACK][REHSACK]]) in 2013) that adds the
+capability to read any [[https://metacpan.org/pod/Config::Any][Config::Any]] -supported config file. Although bearing the
+similar name as [[https://metacpan.org/pod/MooseX::ConfigFromFile][MooseX::ConfigFromFile]], MooX::ConfigFromFile allows for easy
+customizing for file extensions/locations to search the config files, which I
+prefer. But overall I prefer the MooseX::Getopt approach which allows for more
+laziness.
