@@ -89,6 +89,11 @@ from Getopt::Long interface compatibility to explore new possibilities), and
 switch backend in the long run; the framework for which I've written a [[https://perlancar.wordpress.com/tag/pericmd-tut/][whole
 series]] of tutorial posts).
 
+XXX if you want to map to function arguments directly, you might want to take a
+look at pericmd. it's like moosex::getopt for those that don't fancy OO that
+much.
+
+
 | name                     | GL-based | GL-like interface | spec | validation | required | default | deps    | autohelp |
 |--------------------------+----------+-------------------+------+------------+----------+---------+---------+----------|
 | Getopt::Long::Complete   | y        | y                 | y    |            |          |         |         |          |
