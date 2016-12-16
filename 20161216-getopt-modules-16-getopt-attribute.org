@@ -33,16 +33,18 @@ himself):
 
 Here's how you would you Getopt::Attribute:
 
-: use Getopt::Attribute;
-:
-: our $verbose : Getopt(verbose!);
-: our $all     : Getopt(all);
-: our $size    : Getopt(size=s);
-: our $more    : Getopt(more+);
-: our @library : Getopt(library=s);
-: our %defines : Getopt(define=s);
-: sub quiet : Getopt(quiet) { our $quiet_msg = 'seen quiet' }
-: usage() if our $man : Getopt(man);
+#+BEGIN_SRC perl
+use Getopt::Attribute;
+
+our $verbose : Getopt(verbose!);
+our $all     : Getopt(all);
+our $size    : Getopt(size=s);
+our $more    : Getopt(more+);
+our @library : Getopt(library=s);
+our %defines : Getopt(define=s);
+sub quiet : Getopt(quiet) { our $quiet_msg = 'seen quiet' }
+usage() if our $man : Getopt(man);
+#+END_SRC
 
 As you can see, it uses a rather Perl-specific feature called subroutine
 attributes. You can then call your CLI app like this:
