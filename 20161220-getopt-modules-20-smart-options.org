@@ -1,17 +1,21 @@
+#+POSTID: 1573
 #+BLOG: perlancar
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
 #+CATEGORY: perl,cli,getopt
 #+TAGS: perl,cli,getopt
 #+DESCRIPTION:
-#+TITLE: Getopt modules 99: Smart::Options
+#+TITLE: Getopt modules 20: Smart::Options
 
 *About this mini-article series.* Each day for 24 days, I will be reviewing a
 module that parses command-line options (such module is usually under the
 ~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
 
+In the next few days, I'll be reviewing Perl ports of some popular option
+parsing modules from other languages. Today: [[https://metacpan.org/pod/Smart::Options][Smart::Options]].
+
 * Summary
 
-[[https://metacpan.org/pod/Smart::Options][Smart::Options]] is written by KAN Fushihara ([[https://metacpan.org/author/MIKIHOSHI][MIKIHOSHI]]) and is a Perl port*) of
+Smart::Options is written by KAN Fushihara ([[https://metacpan.org/author/MIKIHOSHI][MIKIHOSHI]]) and is a Perl port*) of
 [[https://nodejs.org][node]]'s [[https://github.com/substack/node-optimist][optimist]] package, which in turns uses [[https://www.npmjs.com/package/minimist][minimist]] as the option parsing
 engine and adds some stuffs, mainly the ability to generate usage/help message.
 Ironically, ~optimist~ is now deprecated in favor of [[https://www.npmjs.com/package/minimist][yargs]] which is roughly the
@@ -20,7 +24,8 @@ completion.
 
 So ~minimist~ is roughly the equivalent of [[https://metacpan.org/pod][Getopt::Long]], ~optimist~ is the
 equivalent of [[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]], ~yargs~ is roughly the equivalent of
-Getopt::Long::Descriptive + tab completion ([[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]]).
+Getopt::Long::Descriptive + tab completion (like [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]] or
+[[https://metacpan.org/pod/Getopt::Long::More][Getopt::Long::More]]).
 
 You can get an idea of the sheer number of packages in [[https://npmjs.com][npm]], the CPAN equivalent
 in the node ecosystem, by looking at these numbers: compared to Getopt::Long's
@@ -38,15 +43,15 @@ interface. I didn't find any Perl port of ~commander~ on CPAN though.
 
 But I digress. Let's go back Smart::Options and ~optimist~. As I said earlier,
 ~optimist~ is roughly equivalent to Getopt::Long::Descriptive. Except for one
-main difference: you are not required to specify any specification. I can see
-the value of this, especially for the lazy ones out there hacking a
-quick-n-dirty CLI script. Without any specification, the library will simply
-accept any option and put it in a hash. But remember that without specification,
-you cannot check for an unknown option. You also don't get auto-abbreviation,
-for sure. Bundling (grouping) of short one-letter options is supported, but
-without specification the library also cannot differentiate which short options
-require value and which ones don't: the library will simply assume that all
-short options are just flags which don't take value.
+main difference: you are not required to specify any specification. Without any
+specification, the library will simply accept any option and put it in a hash.
+But remember that without specification, you cannot check for an unknown option
+or get auto-abbreviation.
+
+Bundling of short one-letter options is supported, but if you don't provide
+specification the library cannot differentiate which short options require value
+and which ones don't: the library will simply assume that all short options are
+just flags which don't take value.
 
 Another difference is the usage of OO and method chaining.
 
@@ -76,14 +81,14 @@ Let's try to run it:
 As you can see, the command-line arguments will be put in the ~_~ key. And
 unlike Getopt::Long, it does not modify ~@ARGV~.
 
-One nit-pick: the ~argv()~ or the ~parse()~ function (or method) can accept a
-list to parse options from array other than ~@ARGV~, but since it accept a list
+One nitpick: the ~argv()~ or the ~parse()~ function (or method) can accept a
+list to parse options from array other than ~@ARGV~, but since it accepts a list
 instead of arrayref, when you pass a zero-length array it will assume that you
 don't pass any array and so still defaults to ~@ARGV~. This can be remedied,
 e.g., by accepting an arrayref instead.
 
 Without options specification, it's not possible to declare an option to be
-required, repeatable, or as a flag. Let's add some specification:
+required, repeatable, or as a flag. So let's add some specification:
 
 #+BEGIN_SRC perl
 use 5.010;
@@ -111,15 +116,16 @@ After this, you can generate help message:
 :
 : Missing required arguments: foo
 
-I think perhaps there's still a bug in the module, where it still complains
-about missing ~--foo~ when we just want to show help message.
+BTW, some option parsing modules, including Smart::Options, still complain about
+missing ~--foo~ when we instruct it to show help message (~--help~), like shown
+above. I think this behavior is a bug and should be fixed.
 
 * Other features
 
-*) I said earlier that Smart::Options is a port of ~optimist~. It more
-accurately is a blend between ~optimist~ and Kan's older module [[https://metacpan.org/pod/opts][opts]]. So beyond
-~optimist~, Smart::Options adds some more (quite substantial) features, which do
-not exist even in ~yargs~ or ~commander~.
+*) I said earlier that Smart::Options is a port of ~optimist~. It is actually
+more accurately a blend between ~optimist~ and Kan's older module [[https://metacpan.org/pod/opts][opts]]. So
+beyond ~optimist~, Smart::Options adds some more (quite substantial) features,
+which do not exist even in ~yargs~ or ~commander~.
 
 *Validation.* Like in Getopt::Long, you can add some validation. You can declare
 an option to accept Bool, Int, Num, Str, ArrayRef (this is similar to

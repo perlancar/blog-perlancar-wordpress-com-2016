@@ -1,0 +1,47 @@
+#+POSTID: 1571
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 19: App::Spec
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+In the previous article I discussed [[https://metacpan.org/pod/App::Cmd][App::Cmd]], which is a nice, simple CLI
+framework that supports subcommands by requiring you to write a subcommand class
+for each subcommand you want to add. And it also lets you specify
+[[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]] command-line options directly so you can be as custom
+as Getopt::Long::Descriptive lets you to be. However, many high-level features
+are missing.
+
+There exists many more CLI frameworks on CPAN, like there are option parsing
+libraries, some closer to App::Cmd (except, say, being Moo- or Moose-specific)
+while others try to provide more said features.
+
+[[https://metacpan.org/pod/App::Spec][App::Spec]] is one module. It is closer in features to my [[https://metacpan.org/pod/Perinci::CmdLine][Perinci::CmdLine]] with
+the main difference being that App::Spec is OO (although it uses a single class
+and different methods to support subcommands instead of a separate class for
+each subcommand) while Perinci::CmdLine is decidedly not. Here are the features
+that it supports (or want to support, as it's not quite polished or finished
+yet): a specification for CLI app (summary/description, list of subcommands
+(possibly nested), and parameters/options for each subcommand), extra
+validation, automatic help/usage message generation, and shell tab completion.
+App::Spec is relatively new (2016) and written by Tina Muller ([[https://metacpan.org/author/TINITA][TINITA]]). No
+applications on CPAN are using it right now. There is actually an App::Spec
+[[http://perladvent.org/2016/2016-12-17.html][article]] on [[http://perladvent.org/2016/][this year]]'s [[http://perladvent.org][Perl Advent Calendar]] so I'll just direct you to reading
+the article instead of describing it myself.
+
+What's good about App::Spec is that it does not use Moo or Moose, so you can use
+it for applications you want to be light. It's also not too heavy on the OO
+side. It provides shell tab completion out of the box; we need more frameworks
+like this because tab completion is one of pillars of usability on the CLI. I
+hope the completion feature improves in the future.
+
+What I find in App::Spec not really to my liking includes: low-level (manual)
+mapping to Getopt::Long specification format (I prefer an automatic mapper like
+in [[https://metacpan.org/pod/MooseX::Getopt][MooseX::Getopt]] or my Perinci::CmdLine), splitting options into "options" and
+"parameters" (unnecessary, they're all options to me, "options" just happen to
+be boolean switches while "parameters" have values like string or whatever).

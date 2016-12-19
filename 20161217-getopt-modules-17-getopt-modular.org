@@ -1,0 +1,73 @@
+#+POSTID: 1567
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 17: Getopt::Modular
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Modular][Getopt::Modular]] is a [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] wrapper that lets you place some command-line
+options to one or more modules and then lets you combine them as you use the
+modules. For example:
+
+#+BEGIN_SRC perl
+# Module1.pm
+use Getopt::Modular;
+Getopt::Modular->acceptParam(
+    opt1 => {
+        spec => '=s',
+        aliases => ['O'],
+        help => 'This is option one',
+        default => 'foo',
+        validate => sub { ... },
+    },
+    opt2 => {
+        ...
+    },
+);
+# access the parameters somewhere in your code using:
+if (Getopt::Modular->getOpt('foo')) { ... }
+1;
+
+# in Module2.pm
+use Getopt::Modular;
+Getopt::Modular->acceptParam(
+    opt3 => { ... },
+);
+1;
+
+# in myapp
+use Getopt::Modular;
+use Module1;
+use Module2;
+Getopt::Modular->parse_args; # program accepts options opt1, opt2, opt3
+#+END_SRC
+
+As you can see, aside from splitting command-line options over several modules,
+Getopt::Modular also lets you specify default value, usage/help message strings,
+and extra validation routine.
+
+Getopt::Modular is written by Darin McBride ([[https://metacpan.org/author/DMCBRIDE][DMCBRIDE]]), first release is in 2008
+and last updated in 2014. Currently no other CPAN distributions are using it.
+But Getopt::Modular inspired another module [[https://metacpan.org/pod/Getopt::Awesome][Getopt::Awesome]] (written by Pablo
+Fischer ([[https://metacpan.org/author/PFISCHER][PFISCHER]]) in 2009) which continues Getopt::Modular's basic premise but
+with an alternative syntax.
+
+The intention is good, to achieve modularity, but it's modularity at the
+inappropriate level. If you want your code in a module to be more reusable and
+flexible (and everybody wants that), you accept parameters. The first attempt
+for accepting parameters should be function parameters (or if you are building
+an OO class, class attributes). If that is not suitable, for example if you want
+to parameterize a more global behavior, you use package variables or perhaps
+environment variable. Using Getopt::Modular (needlessly) ties the parameters to
+command-line, when your module might not be command-line-specific. The mapping
+is perhaps best done at the script level instead of at the modules.
+
+That said, there are surely cases when this module is appropriate, for example
+if you are building a rather complex CLI application that you split into several
+modules, where the modules are CLI/application-specific. But even then, you
+should probably try to make the module not CLI-specific if you can.

@@ -76,7 +76,10 @@ effort has been scrapped, though.
 Some modules are quickly skipped for various reasons. Most simple . One module
 was skipped because it uses Moose (probably to utilize Moose type system)
 causing the startup overhead of script loading this module alone to be above
-200-300ms.
+200-300ms. getopt::Chain (ridiculous startup, loads close to 200 files, 300ms on
+my fast PC).
+
+ada banyak cli frameworks yang tidak dibahas, ...
 
 I've avoided reviewing my own modules, which include [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]]
 (Getopt::Long wrapper which adds tab completion), [[https://metacpan.org/pod/Getopt::Long::Subcommand][Getopt::Long::Subcommand]]
