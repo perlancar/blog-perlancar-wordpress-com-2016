@@ -79,7 +79,8 @@ causing the startup overhead of script loading this module alone to be above
 200-300ms. getopt::Chain (ridiculous startup, loads close to 200 files, 300ms on
 my fast PC).
 
-ada banyak cli frameworks yang tidak dibahas, ...
+ada banyak cli frameworks yang tidak dibahas, ... (ini sudah dimention di day
+19).
 
 I've avoided reviewing my own modules, which include [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]]
 (Getopt::Long wrapper which adds tab completion), [[https://metacpan.org/pod/Getopt::Long::Subcommand][Getopt::Long::Subcommand]]
