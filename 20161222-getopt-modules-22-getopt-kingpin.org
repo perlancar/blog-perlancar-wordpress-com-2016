@@ -1,0 +1,35 @@
+#+POSTID: 1586
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 22: Getopt::ArgParse
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+[[https://metacpan.org/pod/Getopt::Kingpin][Getopt::Kingpin]] is a port of Go's [[https://github.com/alecthomas/kingpin][kingpin]] library, written by Masaaki Takasago
+([[https://metacpan.org/author/TAKASAGO][TAKASAGO]]) in 2016. It offers the usual "nowadays standard" features like: short
+and long options with short option bundling, automatic help/usage message
+generation, specifying that an option is required, default value, and
+subcommands. Two extra features are: specifying that an option can be set via
+environment variable of a certain name, and built-in completion (which is a
+feature from the original library but doesn't seem to be implemented yet in the
+Perl port). The Go library also allows templating of help message, and this is
+not yet supported by Getopt::Kingping.
+
+Like [[https://metacpan.org/pod/Smart::Options][Smart::Options]] ([[https://perlancar.wordpress.com/2016/12/20/getopt-modules-20-smartoptions/][reviewed a couple of days ago]]), kingpin is using the
+so-called "fluent style" interface, a.k.a. chained methods, which I find
+annoying to type in Perl due to the method call operator in Perl being ~->~
+instead of a single dot. Although fortunately the chained methods interface is
+slightly less annoying than in Smart::Options.
+
+After looking at the 3 ports of option parsing libraries (the abovementioned two
+plus [[https://metacpan.org/pod/Getopt::ArgParse][Getopt::ArgParse]] reviewed yesterday) it indeed seems that subcommand
+support is becoming a standard thing. Which makes me think about whether
+[[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] should also add such feature, or whether we should promote some
+other option parsing library as the "best practice" when one wants to do
+subcommands. So far, I'm not seeing any single best candidate for
+"Getopt::Long + subcommand support".

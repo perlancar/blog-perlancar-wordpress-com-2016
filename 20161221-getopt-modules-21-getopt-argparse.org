@@ -1,0 +1,77 @@
+#+POSTID: 1581
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 21: Getopt::ArgParse
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+In contrast to in Perl, where the core modules [[https://metacpan.org/pod/Getopt::Std][Getopt::Std]] and [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]]
+stand the test of time and remain the most popular ways people parse
+command-line options with in their Perl CLI scripts, in Python we encounter
+several churns of recommended standard modules.
+
+First there is [[https://docs.python.org/3/library/getopt.html][getopt]], "C-style parser for command line options". To use getopt,
+you pass a string containing list of short options a la Getopt::Std, e.g.
+~"ho:v"~ (meaning ~-o~ takes argument while ~h~ and ~v~ are flag switches), and
+also an array containing long options, e.g. ~["help", "output="]~ (meaning
+~--output~ takes argument while ~--help~ does not). But, instead of supplying
+references to variables to set, or coderefs (remember, specifying anonymous
+function is inconvenient in Python) like in Getopt::Long, in getopt programmers
+are asked to do a manual if-then-else and a loop (see the linked documentation
+for example). This is also quite similar in interface to the [[https://ruby-doc.org/stdlib-2.1.0/libdoc/getoptlong/rdoc/GetoptLong.html][GetoptLong]] class in
+Ruby.
+
+No doubt, this style of programming feels manual and tedious. Thus came [[https://docs.python.org/3/library/optparse.html][optparse]]
+which is more OO and supposedly more Pythonic. Instead of passing a whole list
+of options at once, you now add one option (object) at a time using ~add_option~
+method, along with more information for each option: usage/help message, type,
+whether the option is required, number of arguments expected, default value, and
+perhaps some callback. optparse's capability is equivalent to Getopt::Long or
+[[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]], except that optparse makes some design choices, for
+example it is decidedly Unix-oriented, allowing only ~-~ or ~--~ as the option
+prefix (while Getopt::Long allows you to configure this). The documentation is
+quite probably the nicest aspect of this module: it does not assume much
+knowledge (like familiarity with Unix or CLI) from the readers and explains at
+length what an option is and how should one design a CLI program with regards to
+accepting options. I realized that "required option" is indeed an oxymoron from
+reading it!
+
+But, as with Getopt::Long, optparse does not have the concept of subcommands.
+Thus arrived [[https://docs.python.org/3/library/argparse.html][argparse]]. It is basically like optparse in appearance, except it
+has some extra features like the ability to specify positional arguments (in
+Getopt::Long, this is handled by the ~<>~ option specification) and support
+nested subcommands with the use of subparsers. Interestingly, argparse supports
+reading arguments from a file just like [[https://metacpan.org/pod/Getopt::ArgvFile][Getopt::ArgvFile]], and this is the only
+form of "config file" it supports.
+
+As things are right now, argparse becomes part of the standard library (a.k.a.
+core modules, in Perl parlance) while optparse is now deprecated and might be
+removed. However, getopt remains.
+
+There is a Perl port of argparse on CPAN called [[https://metacpan.org/pod/Getopt::ArgParse][Getopt::ArgParse]], created by M
+ytraM ([[https://metacpan.org/author/MYTRAM][MYTRAM]]) in 2013 and last updated in 2015. It is not feature-by-feature
+equivalent to its Python original, because of language differences and because
+argparse still accumulates features over time. You get some basic features like
+autohelp/autousage message, default value, setting an option as required,
+setting number of expected arguments, as well as subparsers for subcommand
+support (although not yet nested in Getopt::ArgParse). The type/validation
+feature is weak or almost nonexistent; perhaps a custom validation routine
+should be allowed to be specified or more can be explored here.
+
+What's rather disappointing from this port is its use of [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] (I was
+expecting a full port so option parsing should be done by itself) and [[https://metacpan.org/pod/Moo][Moo]],
+significantly adding dependencies.
+
+There is mention of configuration file in the documentation, but actually there
+is no explicit support of configuration file. Not even using "option file
+prefix" ala argparse or [[https://metacpan.org/pod/Getopt::ArgvFile][Getopt::ArgvFile]].
+
+All in all, I'm not seeing something to make me prefer this module. If you do
+not use subcommands, I recommend sticking with [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] or
+[[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]]. If you do use subcommands, perhaps also consider a
+CLI framework like [[https://metacpan.org/pod/App::Cmd][App::Cmd]], or [[https://metacpan.org/pod/Getopt::Long::Subcommand][Getopt::Long::Subcommand]].

@@ -1,0 +1,112 @@
+#+POSTID: 1590
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules 23: Getopt::Complete
+
+*About this mini-article series.* Each day for 24 days, I will be reviewing a
+module that parses command-line options (such module is usually under the
+~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+Getopt::Complete (GC) is a module written by Scott Smith ([[https://metacpan.org/author/SAKOHT][SAKOHT]]) in 2009 and
+also co-maintained by Nathan Nutter ([[https://metacpan.org/author/NNUTTER][NNUTTER]]). Last release is in 2011. So far
+it registers one CPAN distribution depending on it, although it's written by
+Scott himself.
+
+Shell tab completion is a topic which I have been interested in since around
+2012. I've released numerous modules related to completion, including two option
+parsing modules [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]] (GLC) and [[https://metacpan.org/pod/Getopt::Long::More][Getopt::Long::More]] (GLM) which
+sports completion as (one of) its selling point, so it's natural that I want to
+compare them to Getopt::Complete. Throughout the article I'll be repeatedly
+doing those comparisons, and I hope it's not becoming too annoying.
+
+GC, like GLC and GLM, is a [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] (GL) wrapper that adds tab completion
+feature. To let the module detect tab completion mode and return completion
+answer as soon as possible, GC offers this interface:
+
+** Interface
+#+BEGIN_SRC perl
+use Getopt::Complete (
+    'frog'        => ['ribbit','urp','ugh'],
+    'fraggle'     => sub { return ['rock','roll'] },
+    'quiet!'      => undef,
+    'name'        => undef,
+    'age=n'       => undef,
+    'outfile=s@'  => 'files',
+    'outdir'      => 'directories',
+    'runthis'     => 'commands',
+    'username'    => 'users',
+    '<>'          => 'directories',
+);
+#+END_SRC
+
+That is, it accepts the options specification as import arguments. This looks
+simple but presents its own inconveniences.
+
+The second thing you'll notice that the options specification are different than
+GL. While GLC and GLM choose to use an interface that is backward-compatible
+with GL, GC focuses on tab completion. The values of the pairs in the options
+specification is not a variable reference/coderef as you would expect in GL, but
+solely completion specification: it's either undef (meaning the option does not
+require argument), a string (meaning a completion type/routine to use, e.g.
+~files~ to complete from filenames, ~commands~ to complete from program names in
+PATH, and so on. The options values themselves are collected in ~%ARGS~.
+
+Thus, compared to GLC and GLM, specifying completion routines is simpler in GC
+(but I also wrote [[https://metacpan.org/pod/Shell::Completer][Shell::Completer]] to provide the same level of convenience with
+more flexibility).
+
+** Activating Completion
+To activate completion in bash, you need to declare this shell function first:
+
+: function _getopt_complete () {
+:   COMPREPLY=($( COMP_CWORD=$COMP_CWORD perl `which ${COMP_WORDS[0]}` ${COMP_WORDS[@]:0} ));
+: }
+
+then for each CLI application you also need to do:
+
+: % complete -F _getopt_complete myapp
+
+This is different than the way you activate completion for GLC- or GLM-based
+scripts:
+
+: % complete -C myapp myapp
+
+External programs receive raw ~COMP_LINE~ and ~COMP_POINT~ environment variables
+from bash when doing tab completion, while shell functions are provided with the
+already-parsed command-line ~COMP_WORDS~ array variable and ~COMP_CWORD~. GC
+wants to avoid parsing the command-line on its own, so the ~_getopt_complete~
+function is used to give the Perl program parsed command-line arguments in
+~@ARGV~, and ~COMP_CWORD~ in another environment variable.
+
+Using command-line that is already parsed by bash in ~COMP_WORDS~ has its pros
+as well as cons, due to the way that bash parses command-line for ~COMP_WORDS~.
+So I cannot say which way is better, but what I can say is parsing ~COMP_LINE~
+ourselves is more flexible.
+
+** Completion behavior and bugs
+
+When you press tab after the command:
+
+: % myapp <tab>
+
+GC offers only completion from the ~<>~ specification. In the above example, it
+only offers list of directories as answer. On the other hand, GLC and GLM also
+shows the list of available option names. With GC, to list the available
+options, you have to do:
+
+: % myapp -<tab>
+
+I also cannot say that GLC's and GLM's way is better, but it certainly makes the
+CLI program more discoverable. By just pressing Tab, a user (especially a new
+user) can know more about what's possible.
+
+GC has still a few problems. First of all, it cannot complete "--opt=" when
+COMP_WORDBREAKS contains "=". I have put workarounds for this issue in GLC and
+GLM. Second, it cannot handle filenames/directory names with spaces, or quotes,
+and probably other special characters too.
+
+Third, GLC and GLM through [[https://metacpan.org/pod/Complete::Util][Complete::Util]] offers some matching algorithms aside
+from simple prefix matching, for extra convenience. This is not offered by GC.
