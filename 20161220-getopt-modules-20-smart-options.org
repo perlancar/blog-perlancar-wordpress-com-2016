@@ -13,7 +13,7 @@ module that parses command-line options (such module is usually under the
 In the next few days, I'll be reviewing Perl ports of some popular option
 parsing modules from other languages. Today: [[https://metacpan.org/pod/Smart::Options][Smart::Options]].
 
-* Summary
+** Summary
 
 Smart::Options is written by KAN Fushihara ([[https://metacpan.org/author/MIKIHOSHI][MIKIHOSHI]]) and is a Perl port*) of
 [[https://nodejs.org][node]]'s [[https://github.com/substack/node-optimist][optimist]] package, which in turns uses [[https://www.npmjs.com/package/minimist][minimist]] as the option parsing
@@ -55,7 +55,7 @@ just flags which don't take value.
 
 Another difference is the usage of OO and method chaining.
 
-* Usage
+** Usage
 
 Here's how one would use Smart::Options in the simplest way (without any
 specification):
@@ -120,7 +120,7 @@ BTW, some option parsing modules, including Smart::Options, still complain about
 missing ~--foo~ when we instruct it to show help message (~--help~), like shown
 above. I think this behavior is a bug and should be fixed.
 
-* Other features
+** Other features
 
 *) I said earlier that Smart::Options is a port of ~optimist~. It is actually
 more accurately a blend between ~optimist~ and Kan's older module [[https://metacpan.org/pod/opts][opts]]. So
@@ -157,7 +157,7 @@ my $opts = Smart::Options->new
 option one by one much like Moose's ~has~. Although it doesn't seem to support
 declaring subcommands yet.
 
-* Performance
+** Performance
 
 The startup overhead of Smart::Options is roughly the same as
 Getopt::Long::Descriptive, while the memory usage is higher.
@@ -174,7 +174,7 @@ Getopt::Long::Descriptive, while the memory usage is higher.
 Also to be noted is that Smart::Options does not use Getopt::Long but does its
 own parsing.
 
-* Verdict
+** Verdict
 
 I find ~optimist~ and ~yargs~ themselves don't offer any new feature not already
 existing in Getopt::Long or Getopt::Long::Descriptive (the completion feature
