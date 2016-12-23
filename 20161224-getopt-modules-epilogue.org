@@ -1,0 +1,75 @@
+#+POSTID: 1597
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli,getopt
+#+DESCRIPTION:
+#+TITLE: Getopt modules: Epilogue
+
+*About this mini-article series.* For each of the past +24+ 23 days, I have
+reviewed a module that parses command-line options (such module is usually under
+the ~Getopt::*~ namespace). [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][First article is here]].
+
+This series was born out of my experimentations with option parsing and tab
+completion, and more broadly of my interest in doing CLI with Perl. Aside from
+writing this series, I've also released numerous modules related to option
+parsing, some of them are purely experimental in nature and some already used in
+production.
+
+It has been interesting evaluating the various modules: the sometimes
+unconventional or seemingly odd approach that they take, or the specific
+features that they offer. Not all of them are worth using, but at least they
+provide perspectives and some lessons for us to learn.
+
+Of course, not all modules got reviewed. There are simply far more than 24
+modules ([[https://metacpan.org/pod/lcpan][lcpan]] tells me that there are 180 packages in the ~Getopt::~ namespace
+alone, with 94 distributions having the name ~Getopt-*~). I tried to cover at
+least the must-know ones, core ones, and the popular ones. Other than that,
+frankly the selection is pretty much random. I picked what's interesting to me
+or what I can make some points about, whether they are negative or positive
+points.
+
+I have skipped many modules that are just yet another Getopt::Long wrapper which
+adds per-option usage or some other features found in [[https://metacpan.org/pod/Getopt::Long::Descriptive][Getopt::Long::Descriptive]]
+(GLD). Not that they are worse than GLD, for some reason or another they just
+didn't get adopted widely or at all. A couple examples of these:
+[[https://metacpan.org/pod/Getopt::Helpful][Getopt::Helpful]], [[https://metacpan.org/pod/Getopt::Fancy][Getopt::Fancy]].
+
+Modules which use [[https://metacpan.org/pod/Moose][Moose]], except [[https://metacpan.org/pod/MooseX::Getopt][MooseX::Getopt]], automatically get skipped by me
+because their applicability is severely limited by the high number of
+dependencies and high startup overhead (200-500ms or even more on slower
+computers). These include: [[https://metacpan.org/pod/Getopt::Flex][Getopt::Flex]], [[https://metacpan.org/pod/Getopt::Alt][Getopt::Alt]], [[https://metacpan.org/pod/Getopt::Chain][Getopt::Chain]].
+
+Some others are simply too weird or high in "WTF number", but I won't name names
+here.
+
+Except for [[https://metacpan.org/pod/App::Cmd][App::Cmd]] and [[https://metacpan.org/pod/App::Spec][App::Spec]], I haven't really touched CLI frameworks in
+general. There are no shortages of CLI frameworks on CPAN too, perhaps for
+another series?
+
+I've avoided reviewing my own modules, which include [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]]
+(Getopt::Long wrapper which adds tab completion), [[https://metacpan.org/pod/Getopt::Long::Subcommand][Getopt::Long::Subcommand]]
+(Getopt::Long wrapper, with support for subcommands), [[https://metacpan.org/pod/Getopt::Long::More][Getopt::Long::More]] (my
+most recent Getopt::Long wrapper which adds tab completion and other features),
+[[https://metacpan.org/pod/Getopt::Long::Less][Getopt::Long::Less]] & [[https://metacpan.org/pod/Getopt::Long::EvenLess][Getopt::Long::EvenLess]] (two leaner versions of Getopt::Long
+for the specific goal of reducing startup overhead), [[https://metacpan.org/pod/Getopt::Panjang][Getopt::Panjang]] (a break
+from Getopt::Long interface compatibility to explore new possibilities), and a
+CLI framework [[https://metacpan.org/pod/Perinci::CmdLine::Lite][Perinci::CmdLine]] (which currently uses Getopt::Long but plans to
+switch backend in the long run; I've written a [[https://perlancar.wordpress.com/tag/pericmd-tut/][whole series]] of tutorial posts
+for this module).
+
+In general, I'd say that you should probably try to stick with [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]]
+first. As far as option parsing is concerned, it's packed with features already,
+and it has the advantage of being a core module. But as soon as you want:
+automatic autohelp/automessage generation, subcommand, tab completion then you
+should begin looking elsewhere.
+
+Unfortunately except for evaluating Perl ports of some option parsing libraries
+(like [[https://metacpan.org/pod/Smart::Options][Smart::Options]], [[https://metacpan.org/pod/Getopt::ArgParse][Getopt::ArgParse]], [[https://metacpan.org/pod/Getopt::Kingpin][Getopt::Kingpin]]), I haven't got the
+chance to deeply look into how option parsing is done in other languages. Among
+the other languages is Perl's own sister [[https://perl6.org][Perl 6]], which offers [[https://perl6advent.wordpress.com/2010/12/02/day-2-interacting-with-the-command-line-with-main-subs/][built-in
+command-line option parsing]]. This endeavor of researching option parsing in
+other languages could potentially offer more lessons and perspectives.
+
+I hope this series is of use to some people. Merry christmas and happy holidays
+to everybody.

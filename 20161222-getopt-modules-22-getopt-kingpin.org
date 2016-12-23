@@ -4,7 +4,7 @@
 #+CATEGORY: perl,cli,getopt
 #+TAGS: perl,cli,getopt
 #+DESCRIPTION:
-#+TITLE: Getopt modules 22: Getopt::ArgParse
+#+TITLE: Getopt modules 22: Getopt::Kingpin
 
 *About this mini-article series.* Each day for 24 days, I will be reviewing a
 module that parses command-line options (such module is usually under the

@@ -15,18 +15,19 @@ also co-maintained by Nathan Nutter ([[https://metacpan.org/author/NNUTTER][NNUT
 it registers one CPAN distribution depending on it, although it's written by
 Scott himself.
 
-Shell tab completion is a topic which I have been interested in since around
-2012. I've released numerous modules related to completion, including two option
+Shell tab completion is a topic which I have been interested in since around 2012.
+I've released numerous modules related to completion, including two option
 parsing modules [[https://metacpan.org/pod/Getopt::Long::Complete][Getopt::Long::Complete]] (GLC) and [[https://metacpan.org/pod/Getopt::Long::More][Getopt::Long::More]] (GLM) which
 sports completion as (one of) its selling point, so it's natural that I want to
 compare them to Getopt::Complete. Throughout the article I'll be repeatedly
 doing those comparisons, and I hope it's not becoming too annoying.
 
+** Interface
+
 GC, like GLC and GLM, is a [[https://metacpan.org/pod/Getopt::Long][Getopt::Long]] (GL) wrapper that adds tab completion
 feature. To let the module detect tab completion mode and return completion
 answer as soon as possible, GC offers this interface:
 
-** Interface
 #+BEGIN_SRC perl
 use Getopt::Complete (
     'frog'        => ['ribbit','urp','ugh'],
