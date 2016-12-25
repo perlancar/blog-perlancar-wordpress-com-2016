@@ -18,7 +18,7 @@ subcommands. Two extra features are: specifying that an option can be set via
 environment variable of a certain name, and built-in completion (which is a
 feature from the original library but doesn't seem to be implemented yet in the
 Perl port). The Go library also allows templating of help message, and this is
-not yet supported by Getopt::Kingping.
+not yet supported by Getopt::Kingpin.
 
 Like [[https://metacpan.org/pod/Smart::Options][Smart::Options]] ([[https://perlancar.wordpress.com/2016/12/20/getopt-modules-20-smartoptions/][reviewed a couple of days ago]]), kingpin is using the
 so-called "fluent style" interface, a.k.a. chained methods, which I find
