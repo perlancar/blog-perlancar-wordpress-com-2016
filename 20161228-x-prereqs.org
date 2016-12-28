@@ -1,0 +1,41 @@
+#+POSTID: 1607
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cpan,toolchain
+#+TAGS: perl,cpan,toolchain
+#+DESCRIPTION:
+#+TITLE: x_* prereqs
+
+Do you know that aside from the standard phases "develop", "configure", "build",
+"test", "runtime", and the standard relationship types "requires", "recommends",
+"suggests", you can also put arbitrary phase and relationship type in your Perl
+distribution's dependencies (prerequisites, a.k.a. prereqs) using ~x_~ prefix?
+
+The CPAN Meta Spec v2 ([[https://metacpan.org/pod/CPAN::Meta::Spec][CPAN::Meta::Spec]]) already allows this, but until fairly
+recently when using [[https://metacpan.org/pod/Dist::Zilla][Dist::Zilla]] you can't produce those custom
+phase/relationship into your distribution's ~META.json~ because
+[[https://metacpan.org/pod/CPAN::Meta::Prereqs][CPAN::Meta::Prereqs]] drops all but the standard phases/relationships. But since
+version 2.150006, thanks to Karen Etheridge ([[https://metacpan.org/author/ETHER][ETHER]]) ([[https://github.com/Perl-Toolchain-Gang/CPAN-Meta/pull/110/commits/513ed6525a6f6c747054574295d6341560b4ad48][commit link]]) they are no
+longer dropped.
+
+What would one use those custom phase/relationship for? So far, Kent Fredric
+([[https://metacpan.org/author/KENTNL][KENTNL]]) is using ~x_examples~ custom phase to specify prerequisites for
+examples (which normally will not be installed by your typical CPAN client).
+Karen [[https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues/66][plans]] to "use some new prereq categories for travis to make use of when
+deciding what prereqs to install for different tasks."
+
+I myself am using ~x_spec~ relationship (in the ~develop~ phase) to specify that
+a distribution follows some specification, for example all my distributions
+which contain some [[https://metacpan.org/pod/Rinci][Rinci]] metadata is peppered with this. Another one is
+~x_embed~ relationship. This is when I embed a module source code into another
+module using fatpacking technique using [[https://metacpan.org/pod/Module::FatPack][Module::FatPack]], to reduce dependencies.
+The embedding distribution no longer needs to specify a ~runtime~ ~requires~
+dependency for the embedded module, but I still would like to record the fact
+that the module is being embedded, so I can know when I want to update the
+embedded source sometime later.
+
+The possibilities are endless.
+
+A somewhat related issue, which is broader, more complex, and hasn't been
+solved, is specifying dependencies to things that are not Perl modules, e.g. an
+OS package, a certain program, a certain C library. (References: [[https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues/79][#79]], [[https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues/82][#82]]).
