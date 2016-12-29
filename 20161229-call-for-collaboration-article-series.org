@@ -1,0 +1,34 @@
+#+POSTID: 1611
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl
+#+TAGS: perl
+#+DESCRIPTION:
+#+TITLE: Call for collaboration: mini-article series on object systems and Dist::Zilla plugins
+
+Aside from the [[https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/][mini-article series on option parsing modules]] that I have
+recently completed, there are two more series I currently have in mind: one on
+object systems ([[https://metacpan.org/pod/Moose][Moose]], [[https://metacpan.org/pod/Mouse][Mouse]], [[https://metacpan.org/pod/Moo][Moo]], [[https://metacpan.org/pod/Mo][Mo]], [[https://metacpan.org/pod/Object::Tiny][Object::Tiny]], [[https://metacpan.org/pod/Class::Accessor][Class::Accessor]], and so on)
+and another on [[https://metacpan.org/pod/Dist::Zilla][Dist::Zilla]] plugins. However, as I don't feel familiar with many
+of the modules or plugins, I think it would be nice if more people could write
+the articles.
+
+The format of the series is 24-25 (mini-)articles, each comprised of minimum
+250-300 words, 3-5 paragraphs. This is equivalent to the amount of text of a
+typical essay one is expected to write in a [[https://www.ets.org/Media/Tests/TOEFL/pdf/ibt_writing_sample_responses.pdf][TOEFL]] test in 20-30 minutes time. So
+it should relatively easy to write even for non-native English speakers. I
+personally find that writing a blog post in 30-60 minutes time is ideal: it can
+be done in one sitting and does not take too much time to interrupt your daily
+work. It can even be done during a break. There is no maximum length limit.
+
+Each article should discuss or review a single module. Ideally the author of the
+article is not the author or (co-)maintainer of the reviewed module. The article
+should first describe the module (its brief history, popularity, position in the
+[[http://neilb.org/tag/cpan-river/][CPAN river]]) then proceed to discussion on the user interface and design of the
+module and finally close with the author's overall view on the module (whether
+the module is well designed, whether the module is useful to her, whether the
+module is worth using compared to other modules).
+
+If you are interested in collaborating, please contact me at perlancar gmail. I
+expect the series on object systems to be posted on Feb 1st, 2017 and the series
+on dzil plugins on Apr 1st.
