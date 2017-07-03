@@ -1,0 +1,30 @@
+#+POSTID: 1676
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli
+#+TAGS: perl,cli
+#+DESCRIPTION:
+#+TITLE: csv-grep (and App::CSVUtils)
+
+Today I decided to add [[https://metacpan.org/pod/csv-grep][csv-grep]] to [[https://metacpan.org/pod/App::CSVUtils][App::CSVUtils]], as an alternative to [[https://metacpan.org/author/NEILB][NEILB]]'s
+[[https://metacpan.org/pod/csvgrep][csvgrep]] (which Neil [[http://neilb.org/2017/06/22/csvgrep.html][announced]] about a week ago). I find csvgrep too simplistic
+for my taste or future needs. It's basically equivalent to:
+
+: % ( head -n1 FILE.CSV; grep PATTERN FILE.CSV ) | csv2asciitable
+
+I also think csvgrep's *-d* option does not belong. It's not relevant to
+grepping as well as too case-specific. What if user wants the oldest file in the
+directory? The biggest? The ~find~ or ~ls~ command should be able to do that for
+you:
+
+: % csvgrep PATTERN "`ls *.csv --sort=t | head -n1`"
+
+In csv-grep, you specify Perl code instead of regex pattern. Your Perl code
+receives the CSV row in $_ as an arrayref (or hashref, if you specify *-H*). So
+you can filter based on some particular fields and use the full expressive Power
+of Perl. csv-grep outputs CSV, but you can convert it to other formats by the
+abovementioned [[https://metacpan.org/pod/csv2asciitable][csv2asciitable]], or to JSON with [[https://metacpan.org/pod/csv2json][csv2json]], or to Perl data
+structure with [[https://metacpan.org/pod/csv2dd][csv2dd]], or what have you.
+
+Aside from csv-grep, App::CSVUtils also includes a bunch of other CSV utilities
+which I wrote when I needed to munge CSV files a few months back. Check it out.
