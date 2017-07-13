@@ -1,0 +1,70 @@
+#+POSTID: 1679
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,logging
+#+TAGS: perl,cli,logging
+#+DESCRIPTION:
+#+TITLE: Introducing Log::ger
+
+Yesterday more or less completed the migration of my CPAN modules from using
+[[https://metacpan.org/pod/Log::Any][Log::Any]] to [[https://metacpan.org/pod/Log::ger][Log::ger]]. Sorry for the noise in the releases news channels due to
+the high number of my CPAN modules (particularly to [[https://twitter.com/genio_cw/status/884438623923384320][Chase Whitener]]).
+
+I did not have anything against Log::Any, to be honest. It was lightweight and
+so easy to use in modules as it encourages separation of log producers and
+consumers. Sure, I wish Log::Any had some features that I want but I was okay
+with using it for all my logging needs.
+
+Until Log::Any 1.00 came along in late 2014, when its startup overhead jumped
+from ~2ms (version 0.15) to ~15ms. The new version ballooned from just loading
+[[https://metacpan.org/pod/strict][strict]], [[https://metacpan.org/pod/warnings][warnings]], and [[https://metacpan.org/pod/Log::Any::Adapter::Null][Log::Any::Adapter::Null]] to over a dozen modules. Later
+versions of Log::Any improve somewhat on the startup overhead front but after
+the introduction of Log::Any::Proxy I thought it probably will not get back to
+the previous lightweight level. So I planned to write a more lightweight
+alternative along with probably implementing my wishlist. But this would require
+some time and in the mean time I wrote a hackish workaround called
+[[https://metacpan.org/pod/release/PERLANCAR/Log-Any-IfLOG-0.07/lib/Log/Any/IfLOG.pm][Log::Any::IfLOG]] that will load Log::Any only if environment variable like ~LOG~
+or ~DEBUG~ or ~TRACE~ is set to true.
+
+By the way, why do I fuss about a few milliseconds? My major interest in using
+Perl is for building CLI applications. I am simply annoyed if my CLIs show a
+noticeable (~50-100ms or more) delay before responding with output (major
+offenders include Moose-based CLIs like dzil) when the fact is that Perl can be
+much more responsive than that. Log::Any is but one of several (sometimes many)
+modules I must load in a CLI so if a few ms is added here and a few others
+there, it could quickly add up. Also my CLIs feature shell tab completion and
+this is implemented by running the CLIs themselves for getting the completion
+answers so I always prefer responsive CLIs.
+
+The recent [[https://en.wikipedia.org/wiki/Eid_al-Fitr][Eid al-Fitr]] holiday finally made it possible for me to write a
+replacement for Log::Any: Log::ger in the course of a couple of weeks, along
+with all the log outputs and plugins to match all the features that I needed. So
+in what ways is Log::ger different than Log::Any or the other logger libraries?
+
+First of all, for the low startup overhead goal, I've managed to keep ~use
+Log::ger~ having an overhead of just 0.5-1ms (without loading any extra
+modules). This is even less than ~use warnings~ and certainly less than ~use
+Log::Any~ (8-10ms) or the much heavier ~use Log::Log4perl ':easy'~ (35ms). This
+means, adding logging with Log::ger to your modules now incurs a negligible
+startup overhead. You can add logging to most of your modules without worrying
+about startup overhead.
+
+What about null-logging (stealth-logging) overhead? Log::ger also manages to be
+the fastest here. It's about 1.5x faster than Log::Any, 3x faster than Log4perl,
+and 5x faster than [[https://metacpan.org/pod/Log::Fast][Log::Fast]] (included here because the name claims something
+about speed). This is thanks to using procedural style logging
+(~log_warn("foo")~) instead of OO (~$log->warn("foo")~) and just using an empty
+subroutine like ~sub {0}~. If you don't want any runtime overhead, you can do
+that too with [[https://metacpan.org/pod/Log::ger::Plugin::OptAway][Log::ger::Plugin::OptAway]]. This plugin uses some B magic to turn
+your logging statements into a constant so they are removed during run-time.
+
+As a bonus, due to the modular and flexible design of Log::ger, you can also:
+log using OO-style, use Log::Any style (method names and formatting rule), use
+Log::Log4perl style (method names and formatting rule), use Log::Contextual
+style (block style), or mimic other interface that you want. _And_ mix different
+styles in different modules of your application. And as another bonus, writing a
+Log::ger output is also simpler and significantly shorter than writing a
+Log::Any adapter.
+
+To keep this post short, instead of explaining how Log::ger works or the details
+of its features here I welcome you to look at the [[https://metacpan.org/pod/Log::ger::Manual][documentation]].
