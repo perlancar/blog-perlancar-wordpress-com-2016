@@ -55,9 +55,10 @@ the fastest here. It's about 1.5x faster than Log::Any, 3x faster than Log4perl,
 and 5x faster than [[https://metacpan.org/pod/Log::Fast][Log::Fast]] (included here because the name claims something
 about speed). This is thanks to using procedural style logging
 (~log_warn("foo")~) instead of OO (~$log->warn("foo")~) and just using an empty
-subroutine like ~sub {0}~. If you don't want any runtime overhead, you can do
-that too with [[https://metacpan.org/pod/Log::ger::Plugin::OptAway][Log::ger::Plugin::OptAway]]. This plugin uses some B magic to turn
-your logging statements into a constant so they are removed during run-time.
+subroutine ~sub {0}~ as the null default. If you don't want /that/ tiny runtime
+overhead too, you can eliminate it with [[https://metacpan.org/pod/Log::ger::Plugin::OptAway][Log::ger::Plugin::OptAway]]. This plugin
+uses some B magic to turn your logging statements into a constant so they are
+removed during run-time.
 
 As a bonus, due to the modular and flexible design of Log::ger, you can also:
 log using OO-style, use Log::Any style (method names and formatting rule), use
