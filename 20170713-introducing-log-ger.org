@@ -24,17 +24,18 @@ the previous lightweight level. So I planned to write a more lightweight
 alternative along with probably implementing my wishlist. But this would require
 some time and in the mean time I wrote a hackish workaround called
 [[https://metacpan.org/pod/release/PERLANCAR/Log-Any-IfLOG-0.07/lib/Log/Any/IfLOG.pm][Log::Any::IfLOG]] that will load Log::Any only if environment variable like ~LOG~
-or ~DEBUG~ or ~TRACE~ is set to true.
+or ~DEBUG~ or ~TRACE~ is set to true. I hated that workaround and regretted
+having created it.
 
-By the way, why do I fuss about a few milliseconds? My major interest in using
+By the way, why do I fuss over a few milliseconds? My major interest in using
 Perl is for building CLI applications. I am simply annoyed if my CLIs show a
 noticeable (~50-100ms or more) delay before responding with output (major
 offenders include Moose-based CLIs like dzil) when the fact is that Perl can be
 much more responsive than that. Log::Any is but one of several (sometimes many)
-modules I must load in a CLI so if a few ms is added here and a few others
-there, it could quickly add up. Also my CLIs feature shell tab completion and
-this is implemented by running the CLIs themselves for getting the completion
-answers so I always prefer responsive CLIs.
+modules I must load in a CLI so if a few ms is added here and a few more there,
+it could quickly add up. Also my CLIs feature shell tab completion and this is
+implemented by running the CLIs themselves for getting the completion answers so
+I always prefer responsive CLIs.
 
 The recent [[https://en.wikipedia.org/wiki/Eid_al-Fitr][Eid al-Fitr]] holiday finally made it possible for me to write a
 replacement for Log::Any: Log::ger in the course of a couple of weeks, along
@@ -60,11 +61,13 @@ your logging statements into a constant so they are removed during run-time.
 
 As a bonus, due to the modular and flexible design of Log::ger, you can also:
 log using OO-style, use Log::Any style (method names and formatting rule), use
-Log::Log4perl style (method names and formatting rule), use Log::Contextual
-style (block style), or mimic other interface that you want. _And_ mix different
+Log::Log4perl style (method names and formatting rule), use [[https://metacpan.org/pod/Log::Contextual][Log::Contextual]]
+style (block style), or mimic other interface that you want. /And/ mix different
 styles in different modules of your application. And as another bonus, writing a
 Log::ger output is also simpler and significantly shorter than writing a
-Log::Any adapter.
+Log::Any adapter. Compare [[https://metacpan.org/source/SHARYANTO/Log-Any-Adapter-Callback-0.09/lib/Log/Any/Adapter/Callback.pm][Log::Any::Adapter::Callback]] with
+[[https://metacpan.org/source/PERLANCAR/Log-ger-Output-Callback-0.002/lib/Log/ger/Output/Callback.pm][Log::ger::Output::Callback]], or [[https://metacpan.org/source/SDT/Log-Any-Adapter-Syslog-1.6/lib/Log/Any/Adapter/Syslog.pm][Log::Any::Adapter::Syslog]] with
+[[https://metacpan.org/source/PERLANCAR/Log-ger-Output-Syslog-0.001/lib/Log/ger/Output/Syslog.pm][Log::ger::Output::Syslog]].
 
 To keep this post short, instead of explaining how Log::ger works or the details
 of its features here I welcome you to look at the [[https://metacpan.org/pod/Log::ger::Manual][documentation]].
