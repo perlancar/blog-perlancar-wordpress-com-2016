@@ -1,0 +1,42 @@
+#+POSTID: 1699
+#+BLOG: perlancar
+#+CATEGORY: perl,cpan
+#+TAGS: perl,cpan
+#+DESCRIPTION:
+#+TITLE: A new distribution a day for CPAN day
+
+My contribution to celebrating [[http://blogs.perl.org/users/neilb/2017/07/cpan-day-is-16th-august-1.html][CPAN Day]] this year is releasing at least one new
+distribution each day in August from day 1 to the culminating 16. Yeah, all of
+the distros are trivial and most of them classify as crap, but perhaps one or
+two are crap that you need :-) (A large proportion of them do solve my itch.)
+
+*Day 1*: [[https://metacpan.org/pod/Perl::Critic::PolicyBundle::PERLANCAR][Perl::Critic::PolicyBundle::PERLANCAR]] (this currently just contains two
+policies written originally by [[https://metacpan.org/author/HAUKEX][HAUKEX]] who were kind enough to write [[https://metacpan.org/pod/Perl::Critic][Perl::Critic]]
+policies to solve my itches. Since HAUKEX intends to release them eventually as
+CPAN distros himself, I do not index the policy packages so when he does upload
+to CPAN he will not encounter permission problems). *Day 2*:
+[[https://metacpan.org/pod/Module::Load::DiffINC][Module::Load::DiffINC]], [[https://metacpan.org/pod/App::PerlCriticUtils][App::PerlCriticUtils]]. *Day 3*: [[https://metacpan.org/pod/App::LogGerUtils][App::LogGerUtils]],
+[[https://metacpan.org/pod/Log::ger::Screen::ColorSchemes::Kuler][Log::ger::Screen::ColorSchemes::Kuler]], [[https://metacpan.org/pod/Log::ger::Level::Like::RubyLogging][Log::ger::Level::Like::RubyLogging]],
+[[https://metacpan.org/pod/Log::ger::Level::Like::PythonLogging][Log::ger::Level::Like::PythonLogging]]. *Day 4*: [[https://metacpan.org/pod/Log::ger::Plugin::WithWarn][Log::ger::Plugin::WithWarn]] (the
+stack trace is still screwed up). *Day 5*: [[https://metacpan.org/pod/App::envset][App::envset]] (after having the idea
+and name, I googled "envset" and it turned up [[https://www.npmjs.com/package/envset][this npm package]] of the same name
+and overall functionality; but I wanted to be able to specify multiple sets and
+I thought writing configuration in [[https://metacpan.org/pod/IOD][IOD]] format will make it more convenient to
+specify arrays, do proper quoting, etc so I wrote the Perl version anyway). *Day
+6*: [[https://metacpan.org/pod/App::DiffTarballs][App::DiffTarballs]]. *Day 7*: [[https://metacpan.org/pod/App::DiffCPANReleases][App::DiffCPANReleases]] ([[https://metacpan.org/author/VTI][VTI]] pointed out in a
+tweet that his [[https://depentree.com][depentree.com]] can also do this, and because of that I got
+reminded that [[https://libraries.io][libraries.io]] can also do it, albeit only for distros that have
+github repos). *Day 8*: [[https://metacpan.org/pod/Tie::Handle::LogAny][Tie::Handle::LogAny]], [[https://metacpan.org/pod/Tie::Handle::LogGer][Tie::Handle::LogGer]].
+
+*Day 9*: [[https://metacpan.org/pod/Text::DumbTemplate][Text::DumbTemplate]]. *Day 10*: [[https://metacpan.org/pod/App::corruptor][App::corruptor]], [[https://metacpan.org/pod/Sah::Schemas::Float][Sah::Schemas::Float]],
+[[https://metacpan.org/pod/Getopt::Long::EvenLess::Dump][Getopt::Long::EvenLess::Dump]]. *Day 11*: [[https://metacpan.org/pod/Module::CPANfile::FromDistINI][Module::CPANfile::FromDistINI]] (this
+module was inspired by [[http://blogs.perl.org/users/piotr_roszatycki/2014/01/i-hate-distzilla-and-missing-makefilepl.html][this post]]; the module does not solve the problem
+completely, but it relieves the pain somewhat). *Day 12*:
+[[https://metacpan.org/pod/Text::WordDiff::Unified::ANSIColor][Text::WordDiff::Unified::ANSIColor]], [[https://metacpan.org/pod/App::diffwc][App::diffwc]] (before writing [[https://metacpan.org/pod/diffwc][diffwc]], and
+since writing [[https://metacpan.org/pod/App::DiffTarballs][App::DiffTarballs]], I used [[https://github.com/walles/riff][riff]] for a few days but it has a few
+bugs and there is no diff wrapper, only filter; plus a Rubygem-based utility
+doesn't feel like a typical Unix utility). *Day 13*:
+[[https://metacpan.org/pod/App::diffwc::ColorSchemes::Kuler][App::diffwc::ColorSchemes::Kuler]]. *Day 14*: [[https://metacpan.org/pod/App::ProveDeps][App::ProveDeps]] (the [[https://metacpan.org/pod/prove-deps][prove-deps]]
+utility was born out of the need to test the dependents of [[https://metacpan.org/pod/Log::ger][Log::ger]] which are
+many). *Day 15*: [[https://metacpan.org/pod/Patch::chdir::Print][Patch::chdir::Print]], [[https://metacpan.org/pod/DBIx::Connect::MySQL][DBIx::Connect::MySQL]]. *Day 16*:
+[[https://metacpan.org/pod/App::finddo][App::finddo]].
