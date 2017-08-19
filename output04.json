@@ -1,0 +1,686 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1780",
+               "key" : "email_notification",
+               "value" : "1480812719"
+            },
+            {
+               "id" : "1774",
+               "key" : "jabber_published",
+               "value" : "1480812718"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1508",
+         "link" : "https://perlancar.wordpress.com/2016/12/04/getopt-modules-04-getoptcompact/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<B>About this mini-article series.</B> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <TT>Getopt::*</TT> namespace). <A HREF=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</A>. \n<p><A HREF=\"https://metacpan.org/pod/Getopt::Compact\">Getopt::Compact</A> is a module that was first released in 2004 by Andrew Stewart Williams (<A HREF=\"https://metacpan.org/author/ASW\">ASW</A>) and last updated in 2006. It manages to have 7 CPAN distributions depending on it. \n<p>Like Getopt::Long::Descriptive, this module is a wrapper for Getopt::Long mainly to allow users to specify summary string for each option as that&#039;s what is lacking in Getopt::Long to produce a useful usage/help message. Getopt::Compact also tries to present a different interface that claims to be more compact if you have a lot of (flag) options. For example, this code using Getopt::Long: \n<p>[sourcecode language=\"perl\"]\nGetOptions(\n    \"--flag1\" =&gt; \\$opts{flag1},\n    \"--flag2\" =&gt; \\$opts{flag1},\n    \"--flag3\" =&gt; \\$opts{flag1},\n    \"--flag4\" =&gt; \\$opts{flag1},\n    \"--val1|1=s\"  =&gt; \\$opts{val1},\n    \"--val2|2=i\"  =&gt; \\$opts{val2},\n    \"--val3=s@\"   =&gt;  $opts{val3},\n);[/sourcecode]\n\nwill become like this when using Getopt::Compact: \n<p>[sourcecode language=\"perl\"]\nmy $opts = Getopt::Compact-&gt;new(\n    modes  =&gt; [qw/flag1 flag2 flag3 flag4/],\n    struct =&gt; [\n        [[\"val1\", \"1\"], \"Value1 blah blah\"],\n        [[\"val2\", \"2\"], \"Value2 blah blah\", \"=i\"],\n        [\"val3\"       , \"Value3 blah blah\", \"=s@\"],\n    ],\n)-&gt;opts;[/sourcecode]\n\nBut if you always put option values into hash elements (instead of sometimes assigning an option handler), <TT>GetOptions</TT> provides an alternative interface in which you specify hashref as first argument. This makes for a more compact syntax: \n<p>[sourcecode language=\"perl\"]\nGetOptions(\n    \\%opts,\n    [qw/--flag1 --flag2 --flag3 --flag4\n        --val1|1=s --val2|2=i --val3=s@/],\n);[/sourcecode]\n\nSo basically what Getopt::Compact makes you do is specifying option in split parts: <TT>--name|a=s@</TT> in Getopt::Long becomes: \n<p><PRE CLASS=\"fixed_width_section\">[[&quot;name&quot;,&quot;a&quot;], &quot;summary&quot;, &quot;=s@&quot;]\n</PRE>\n\nI recommend using Getopt::Long::Descriptive (GLD) instead of this because: 1) the interface is slightly nicer (no split option specification so more familiar to Getopt::Long users); 2) GLD allows specifying default value for options; 3) GLD allows expressing that an option is required.",
+         "post_date" : "20161204T07:44:09",
+         "post_date_gmt" : "20161204T00:44:09",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1508",
+         "post_mime_type" : "",
+         "post_modified" : "20161206T22:30:35",
+         "post_modified_gmt" : "20161206T15:30:35",
+         "post_name" : "getopt-modules-04-getoptcompact",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 04: Getopt::Compact",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-ok",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1770",
+               "key" : "email_notification",
+               "value" : "1480725940"
+            },
+            {
+               "id" : "1762",
+               "key" : "jabber_published",
+               "value" : "1480725938"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1506",
+         "link" : "https://perlancar.wordpress.com/2016/12/03/getopt-modules-03-getoptlongdescriptive/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<B>About this mini-article series.</B> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <TT>Getopt::*</TT> namespace). <A HREF=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</A>. \n<p>Note that from this day on, all the reviewed modules are non-core since only <A HREF=\"https://metacpan.org/pod/Getopt::Std\">Getopt::Std</A> and <A HREF=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</A> are core modules. The choice of using these modules must take into account this factor, as your user must bear an additional cost of installing the module from CPAN (unless your application bundles the module). \n<p>Some of these modules are wrappers for Getopt::Long, either because the author wants to offer a different interface and/or add some missing features. Some of the modules are higher-level: they are more than mere option parsing modules, usually a CLI framework. \n<p>Among the missing features often added is the ability to generate usage message (and the other common one is the ability to parse commands/subcommands). When using Getopt::Long, one already specifies a list of options. But there is no way to add a summary string for each option, making it impossible to create a useful/nice usage message. The modules solve this problem either by allowing user to specify the per-option summary string, or using/parsing user-supplied usage text/POD. \n<p><A HREF=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</A> is one such module: it allows you to specify per-option summary string, as well as default value for an option and whether an option is required. Judging from the number of reverse dependencies, <A HREF=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</A> is the fourth most popular option parsing module on CPAN with 64 reverse dependencies (after Getopt::Long with 1127, Getopt::Std with 167, and MooseX::Getopt with 134). I also have actually reviewed Getopt::Long::Descriptive in <A HREF=\"https://perlancar.wordpress.com/2015/02/04/pericmd-005-getoptlongdescriptive/\">one of my Perinci::CmdLine tutorial posts</A>. \n<p>Aside my minor nitpick as described in the linked post, there are two additional notes: Getopt::Long::Descriptive depends on another non-core module Sub::Exporter, and its startup is ~twice that of Getopt::Long: \n<p><PRE CLASS=\"fixed_width_section\">| participant               | time (ms) | mod_overhead_time (ms) |\n|---------------------------+-----------+------------------------|\n| Getopt::Long::Descriptive |        36 |                   33.9 |\n| Getopt::Long              |        15 |                   12.9 |\n| Getopt::Std               |       3.8 |                    1.7 |\n| perl -e1 (baseline)       |       2.1 |                      0 |\n</PRE>\n\nNot that this should be a concern to most. If you use Getopt::Long, Getopt::Long::Descriptive is pretty recommended. \n<p><B>Tab completion.</B> if you have a Getopt::Long::Descriptive-based CLI script, your users can now also use <A HREF=\"https://metacpan.org/pod/shcompgen\">shcompgen</A> to get tab completion, because shcompgen now supports detecting Getopt::Long::Descriptive-based scripts and activating tab completion for such scripts. In shells like fish and zsh, the description for each option will even be shown.",
+         "post_date" : "20161203T07:43:09",
+         "post_date_gmt" : "20161203T00:43:09",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1506",
+         "post_mime_type" : "",
+         "post_modified" : "20161203T07:45:37",
+         "post_modified_gmt" : "20161203T00:45:37",
+         "post_name" : "getopt-modules-03-getoptlongdescriptive",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 03: Getopt::Long::Descriptive",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oi",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1729",
+               "key" : "email_notification",
+               "value" : "1480638658"
+            },
+            {
+               "id" : "1723",
+               "key" : "jabber_published",
+               "value" : "1480638655"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1464",
+         "link" : "https://perlancar.wordpress.com/2016/12/02/getopt-modules-02-getoptstd/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<!-- # still can't get org2blog to work  -->\n\n<b>About this mini-article series.</b> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <tt>Getopt::*</tt> namespace). <a href=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</a>.\n\nGetopt::Std is the other core module that comes with Perl when it comes to parsing command-line options. The problem is, it only supports one-letter options. Since <a href=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</a> also supports one-letter options, there is really little or no reason for you to use Getopt::Std.\n\nBut Getopt::Std is still the second-most popular CPAN module when it comes to parsing command-line options, if you look at the number of reverse dependencies it has (167, after Getopt::Long which has 1127). Maybe this is because some people prefer using only short options. Also note that since these two modules are core, some distributions do not specify them as dependencies. Which means that the number of reverse dependencies for these two are actually higher.\n\nOne advantage of using Getopt::Std is its dead-simple API. You just call <tt>getopts()</tt> and user-specified options will be collected in <tt>$opt_*</tt> variables. Perfect if you have a short script that only accepts a few one-letter options.\n\n<b>Tab completion.</b> If you have a Getopt::Std-based CLI script, your users can use <a href=\"https://metacpan.org/pod/shcompgen\">shcompgen</a> to get tab completion, because shcompgen now supports detecting Getopt::Std-based scripts and activating tab completion for such scripts. It only supports completing option names though. To be more useful (completing option values and arguments) you will need to use one of the other Getopt modules, e.g. <a href=\"https://metacpan.org/pod/Getopt::Long::Complete\">Getopt::Long::Complete</a>.",
+         "post_date" : "20161202T07:15:56",
+         "post_date_gmt" : "20161202T00:15:56",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1464",
+         "post_mime_type" : "",
+         "post_modified" : "20161202T11:50:40",
+         "post_modified_gmt" : "20161202T04:50:40",
+         "post_name" : "getopt-modules-02-getoptstd",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 02: Getopt::Std",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-nC",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1687",
+               "key" : "email_notification",
+               "value" : "1480571131"
+            },
+            {
+               "id" : "1679",
+               "key" : "jabber_published",
+               "value" : "1480571129"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1462",
+         "link" : "https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this mini-article series.</b> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <tt>Getopt::*</tt> namespace).\n\nToday, our module is <a href=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</a>. I actually have reviewed it in a couple of my Perinci::CmdLine tutorial posts: <a href=\"https://perlancar.wordpress.com/2015/01/31/pericmd-002-getoptlong/\">Getopt::Long</a> and <a href=\"https://perlancar.wordpress.com/2015/02/01/pericmd-003-whats-wrong-with-getoptlong/\">What's wrong with Getopt::Long</a>. To recap: Getopt::Long is a core module that should be your go-to module for parsing command-line options.\n\nTwo things to remember. First, you should start your code with something like this:\n\n[sourcecode language=\"perl\"]\nGetopt::Long::Configure(&quot;bundling&quot;, &quot;no_ignore_case&quot;, &quot;permute&quot;, &quot;no_getopt_compat&quot;);[/sourcecode]\n\n<tt>bundling</tt> is to enable you to say <tt>-abc</tt> instead of <tt>-a -b -c</tt> if you happen to have these short options. Most Unix programs allow this. <tt>no_ignore_case</tt> is so that Getopt::Long differentiates <tt>-v</tt> and <tt>-V</tt>. Most Unix programs also behave like this, they are not case-insensitive when it comes to command-line options. Since there are only so many Latin letters, very often the lowercase letter and uppercase letter are used for different purposes.\n\n<tt>permute</tt> is to allow you to say <tt>--option val --flag arg1 arg2 --another-flag</tt>. That is, you intersperse command-line options and arguments. For convenience, many Unix programs behave like this. For example, you can say <tt>ls -l A*</tt> or <tt>ls A* -l</tt>. By default (under <tt>no_permute</tt> mode), Getopt::Options requires a user to specify all options first before any argument, which is rather inconvenient.\n\n<tt>no_getopt_compat</tt> is to disable interpreting <tt>+foo</tt> the same as <tt>--foo</tt>. Most programs nowaday do not interpret <tt>+</tt> as the start of command-line options anymore. Enabling <tt>getopt_compat</tt> (the default) only serves to interfere, for example if you have a filename like <tt>+foo</tt> then you'll have to write it as <tt>./+foo</tt> to avoid it being parsed as command-line options.\n\nThese modes should be the default, right? Just like <tt>use strict</tt> and <tt>use warnings</tt> should be the default in Perl. But for the sake of backward compatibility, they aren't.\n\n<b>Tab completion.</b> Another thing I want to add is: if you have a Getopt::Long-based CLI script, aside from modifying your script to use <a href=\"https://metacpan.org/pod/Getopt::Long::Complete\">Getopt::Long::Complete</a> instead, your users can now also use <a href=\"https://metacpan.org/pod/shcompgen\">shcompgen</a> to get tab completion, because shcompgen now supports detecting Getopt::Long-based scripts and activating tab completion for such scripts.",
+         "post_date" : "20161201T12:45:28",
+         "post_date_gmt" : "20161201T05:45:28",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1462",
+         "post_mime_type" : "",
+         "post_modified" : "20161202T12:01:26",
+         "post_modified_gmt" : "20161202T05:01:26",
+         "post_name" : "getopt-modules-01-getoptlong",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 01: Getopt::Long",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-nA",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1652",
+               "key" : "email_notification",
+               "value" : "1477396526"
+            },
+            {
+               "id" : "1648",
+               "key" : "jabber_published",
+               "value" : "1477396524"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1397",
+         "link" : "https://perlancar.wordpress.com/2016/10/25/whats-next-for-bash-completion-wise/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Trying out completion feature in several other shells which I don't use daily--including zsh, tcsh, and fish--I can't help but comparing them with bash.\n\nIMHO, the last major feature in completion in bash happens in 2009-2010, when bash 4.1 introduces -D option for the \"complete\" command. This enables fallback/catch-all mechanism like already found in other shells like fish and zsh. When a user requests completion for a command that does not yet have a completion definition, the hook function specified in \"complete -D\" can execute and find a completion definition somewhere. And the completion can be activated right there and then instead of having to wait for the next command (or after the user logs out and logs in again). A major convenience as completion can be activated or deactivated instantly.\n\nThe subsequent major bash versions don't introduce anything ground-breaking in terms of completion: 4.2 allows us to configure the number of columns used when displaying completion (nice, but not an additional core functionality) and case-map to treat underscore and dash as the same (really convenient, but we can do that ourselves if we want using function or external command backend). 4.3 introduces \"-o noquote\" and 4.4 introduces \"-o nosort\" which are just minor.\n\n<strong>Completion description.</strong> As many bash users who have tasted fish and zsh would agree, I think bash really needs to add the feature of showing description/help text next to each completion answer. This is a major boost for CLI usability. For example, user can see or be reminded of what each command option does instead of having to \"man\" or open a browser to Google for it.\n\n<strong>Menu select.</strong> The other popular feature is \"menu select\" like in zsh (not to be confused with the already existing option \"menu-completion\" in bash), where after the user presses Tab and is presented with the list of completions, she can use arrow keys to select the completion she wants instead of typing. This is nice but of lesser impact compared to the previous item. A seasoned CLI user would prefer and can complete faster using typing anyway. What I think would be really nifty is incremental matching, where the list of completions is reduced or expanded as the user types. So for example you press \"deluser t\" and get presented with a list of 30 usernames starting with \"t\". You can now type more letters to match fewer of those names until you get the one you want. The list displayed interactively shrinks or reexpands to show only the matching items. The exact detail of how this would work can be tuned to be as comfortable and powerful as possible. What I described just now is actually just a UI (TUI?) improvement of the functionality already present, as when we use tab completion we often do just that, albeit without the interactive list being displayed automatically (we still need to press Tab whenever we want to get the list of completions).\n\n<strong>Colors.</strong> Fish utilizes colors a lot, for good purpose. For example if you type \"ls -\" in fish you'll get a much nicer output compared to in bash. This lets you scan the list faster. It would be nice if we can show colors more in the list of completion in bash.",
+         "post_date" : "20161025T18:55:23",
+         "post_date_gmt" : "20161025T11:55:23",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1397",
+         "post_mime_type" : "",
+         "post_modified" : "20161026T03:28:22",
+         "post_modified_gmt" : "20161025T20:28:22",
+         "post_name" : "whats-next-for-bash-completion-wise",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "What's next for bash, completion-wise?",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-mx",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "2",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "bash",
+               "parent" : "0",
+               "slug" : "bash",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "2674",
+               "term_taxonomy_id" : "18"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1642",
+               "key" : "email_notification",
+               "value" : "1477394407"
+            },
+            {
+               "id" : "1637",
+               "key" : "jabber_published",
+               "value" : "1477394404"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1345",
+         "link" : "https://perlancar.wordpress.com/2016/10/25/adding-support-for-fish-zsh-tcsh-in-shcompgen/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "I've recently added support for the other three shells (fish, zsh, tcsh) in <a href=\"https://metacpan.org/pod/shcompgen\">shcompgen</a>. shcompgen is basically a utility to write those shell commands \"complete -C foo foo\" or \"complete -c foo -l longopt1 --description 'Add a thing to foo'\" for you. It recognizes scripts written using <a href=\"https://metacpan.org/pod/Getopt::Long::Complete\">Getopt::Long::Complete</a>, <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Lite\">Perinci::CmdLine</a>, and a few others so that you can enable shell tab completion for your scripts.\n\n<strong>fish</strong>. Enabling tab completion for a command in fish is relatively simple. For each short/long option of a command, you can define a separate \"complete\" command, e.g.:\n<pre>complete -c man -s k --description \"Show apropos information\"\ncomplete -rc man -s C --description \"Configuration file\"\ncomplete -xc man -a 1 --description \"Program section\"\ncomplete -xc man -a 2 --description \"Syscall section\"\ncomplete -xc man -a 3 --description \"Library section\"\n...</pre>\nDoing this has the advantage of fish knowing about the each program option and its description, so you can get a prettier/more informative completion. <del>It is not possible to just say like in bash \"complete -F somefunc cmd; # delegate completion to a function\" or \"complete -C somecmd cmd ; # delegate completion to an external command\".</del> It's also possible to just delegate to the program entirely a la bash's \"complete -C\":\n<pre>complete -c somecmd -a '(begin; set -lx COMP_SHELL fish; set -lx COMP_LINE (commandline); set -lx COMP_POINT (commandline -C); shcompgen; end)'</pre>\n<strong>zsh.</strong> Completion in zsh is complex and complicated with lots and lots of options, if not featureful. You can, in theory, use \"complete\" or \"compgen\" command like in bash because zsh has \"bashcompinit\" that (partially) simulates those two bash commands. This enables you to reuse your bash completion definitions in zsh. I tried to do that but didn't succeed though.\n<pre>#compdef pmman\n<code><span class=\"pln\">autoload bashcompinit\nbashcompinit\n# this is bash-style\ncomplete -C pmman pmman\n</span></code></pre>\nThe commands I type will sometimes complete, but at other times won't. So I use \"compadd\" instead, which is the standard way to add completion results in zsh. For example:\n<pre>#compdef pmman\n_pmman() {\n si=$IFS\n compadd -- $(COM_SHELL=zsh COMP_LINE=$BUFFER COMP_POINT=$CURSOR pmman)\n IFS=$si\n}\n_pmman \"$@\"</pre>\n<strong>tcsh</strong>. tcsh lacks a fallback or autoload mechanism (like \"complete -D\" in bash or similar mechanism in fish and zsh), so activating or deactivating completion for a command requires you to explicitly re-source a definition script or logout + login again.\n\nTab completion now works in zsh, fish, and tcsh but since I don't use those shells daily and am not familiar enough with them, there are still known issues (documented in the shcompgen's POD) like with escaping of special characters like whitespace. I hope that Perl programmers that use one of those shells can give inputs on how to resolve the issues.",
+         "post_date" : "20161025T18:20:03",
+         "post_date_gmt" : "20161025T11:20:03",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1345",
+         "post_mime_type" : "",
+         "post_modified" : "20161026T16:22:08",
+         "post_modified_gmt" : "20161026T09:22:08",
+         "post_name" : "adding-support-for-fish-zsh-tcsh-in-shcompgen",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Adding support for fish, zsh, tcsh in shcompgen",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-lH",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "2",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "bash",
+               "parent" : "0",
+               "slug" : "bash",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "2674",
+               "term_taxonomy_id" : "18"
+            },
+            {
+               "count" : "1",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "fish",
+               "parent" : "0",
+               "slug" : "fish",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5995",
+               "term_taxonomy_id" : "19"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            },
+            {
+               "count" : "1",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "tcsh",
+               "parent" : "0",
+               "slug" : "tcsh",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "2029026",
+               "term_taxonomy_id" : "20"
+            },
+            {
+               "count" : "1",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "zsh",
+               "parent" : "0",
+               "slug" : "zsh",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "82955",
+               "term_taxonomy_id" : "21"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1626",
+               "key" : "email_notification",
+               "value" : "1476793351"
+            },
+            {
+               "id" : "1621",
+               "key" : "jabber_published",
+               "value" : "1476793349"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1316",
+         "link" : "https://perlancar.wordpress.com/2016/10/18/adding-tab-completion-for-perlbrew/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<a href=\"https://metacpan.org/pod/App::perlbrew\">perlbrew</a> is a command-line utility I'm using quite a bit recently: while developing <a href=\"https://metacpan.org/pod/Bencher\">Bencher</a> feature of benchmarking against multiple perls, for trying out <a href=\"http://perl11.org/cperl/\">cperl</a>, or just updating to the latest perl release. So I thought it would be nice to add tab completion feature to perlbrew.\n\nThe obvious choice (for many people anyway) to write tab completion feature in is bash, but I'm more comfortable with Perl. And besides, there are a few nice completion features in <a href=\"https://metacpan.org/pod/Complete::Util\">Complete::Util</a> I'd like to use.\n\nThe result is <a href=\"https://metacpan.org/pod/App::ShellCompleter::perlbrew\">App::ShellCompleter::perlbrew</a>. You install it by first installing <a href=\"https://metacpan.org/pod/App::shcompgen\">App::shcompgen</a> from CPAN and then:\n<pre>% shcompgen init</pre>\nthen install App::ShellCompleter::perlbrew from CPAN.\n\nSome of the things that the completion can do:\n<h2>Complete subcommands, option names, option values, arguments</h2>\nFor example:\n<pre>% perlbrew un&lt;tab&gt;</pre>\nwill complete to:\n<pre>% perlbrew uninstall _</pre>\nThe completion features \"word-mode\" matching, so you can also do something like this:\n<pre>% perlbrew i-cp&lt;tab&gt;</pre>\nand it will complete to:\n<pre>% perlbrew install-cpanm _</pre>\n<h2>Display the list of available perls to install</h2>\n<pre>% perlbrew install &lt;tab&gt;</pre>\nThe first time you do this, it will take several seconds because the completion script will fetch the list of available perls from \"perlbrew available\". After that it should be instantaneous because the completion script caches the result in a temporary file.\n<h2>Display the list of installed perls</h2>\nIt can also do \"char-mode\" or \"fuzzy\" matching for increased convenience. For example, type this:\n<pre>% perlbrew switch 10&lt;tab&gt;</pre>\nand it will complete to (assuming you have perl 5.10.1 installed):\n<pre>% perlbrew switch 5.10.1</pre>\n<h2>Source code</h2>\nThe <a href=\"https://metacpan.org/source/PERLANCAR/App-ShellCompleter-perlbrew-0.005/bin/_perlbrew\">source code for _perlbrew</a> is about 300 lines and I believe is fairly easy to write.",
+         "post_date" : "20161018T19:22:28",
+         "post_date_gmt" : "20161018T12:22:28",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1316",
+         "post_mime_type" : "",
+         "post_modified" : "20161018T19:25:04",
+         "post_modified_gmt" : "20161018T12:25:04",
+         "post_name" : "adding-tab-completion-for-perlbrew",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Adding tab completion for perlbrew",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-le",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            },
+            {
+               "count" : "7",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "Tak Berkategori",
+               "parent" : "0",
+               "slug" : "tak-berkategori",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "3278647",
+               "term_taxonomy_id" : "1"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1615",
+               "key" : "email_notification",
+               "value" : "1476791472"
+            },
+            {
+               "id" : "1608",
+               "key" : "jabber_published",
+               "value" : "1476791470"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1308",
+         "link" : "https://perlancar.wordpress.com/2016/10/18/embedding-code-snippets-from-other-modules-and-developrequires/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Aside from use()-ing or require()-ing code from other modules, you can also embed code snippets directly into your module (a single function, variable declaration, or the whole module). I've done this several times. For example, one time I need to remove duplicate elements from an array. Instead of using List::MoreUtils, I copy-pasted the <tt>uniq</tt> function from List::MoreUtils::PP into my module's source code and add a note about it:\n<pre># BEGIN: stolen from List::MoreUtils::PP\nsub uniq (@)\n{\n    my %seen = ();\n    my $k;\n    my $seen_undef;\n    grep { defined $_ ? not $seen{ $k = $_ }++ : not $seen_undef++ } @_;\n}\n# END: stolen from List::MoreUtils::PP\n</pre>\nI've also made a couple of Dist::Zilla plugins to help me automate this kind of process.\n\nBy embedding, you avoid the end user's cost of having to install List::MoreUtils (which is still a non-core module at this time of writing). You also save a bit of startup/compile time by excluding the rest of the functions that you do not need. Of course, you should only do this in the special cases where you really want to minimize dependencies or startup overhead like in bootstrapping scripts or, often in my case, in tab completion scripts which must give answer fast after user presses the ~Tab~ key. And normally you should only do this for code that is already stable and proven, because the cost of having to update this embedded code is usually greater compared to if you simply depend on another module (a case in point: Module::Install).\n\nSince this kind of code embedding is still a form of dependency (whenever the code in source module is updated, you might want to update the embedded code too), it is a good idea to express this dependency when you package your module as a Perl distribution. The appropriate phase and relationship to use for this kind of dependency is DevelopRequires. Modules listed in DevelopRequires dependency will not be installed when users install your module using a CPAN client, but the dependency will serve as a reminder/note that you still depend on the source module.",
+         "post_date" : "20161018T18:51:09",
+         "post_date_gmt" : "20161018T11:51:09",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1308",
+         "post_mime_type" : "",
+         "post_modified" : "20161018T18:53:33",
+         "post_modified_gmt" : "20161018T11:53:33",
+         "post_name" : "embedding-code-snippets-from-other-modules-and-developrequires",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Embedding code snippets from other modules and DevelopRequires",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-l6",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1480",
+               "key" : "email_notification",
+               "value" : "1470138396"
+            },
+            {
+               "id" : "1474",
+               "key" : "jabber_published",
+               "value" : "1470138393"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1299",
+         "link" : "https://perlancar.wordpress.com/2016/08/02/checking-if-a-module-is-loadable-without-actually-loading-it/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<p> One of the easiest ways to check if a module is installed is simply by trying to load it: </p>\n\n<pre class=\"example\">\nif (eval { require Foo::Bar; 1 }) {\n    # Foo::Bar is loadable\n}\n</pre>\n\n<p> However, when Foo::Bar happens to be installed, this actually loads the module. Which is not always desirable, for example in the cases of: 1) checking a lot of modules; 2) checking a module which is OS-specific and might not work under your OS when loaded; 3) checking a module which might conflict with another module that is already loaded; 4) wanting to avoid the security implication of executing the module's code. </p>\n\n<p> Another way to check is by trying to locate the module file by iterating over <code>@INC</code> yourself or using something like <a href=\"https://metacpan.org/pod/Module::Path\">Module::Path</a> or <a href=\"https://metacpan.org/pod/Module::Path::More\">Module::Path::More</a>. Those modules search for the module in directories specified in <code>@INC</code> like Perl's <code>require</code> would: </p>\n\n<pre class=\"example\">\nuse Module::Path qw(module_path);\nif (module_path \"Foo::Bar\") {\n    # Foo::Bar is available\n}\n</pre>\n\n<p> However, this only works when <code>Foo::Bar</code> is indeed located on the filesystem and does not work when <code>Foo::Bar</code> is loaded using a require hook (coderef or object in <code>@INC</code>), like in a <a href=\"https://metacpan.org/pod/App::FatPacker\">fatpacked</a> or <a href=\"https://metacpan.org/pod/App::depak\">datapacked</a> script. Also, it does not work nicely with other uses of require hooks, like emulating a missing module (<a href=\"https://metacpan.org/pod/lib::filter\">lib::filter</a> or <a href=\"https://metacpan.org/pod/lib::disallow\">lib::disallow</a>). </p>\n\n<p> Perl core module <a href=\"https://metacpan.org/pod/Module::Load::Conditional\">Module::Load::Conditional</a> provides <code>check_install</code> which can handle both the cases of the module file is on the filesystem or the module is retrieved from the require hook: </p>\n\n<pre class=\"example\">\nuse Module::Load::Conditional qw(check_install);\nif (check_install(module =&gt; \"Foo::Bar\")) {\n    # Foo::bar is available\n}\n</pre>\n\n<p> In addition to the above, <code>check_install</code> can also be instructed to check for minimum required version: </p>\n\n<pre class=\"example\">\nunless (check_install(module =&gt; \"Foo::Bar\", version=&gt;\"1.23\")) {\n    # Foo::Bar is not available, or its version is &lt; 1.23\n}\n</pre>\n\n<p> Note that checking version number is not performed by loading the module and reading its <code>$VERSION</code>, but instead by using <a href=\"https://metacpan.org/pod/Module::Metadata\">Module::Metadata</a> which tries to extract the version number from the module's source code (which might fail on some weird module that obfuscate its <code>$VERSION</code>, but for normal cases should suffice). </p>\n\n<p> I also recently wrote <a href=\"https://metacpan.org/pod/Module::Installed::Tiny\">Module::Installed::Tiny</a> which does the same as <code>Module::Load::Conditional</code>'s <code>check_install</code> but with a bit less code and dependency: </p>\n\n<pre class=\"example\">\nuse Module::Installed::Tiny qw(module_installed);\nif (module_installed \"Foo::Bar\") {\n    # Foo::Bar is available\n}\n</pre>\n\n<p> Note that <code>check_install</code> nor <code>module_installed</code> does not guarantee that the module will be loaded successfully, as there might be syntax errors in the module's code or runtime errors when running the code. All the routines do is check that the module's source code is available. </p>\n\n<p> <b>UPDATE <span class=\"timestamp-wrapper\"><span class=\"timestamp\">[2016-08-03]</span></span></b>: This post is originally about Module::Loadable before I was made aware of <code>Module::Load::Conditional</code>'s <code>check_install</code>. In the original post I wrote that I hoped I didn't reinvent the wheel by writing Module::Loadable. I was happily proven wrong :-) </p>\n",
+         "post_date" : "20160802T18:46:00",
+         "post_date_gmt" : "20160802T11:46:00",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1299",
+         "post_mime_type" : "",
+         "post_modified" : "20160803T10:34:29",
+         "post_modified_gmt" : "20160803T03:34:29",
+         "post_name" : "checking-if-a-module-is-loadable-without-actually-loading-it",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Checking if a module is installed (without actually loading it)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-kX",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1464",
+               "key" : "email_notification",
+               "value" : "1469199123"
+            },
+            {
+               "id" : "1458",
+               "key" : "jabber_published",
+               "value" : "1469199120"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1292",
+         "link" : "https://perlancar.wordpress.com/2016/07/22/podcast-filenames/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<p> Like many of you, I listen to some podcasts. There are various ways people get their episodes, but I do it manually on a PC: browse the podcast's website and download the MP3 files using the browser or <code>wget</code> or <code>curl</code>. I listen on a variety of devices, including television and car audio which can only get the files via USB flashdisks, so I figure it's better to organize the files on the PC and transfer them to other devices as needed. </p>\n\n<p> Now there's this minor (or major, depending on how OCD you are) issue of the various inconsistent ways the podcasters like to name their MP3 files. Me, I'm standardizing on this: each filename should include, in the following order, 1) the podcast name (preferably short, a few letters, initials); 2) the episode number in the form of at least 000, or date in YYYYMMDD format; 3) episode title (one to a few words). </p>\n\n<p> This way, whenever I see a file lying around in some folder in some device I can immediately know which podcast this is and what the episode is all about (because on smartphones it's usually a pain to move files around). The order and the format of the number/date let the files get sorted nicely (because not all apps can do natural sorting). And the short podcast name/initials will prevent the annoyance of not being able to see the date/title on narrower screens (sometimes an app will scroll the filename horizontally a la stock ticker, but sometimes not). </p>\n\n<p> Oh, and I also stick to lowercase alphanumerical characters and dashes/underscores, avoiding whitespaces or other strange characters, for ease of typing, selecting, and tab-completioning. </p>\n\n<p> Here are some samples of filenames which I will definitely rename: </p>\n\n<ul class=\"org-ul\">\n<li><code>The Secret Emotional Life of Clothes.mp3</code> (from <a href=\"http://www.npr.org/podcasts/510307/invisibilia\">Invisibilia</a>): spaces in filename, no podcast name, no episode number/date. I'd rename it to <code>invisib-20160722-the_secret_emotional_life_of_clothes.mp3</code>.\n</li>\n<li><code>obm20episode2016320-207_19_162C209.0420PM.mp3</code> (from <a href=\"http://maximumfun.org/tags/shows/one-bad-mother\">One Bad Mother</a>): no title, needless string <code>episode</code> as well as time of day, date not in YYYYMMDD order, also the space got mangled into <code>20</code> (probably from <code>%20</code>). I'd rename it to <code>obm-163-when_kids_share_a_room.mp3</code>.\n</li>\n<li><code>ShmanQuestions.mp3</code> (from <a href=\"http://maximumfun.org/tags/shows/shmanners\">Shmanners</a>): no episode number/date. I'd rename it to <code>shmanners-20160722-etiquette_catch_all.mp3</code>. Sometimes the title in the filename doesn't match the title in the post, so I also correct that.\n</li>\n<li><code>OhNoRossAndCarrie_47_RossAndCarrieRememberTonyAlamoPart1.mp3</code> (from <a href=\"http://maximumfun.org/tags/shows/oh-no-ross-and-carrie\">Oh No, Ross and Carrie!</a>): too long. I'd rename it to: <code>onrac-047-tony_alamo_p1.mp3</code>.\n</li>\n</ul>\n\n<p> And here are some that are already good enough: </p>\n\n<ul class=\"org-ul\">\n<li><code>sm237_limabeans.mp3</code> (from <a href=\"http://www.spilledmilkpodcast.com/episodes/\">Spilled Milk</a>). Although before it reaches episode #10 and #100, it uses one and two digits for the episode number so I pad them with leading zeroes.\n</li>\n<li><code>Sawbones146Tea.mp3</code> (from <a href=\"http://maximumfun.org/tags/shows/sawbones\">Sawbones</a>). All the pieces of information are already there in the desired order, I just need to format and lowercase the filename.\n</li>\n</ul>\n\n<p> How do you name your podcast files? </p>\n",
+         "post_date" : "20160722T21:51:00",
+         "post_date_gmt" : "20160722T14:51:00",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1292",
+         "post_mime_type" : "",
+         "post_modified" : "20160722T22:02:45",
+         "post_modified_gmt" : "20160722T15:02:45",
+         "post_name" : "podcast-filenames",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Podcast filenames",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-kQ",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "1",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "organization",
+               "parent" : "0",
+               "slug" : "organization",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "6335",
+               "term_taxonomy_id" : "16"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

@@ -1,0 +1,259 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "100",
+               "key" : "email_notification",
+               "value" : "1422637493"
+            },
+            {
+               "id" : "80",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "95",
+               "key" : "jabber_published",
+               "value" : "1422637492"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=24",
+         "link" : "https://perlancar.wordpress.com/2015/01/31/pericmd-002-getoptlong/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<a href=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</a> (<a href=\"http://cpanratings.perl.org/dist/Getopt-Long\">cpanratings</a>) is an established Perl module for parsing command-line options. A bit of history (via some googling): it has been included as part of the Perl distribution since <a href=\"http://mirrors.develooper.com/perl/historical-perl/perl-5.000.tar.gz\">perl-5.0.0</a> back in 1994. It was actually created as newgetopt.pl during the pre-module days of perl 4.x. The creator is Netherlands-based <a href=\"http://www.vromans.org/johan/\">Johan Vromans</a> (CPAN ID: <a href=\"https://metacpan.org/author/JV\">JV</a>) which also wrote the <a href=\"http://www.amazon.com/Perl-Pocket-Reference-Johan-Vromans/dp/1449303706\">Perl Pocket Reference</a> (one among the well-respected books, if I remember). Amazingly, after 20+ strong years, Johan still maintains Getopt::Long to this very day. So, deep kudos for that.\n\nWhy the ::Long in the name, you might ask? Because before newgetopt.pl, there is actually a Perl 4 library called getopt.pl which became <a href=\"https://metacpan.org/pod/Getopt::Std\">Getopt::Std</a> in Perl 5. It can only handle single-letter options, so we will not consider using it in this series.\n\nHere's a typical CLI program written using Getopt::Long, <a href=\"https://github.com/perlancar/scripts/blob/master/warn-low-df\">taken</a> from my scripts repository:\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse 5.010;\nuse strict;\nuse warnings;\n\nuse Getopt::Long;\n\nmy %opts = (parts =&amp;gt; [&amp;quot;/backup&amp;quot;], all=&amp;gt;0, percent_used=&amp;gt;95);\n\nGetOptions(\n    &amp;quot;part=s&amp;quot;             =&amp;gt; $opts{parts},\n    &amp;quot;all|a&amp;quot;              =&amp;gt; \\$opts{all},\n    &amp;quot;percent-used|pct=i&amp;quot; =&amp;gt; \\$opts{percent_used},\n    &amp;quot;help|h|?&amp;quot;           =&amp;gt; \\$opts{help},\n);\n\nif ($opts{help}) {\n    print &amp;lt;&amp;lt;_;\nUsage: $0 [opts]\nOptions:\n  --part=S  Add partition S to warn, eg. --part=/home --part=/\n  --all     Warn all partitions (except tmpfs)\n  --percent-used=N  Warn if percentage of usage exceeds N (default: 95)\n\n_\n    exit 0;\n}\n\nmy $i;\nfor (`df -h`) {\n    next unless $i++;\n    chomp;\n    my ($fs, $blocks, $used, $avail, $pctuse, $mp) = split /\\s+/, $_;\n    $pctuse =~ s/%//;\n    #say &amp;quot;DEBUG: mp=$mp, pctuse=$pctuse&amp;quot;;\n\n    next if $fs =~ /^(tmpfs)$/;\n    if (!$opts{all}) { next unless $mp ~~ $opts{parts} }\n    next unless $pctuse &amp;gt;= $opts{percent_used};\n    say &amp;quot;Disk usage in $mp has exceeded $pctuse% (only $avail left)!&amp;quot;;\n}\n[/code]\n\nAs you can see, using the module is pretty straightforward: you just specify a hash of options specification and pass it to the GetOptions() function, which will search the options in @ARGV. The function will modify @ARGV and strip all the known options, leaving only unknown options and arguments.\n\nThe only thing you'll need to familiarize with is basically the options specification. Short of a formal grammar, you might want to glance the syntax of the options spec via the regex specified in <a href=\"https://metacpan.org/source/PERLANCAR/Getopt-Long-Util-0.79/lib/Getopt/Long/Util.pm\">Getopt::Long::Util</a>, copy-pasted here for convenience:\n\n[code language=\"perl\"]\n    $optspec =~ qr/\\A\n               (?:--)?\n               (?P&amp;lt;name&amp;gt;[A-Za-z0-9_][A-Za-z0-9_-]*)\n               (?P&amp;lt;aliases&amp;gt; (?: \\| (?:[^:|!+=:-][^:|!+=:]*) )*)?\n               (?:\n                   (?P&amp;lt;is_neg&amp;gt;!) |\n                   (?P&amp;lt;is_inc&amp;gt;\\+) |\n                   (?:\n                       =\n                       (?P&amp;lt;type&amp;gt;[siof])\n                       (?P&amp;lt;desttype&amp;gt;|[%@])?\n                       (?:\n                           \\{\n                           (?: (?P&amp;lt;min_vals&amp;gt;\\d+), )?\n                           (?P&amp;lt;max_vals&amp;gt;\\d+)\n                           \\}\n                       )?\n                   ) |\n                   (?:\n                       :\n                       (?P&amp;lt;opttype&amp;gt;[siof])\n                       (?P&amp;lt;desttype&amp;gt;|[%@])\n                   ) |\n                   (?:\n                       :\n                       (?P&amp;lt;optnum&amp;gt;\\d+)\n                       (?P&amp;lt;desttype&amp;gt;|[%@])\n                   )\n                   (?:\n                       :\n                       (?P&amp;lt;optplus&amp;gt;\\+)\n                       (?P&amp;lt;desttype&amp;gt;|[%@])\n                   )\n               )?\n               \\z/x\n                   or return undef;\n[/code]\n\nSo, an option is more or less a \"word\" which can be followed by zero or more aliases. An alias is usually a single letter (like \"a\" for \"all\") or a shorter version of the option (like \"percent-used\" vs \"pct\"), but can also be some non-alphanumeric characters (like \"?\" as alias for \"help\").\n\nIf an option requires a value, you can add \"=\" followed by one of these letters: s (for string), i (for int), f (for float), o (nowadays seldom used?). Getopt::Long actually allows you to specify optional value, e.g. by specifying \"debug:i\" instead of \"debug=i\", so user can specify either of these options: --debug, --debug=9 (or --debug 9).\n\nGetopt::Long even allows you to specify multiple values, e.g. \"rgb-color=i{3}\" so user can specify options like: --rgb-color 255 255 0. However, you can't do something like this (specifying different type for each value): \"person-age=s,i\". I seldom use this feature, though.\n\nThere are other features of Getopt::Long, some very useful, some rarely used nowadays. We will cover this in the next posts because Perinci::CmdLine uses Getopt::Long for command-line options parsing.\n\nCompared to other (newer) options processing modules on CPAN that reinvent the wheel, chances are Getopt::Long is still your best bet. It's battle tested, comes with Perl 5 out of the box, and already does most of the common needs for options processing. Most of the other options processing modules don't even do the two things that we usually take for granted when using common Unix/GNU utilities: <em>short option bundling</em> and <em>auto abbreviation</em>.\n\n<em>Short option bundling</em> is a feature that lets you bundle two or more single-letter options in a single command-line argument. For example, when using <strong>rsync </strong>I usually write: rsync -avz ... instead of rsync -a -v -z ... The short options must not take values, except for the last one.\n\n<em>Auto abbreviation</em> is a feature that lets you type only partial (the first letters of the) option names, as long as it is unambiguous. For example, if you have an option called --process-directories, you can just specify --process-dir or even --process, as long as it's unambiguous with the other existing options. This is convenient.\n\nIn the next post I'll write about what's wrong with Getopt::Long.",
+         "post_date" : "20150131T00:00:53",
+         "post_date_gmt" : "20150130T17:00:53",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "24",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:00:38",
+         "post_modified_gmt" : "20160416T10:00:38",
+         "post_name" : "pericmd-002-getoptlong",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 002: Getopt::Long",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-o",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            },
+            {
+               "count" : "7",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "Tak Berkategori",
+               "parent" : "0",
+               "slug" : "tak-berkategori",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "3278647",
+               "term_taxonomy_id" : "1"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "72",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "69",
+               "key" : "jabber_published",
+               "value" : "1422599617"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=20",
+         "link" : "https://perlancar.wordpress.com/2015/01/30/pericmd-001-creating-command-line-application-with-perincicmdline/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "I'm starting a (potentially long, hopefully once daily) series of blog posts about <a href=\"https://metacpan.org/pod/Perinci::CmdLine\">Perinci::CmdLine</a>, my library for creating command-line application in Perl, and issues on command-line applications in general. Since I want to only spend between 10-30 minutes writing each post, I expect each post to be short and a single topic, if large enough, might span several posts. I was inspired by <a href=\"http://blogs.perl.org/users/byterock/\">byterock'</a>s series of posts last year where he chronicled his adventure with Moose (and then with XS, in another series), as well as <a href=\"http://blog.laufeyjarson.com/\">Louis Erickson</a>'s series on the Perl Best Practices. The decision to do 10-30 minutes per daily post was first made last December when I did an <a href=\"http://blogs.perl.org/users/perlancar/2014/12/perlancars-2014-advent-calendar.html\">advent calendar</a>. I found that that amount of time spent per post is about right because it does not disrupt my daily flow too much. If I have a longer block of time available, e.g. 1-2 hours, I can always create several posts and schedule them to be published in the subsequent days, giving me more time to come up with the idea for the next unwritten post.\n\nThe series will begin with a list of features that I need/want in a command-line application library, and a review of other libraries/frameworks available on CPAN and in other languages and what's \"wrong\" (and \"right\") about each of them, and why I ended up creating my own.\n\nAfter that, the next posts will continue with the background and architecture of Perinci::CmdLine itself. And finally with building a (or several) command-line applications step by step, highlighting related features of Perinci::CmdLine as we go along.\n<h1>Requirements</h1>\nOk, enough introduction. Let's enumerate all the features that I need for a command-line application library. Ideally, for me at least, I want as many as needed features as possible, to allow my to just write the \"business logic\" and not deal with all the mundane, tedious plumbing tasks.\n\nA typical command-line application (hereby called a CLI app for short, while the library will be called CLI library) needs to do these things:\n<ul>\n\t<li>parse command-line options and arguments</li>\n\t<li>decide which code to handle which tasks (routing)</li>\n\t<li>display usage/help message (typically invoked via <tt>--help</tt>, <tt>-h</tt>, or <tt>-?</tt>)</li>\n\t<li>display result/output</li>\n\t<li>return appropriate exit code</li>\n</ul>\nAlso:\n<ul>\n\t<li>A CLI app should have a proper manpage.</li>\n\t<li>Sometimes a CLI app wants to be interactive and prompts/asks user question.</li>\n\t<li>Often we also want to display progress indicator for visual hints to user, if we are doing something that might take a long time.</li>\n\t<li>Specific to a CLI app, we also want tab completion.</li>\n\t<li>And lastly, we want fast startup time. I define fast as under 0.05-0.1s, because anything over that starts to get noticeable.</li>\n</ul>\nIn the next post we'll discuss <a href=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</a>.",
+         "post_date" : "20150130T13:33:37",
+         "post_date_gmt" : "20150130T06:33:37",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "20",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:00:01",
+         "post_modified_gmt" : "20160416T10:00:01",
+         "post_name" : "pericmd-001-creating-command-line-application-with-perincicmdline",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 001: Creating command-line application with Perinci::CmdLine",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-k",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "60",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "38",
+               "key" : "jabber_published",
+               "value" : "1422544478"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=9",
+         "link" : "https://perlancar.wordpress.com/2015/01/29/progress-indicator-in-terminal-based-applications/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In terminal-based applications, there are various ways one can show progress indicators:\n\nSimple series of dots:\n<pre>Copying files .\nCopying files ..\nCopying files ...\nCopying files .....\nCopying files ......</pre>\nSpinning cursors:\n<pre>Copying files |\nCopying files /\nCopying files -\nCopying files \\\nCopying files |\n</pre>\nOr progress bars (of various styles):\n<pre>Copying files [=         ] 10%\nCopying files [==        ] 20%\nCopying files [===       ] 30%\nCopying files [====      ] 40%\nCopying files [=====     ] 50%\n</pre>\nWith <a href=\"https://metacpan.org/pod/Progress::Any\">Progress::Any</a>, you can update progress indicators and then show them in various forms just by swithing output (<tt>Progress::Any::Output::*</tt>) modules, without re-coding your code. For terminal-based applications, so far these are the (useful) output modules available for terminal applications: <a href=\"https://metacpan.org/pod/Progress::Any::Output::TermProgressBarColor\">TermProgressBarColor</a> (for progress bars), <a href=\"https://metacpan.org/pod/Progress::Any::Output::TermSpin\">TermSpin</a> (for spinning cursors). Here's a very minimal code to show progress:\n\n[code language=\"perl\"]\nuse Progress::Any '$progress';\nuse Progress::Any::Output 'TermProgressBarColor', width=&gt;40;\n$|++;\nprint &quot;Copying files:&quot;;\nfor (1..10) {\n    $progress-&gt;update;\n    sleep 1;\n}\n$progress-&gt;finish;\nprint &quot;done\\n&quot;;\n[/code]\n\nSample output:\n<pre>Copying files:   0% [ ==              ]1s left         \nCopying files:   0% [  ==             ]1s left         \nCopying files:   0% [   ==            ]1s left         \nCopying files:   0% [    ==           ]1s left         \nCopying files:   0% [     ==          ]1s left         \n...\nCopying files: done\n</pre>\nSince we have not provided any target, completion percentage and ETA (estimated time of \"arrival\", or completion) cannot be calculated. To specify target, you can add:\n\n[code language=\"perl\"]\n$progress-&gt;target(10);\n[/code]\n\nbefore the loop. Output:\n<pre>Copying files:  10% [=                ]1s left         \nCopying files:  20% [===              ]4s left         \n...\nCopying files:  90% [================ ]1s left         \nCopying files: done\n</pre>\nTo use another output, just change this output line, e.g.:\n\n[code language=\"perl\"]\nuse Progress::Any::Output 'TermSpin';\n[/code]\n\n<pre>Copying files: |\nCopying files: /\nCopying files: -\n...\nCopying files: done</pre>\nThe spinning cursor output does not show completion percentage or ETA.\n\nThere are many other features available, e.g. TermProgressBarColor can show text message inside the bar, can autoset width to the whole terminal width. You can have separate progress indicators for multiple (sub)tasks. And there are other outputs for non-terminal applications, e.g. for GUI or for logging. Please refer to the documentation for all these.\n\nOne last thing I want to note here is that the terminal progress output modules have been written to work together with <a href=\"https://metacpan.org/pod/Log::Any\">Log::Any</a>, particularly with the <a href=\"https://metacpan.org/pod/Log::Any::Adapter::ScreenColoredLevel\">ScreenColoredLevel</a> adapter. The log adapter and progress output modules all write to terminal, and care has been taken so they do not clobber each other's outputs. Here's a full example:\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse 5.010;\nuse strict;\nuse warnings;\n\nuse Log::Any '$log';\nuse Log::Any::Adapter 'ScreenColoredLevel', min_level=&gt;'info';\n\nuse Progress::Any '$progress';\nuse Progress::Any::Output ('TermProgressBarColor', show_delay=&gt;2);\n\nuse Time::HiRes qw(sleep time);\n\n$progress-&gt;target(3);\n\n$log-&gt;info('Starting');\n\n$log-&gt;info('Doing task 1/3 ...');\n{\n    my $target1 = 30+int(40*rand());\n    for (1..$target1) {\n        $progress-&gt;update(pos =&gt; $_/$target1);\n        if (rand() &lt; 0.025) {\n            $log-&gt;warn(&quot;There's something wrong with item $_&quot;);\n        }\n        sleep 0.1;\n    }\n}\n\n$log-&gt;info('Doing task 2/3 ...');\n{\n    my $target2 = 30+int(40*rand());\n    for (1..$target2) {\n        $progress-&gt;update(pos =&gt; 1 + $_/$target2);\n        sleep 0.1;\n    }\n}\n\n$log-&gt;info('Doing task 3/3 ...');\n{\n    my $target3 = 30+int(40*rand());\n    for (1..$target3) {\n        $progress-&gt;update(pos =&gt; 2 + $_/$target3);\n        sleep 0.1;\n    }\n}\n\n$log-&gt;info('Finished');\n[/code]\n\nOne nice thing about the example above is the usage of TermProgressBarColor's <tt>show_delay</tt> parameter (TermSpin also has the same parameter, BTW). By setting this parameter, the progress output will not be shown first until the specified number of seconds has passed (the counter is reset to zero whenever a new log message is displayed to the screen). This has the effect of less chatty output (only log messages are shown, without progress report), but if several seconds pass without any more message being displayed to the screen, the progress output automatically shows.",
+         "post_date" : "20150129T22:14:37",
+         "post_date_gmt" : "20150129T15:14:37",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "9",
+         "post_mime_type" : "",
+         "post_modified" : "20150322T22:57:28",
+         "post_modified_gmt" : "20150322T15:57:28",
+         "post_name" : "progress-indicator-in-terminal-based-applications",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Progress indicator in terminal-based applications",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-9",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "19",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "16",
+               "key" : "jabber_published",
+               "value" : "1421924018"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=6",
+         "link" : "https://perlancar.wordpress.com/2015/01/22/say-hello-world/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "I'm starting a new blog <a href=\"http://perlancar.wordpress.com/\">here</a> at wordpress.com. My <a href=\"http://blogs.perl.org/users/perlancar\">older blog</a> still exists but <a href=\"http://blogs.perl.org\">bpo</a> has been having <a href=\"https://github.com/blogs-perl-org/blogs.perl.org/issues/291\">problem with logins</a> since last December, preventing me from logging in and posting articles or comments. And unfortunately it looks like the problem isn't going to be fixed soon. So there you go.",
+         "post_date" : "20150122T17:53:38",
+         "post_date_gmt" : "20150122T10:53:38",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "6",
+         "post_mime_type" : "",
+         "post_modified" : "20150322T22:57:56",
+         "post_modified_gmt" : "20150322T15:57:56",
+         "post_name" : "say-hello-world",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "say \"hello, world!\";",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-6",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "7",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "Tak Berkategori",
+               "parent" : "0",
+               "slug" : "tak-berkategori",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "3278647",
+               "term_taxonomy_id" : "1"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

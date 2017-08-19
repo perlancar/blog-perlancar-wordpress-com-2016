@@ -1,0 +1,9 @@
+[
+   200,
+   "OK",
+   [],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

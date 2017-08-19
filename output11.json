@@ -1,0 +1,700 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "390",
+               "key" : "email_notification",
+               "value" : "1424624679"
+            },
+            {
+               "id" : "320",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "385",
+               "key" : "jabber_published",
+               "value" : "1424624678"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=143",
+         "link" : "https://perlancar.wordpress.com/2015/02/23/pericmd-022-tab-completion/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Perinci::CmdLine gives you tab completion feature for free, meaning you don't have to do anything to make it work (in fact, it's more effort to enable it in your shell -- but there are tools for that). Thanks to the rich Rinci metadata, many of the information required to do tab completion is already provided.\n\nThis post assumes you're using bash. I will cover other shells in the future.\n\nLet's return to our example <b>hello</b> script. If you put the script somewhere in your PATH (for example in /usr/local/bin, if your PATH environment variable includes it, or perhaps in ~/bin) and type:\n\n[code language=\"text\"]\n% complete -C hello hello\n[/code]\n\nthen you can already do the following:\n\n[code language=\"text\"]\n% hello &lt;tab&gt;&lt;tab&gt;\n-\\?               .gitignore       --json            --name               --salutation\n--config-path     -h               lcpan.log         --no-config          scratch.txt\n--config-profile  hello            lcpan.stats       pause/               scratch.txt~\n--format          hello~           -n                perl-App-hello/      -v\n.git/             --help           --naked-res       -s                   --version\n[/code]\n\nWhat is that? The completion is giving you a list of all possible options as well as files in the current directory. If you type:\n\n[code language=\"text\"]\n% hello -&lt;tab&gt;&lt;tab&gt;\n-\\?               --format          --json            --name            --salutation\n--config-path     -h                -n                --no-config       -v\n--config-profile  --help            --naked-res       -s                --version\n[/code]\n\nIt will give the list of options only. It can even take advantage of schema information to complete option values:\n\n[code language=\"text\"]\n% hello -s &lt;tab&gt;&lt;tab&gt;\nMiss  Mr    Mrs\n[/code]\n\nsince the schema for the <tt>salutation</tt> argument says:\n\n[code language=\"perl\"]\n['str*', in=&gt;[qw/Mr Mrs Miss/]]\n[/code]\n\nOf course, you can help provide hints so completion works even better. This is done by adding these properties: <b>completion</b> or <b>element_completion</b> to your argument specification. Since tab completion is very useful and very convenient for users, there will be more posts with emphasis on completion in this series. Stay tuned.\n\n<h3>How completion works</h3>\n\nIn bash, completion can be handled by a shell function or an external command. When using an external command, bash will set environment variables COMP_LINE (the raw command line string) and COMP_POINT (an integer pointing to the location of cursor in the command-line string) and then run the command. The command is supposed to return a list of possible completions by outputing them one-per-line to STDOUT.\n\nWhen you call the run() method, Perinci::CmdLine detects the above environment variables and enter into completion mode which then tries to find the appropriate completion, print them to STDOUT, and exit the program.\n\nTherefore, Perinci::CmdLine-based scripts can \"complete themselves\". You tell bash via <tt>complete -C hello hello</tt> that to complete the <b>hello</b> command, the <b>hello</b> command is used.\n\nNow how does Perinci::CmdLine determine the completion? First, it parses COMP_LINE and COMP_POINT into a list of words, and which word the cursor is at. It then parses the resulting words like it were @ARGV, trying to figure out the command-line options and command-line arguments. If the cursor word happens to be a command-line option, it will try to complete from the list of known options. If the cursor word falls after the command-line option, it will try to complete the option value by using several means (the abovementioned <tt>completion</tt> routine, or information from the schema), and so on. Finally it just prints the result into STDOUT.\n\n",
+         "post_date" : "20150223T00:00:39",
+         "post_date_gmt" : "20150222T17:00:39",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "143",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:47:51",
+         "post_modified_gmt" : "20160901T01:47:51",
+         "post_name" : "pericmd-022-tab-completion",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 022: Tab completion",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2j",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "383",
+               "key" : "email_notification",
+               "value" : "1424538047"
+            },
+            {
+               "id" : "316",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "378",
+               "key" : "jabber_published",
+               "value" : "1424538045"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=140",
+         "link" : "https://perlancar.wordpress.com/2015/02/22/pericmd-021-formatting-output/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "So, here's another way you can be lazy if you use Perinci::CmdLine: your function usually needs to return a data structure instead of formatted text. Perinci::CmdLine is the one that will format your output. This is useful because if the function is used as a normal Perl function or for HTTP API function, data structures are readily usable instead of formatted text which must be (re-)parsed. In these days of JSON API's, this works out very nicely.\n\nSo how does Perinci::CmdLine format the data structure? Realizing that 2D table (including a list of lines, which is a one-column table) is the format that is very common, here are the rules that Perinci::CmdLine::Lite uses:\n\n<ol>\n\n<li>If result is undef, print nothing.\n\n<li>If result is a string, print the string. Add ending newline unless the string already has it.\n\n<li>If result is an array of strings (aos), print each string in its own lines.\n\n<li>If result is an array of arrays of strings (aoaos), print as table (using <a href=\"https://metacpan.org/pod/Text::Tiny::Table\">Text::Tiny::Table</a>).\n\n<li>If result is an array of hashes of strings (aohos), print as table. The column names will be taken from the keys of the hashes.\n\n<li>If result is a hash of strings, print as two-column table. First column is keys, second column is values.\n\n<li>Otherwise, print as JSON.\n\n</ol>\n\nThis set of rules is used under the default output format (text) and under interactive mode, which means that the script output is not piped to another command (this is detected automatically, using <tt>-t STDOUT</tt>). Under non-interactive mode, the table output will be simplified as just tab-separated values.\n\nOther formats available are <tt>text-simple</tt> (just like <tt>text</tt>, but forces non-interactive mode rendering, which means tables are always printed as simple tab-separated values) and <tt>text-pretty</tt> (just like <tt>text</tt>, but forces interactive mode rendering, which means tables are always rendered using Text::Tiny::Table so it's prettier). There is also <tt>json</tt> format which forces JSON rendering no matter what kind of data it receives and its variant <tt>json-pretty</tt> (just like <tt>json</tt> but pretty-print the output).\n\nFYI, the ::Classic backend supports more sophisticated rules and table rendering using <a href=\"https://metacpan.org/pod/Text::Tiny::Table\">Text::ANSITable</a>, supporting colors, multiline cells, Unicode borders, and full-width Unicode characters. It also uses <a href=\"https://metacpan.org/pod/Data::Format::Pretty\">Data::Format::Pretty</a> which can output YAML and other formats which are more capable than JSON. But all these result in more dependencies and being slower to render table/output, so their use is avoided by the ::Lite backend. For now, we'll only take a look at the default ::Lite backend.\n\nLet's use a real Perinci::CmdLine-based application as examples: <a href=\"https://metacpan.org/pod/App::lcpan\">App::lcpan</a>. I'm going to show you the JSON output first to let you see the data structure, and then the default text output to see the formatted text.\n \nBelow is how an array of strings would be displayed:\n\n[code language=\"text\"]\n% lcpan modules Perinci::CmdLine:: --format json-pretty\n[\n   200,\n   &quot;OK (envelope added by Perinci::Access::Lite)&quot;,\n   [\n      &quot;Perinci::CmdLine::Any&quot;,\n      &quot;Perinci::CmdLine::Base&quot;,\n      &quot;Perinci::CmdLine::Base::Patch::DumpAndExit&quot;,\n      &quot;Perinci::CmdLine::ColorTheme::Default&quot;,\n      &quot;Perinci::CmdLine::Dump&quot;,\n      &quot;Perinci::CmdLine::Examples&quot;,\n      &quot;Perinci::CmdLine::Help&quot;,\n      &quot;Perinci::CmdLine::Lite&quot;,\n      &quot;Perinci::CmdLine::NonOO&quot;,\n      &quot;Perinci::CmdLine::Role::Help&quot;,\n      &quot;Perinci::CmdLine::Server&quot;,\n      &quot;Perinci::CmdLine::Util&quot;,\n      &quot;Perinci::CmdLine::Util::Config&quot;,\n      &quot;Perinci::CmdLine::dux&quot;,\n      &quot;Perinci::CmdLine::fatten&quot;,\n      &quot;Perinci::Examples::Bin::Any&quot;,\n      &quot;Perinci::Examples::Bin::Any::Multi&quot;,\n      &quot;Perinci::Examples::Bin::Lite&quot;\n   ],\n   {}\n]\n\n% lcpan modules Perinci::CmdLine::\nPerinci::CmdLine::Any\nPerinci::CmdLine::Base\nPerinci::CmdLine::Base::Patch::DumpAndExit\nPerinci::CmdLine::ColorTheme::Default\nPerinci::CmdLine::Dump\nPerinci::CmdLine::Examples\nPerinci::CmdLine::Help\nPerinci::CmdLine::Lite\nPerinci::CmdLine::NonOO\nPerinci::CmdLine::Role::Help\nPerinci::CmdLine::Server\nPerinci::CmdLine::Util\nPerinci::CmdLine::Util::Config\nPerinci::CmdLine::dux\nPerinci::CmdLine::fatten\nPerinci::Examples::Bin::Any\nPerinci::Examples::Bin::Any::Multi\nPerinci::Examples::Bin::Lite\n[/code]\n\nBelow is array of hashes of strings (aohos):\n\n[code language=\"text\"]\n% lcpan modules Perinci::CmdLine:: --detail --format json-pretty\n[\n   200,\n   &quot;OK (envelope added by Perinci::Access::Lite)&quot;,\n   [\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Any&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Any&quot;,\n         &quot;version&quot; : &quot;0.08&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Lite&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Base&quot;,\n         &quot;version&quot; : &quot;0.83&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Dump&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Base::Patch::DumpAndExit&quot;,\n         &quot;version&quot; : &quot;0.02&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::ColorTheme::Default&quot;,\n         &quot;version&quot; : &quot;1.44&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Dump&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Dump&quot;,\n         &quot;version&quot; : &quot;0.02&quot;\n      },\n      {\n         &quot;author&quot; : &quot;SHARYANTO&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Examples&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Examples&quot;,\n         &quot;version&quot; : null\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Help&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Help&quot;,\n         &quot;version&quot; : &quot;0.02&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Lite&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Lite&quot;,\n         &quot;version&quot; : &quot;0.83&quot;\n      },\n      {\n         &quot;author&quot; : &quot;SHARYANTO&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-NonOO&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::NonOO&quot;,\n         &quot;version&quot; : &quot;0.01&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Role::Help&quot;,\n         &quot;version&quot; : &quot;1.44&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Server&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Server&quot;,\n         &quot;version&quot; : &quot;0.04&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Util&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Util&quot;,\n         &quot;version&quot; : &quot;0.06&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-CmdLine-Lite&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::Util::Config&quot;,\n         &quot;version&quot; : &quot;0.83&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;App-dux&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::dux&quot;,\n         &quot;version&quot; : &quot;1.48&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;App-fatten&quot;,\n         &quot;name&quot; : &quot;Perinci::CmdLine::fatten&quot;,\n         &quot;version&quot; : &quot;0.28&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-Examples-Bin-Any&quot;,\n         &quot;name&quot; : &quot;Perinci::Examples::Bin::Any&quot;,\n         &quot;version&quot; : &quot;0.05&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-Examples-Bin-Any&quot;,\n         &quot;name&quot; : &quot;Perinci::Examples::Bin::Any::Multi&quot;,\n         &quot;version&quot; : &quot;0.05&quot;\n      },\n      {\n         &quot;author&quot; : &quot;PERLANCAR&quot;,\n         &quot;dist&quot; : &quot;Perinci-Examples-Bin-Lite&quot;,\n         &quot;name&quot; : &quot;Perinci::Examples::Bin::Lite&quot;,\n         &quot;version&quot; : &quot;0.04&quot;\n      }\n   ],\n   {}\n]\n\n% lcpan modules Perinci::CmdLine:: --detail\n+-----------+---------------------------+--------------------------------------------+---------+\n| author    | dist                      | name                                       | version |\n| PERLANCAR | Perinci-CmdLine-Any       | Perinci::CmdLine::Any                      | 0.08    |\n| PERLANCAR | Perinci-CmdLine-Lite      | Perinci::CmdLine::Base                     | 0.83    |\n| PERLANCAR | Perinci-CmdLine-Dump      | Perinci::CmdLine::Base::Patch::DumpAndExit | 0.02    |\n| PERLANCAR | Perinci-CmdLine           | Perinci::CmdLine::ColorTheme::Default      | 1.44    |\n| PERLANCAR | Perinci-CmdLine-Dump      | Perinci::CmdLine::Dump                     | 0.02    |\n| SHARYANTO | Perinci-CmdLine-Examples  | Perinci::CmdLine::Examples                 |         |\n| PERLANCAR | Perinci-CmdLine-Help      | Perinci::CmdLine::Help                     | 0.02    |\n| PERLANCAR | Perinci-CmdLine-Lite      | Perinci::CmdLine::Lite                     | 0.83    |\n| SHARYANTO | Perinci-CmdLine-NonOO     | Perinci::CmdLine::NonOO                    | 0.01    |\n| PERLANCAR | Perinci-CmdLine           | Perinci::CmdLine::Role::Help               | 1.44    |\n| PERLANCAR | Perinci-CmdLine-Server    | Perinci::CmdLine::Server                   | 0.04    |\n| PERLANCAR | Perinci-CmdLine-Util      | Perinci::CmdLine::Util                     | 0.06    |\n| PERLANCAR | Perinci-CmdLine-Lite      | Perinci::CmdLine::Util::Config             | 0.83    |\n| PERLANCAR | App-dux                   | Perinci::CmdLine::dux                      | 1.48    |\n| PERLANCAR | App-fatten                | Perinci::CmdLine::fatten                   | 0.28    |\n| PERLANCAR | Perinci-Examples-Bin-Any  | Perinci::Examples::Bin::Any                | 0.05    |\n| PERLANCAR | Perinci-Examples-Bin-Any  | Perinci::Examples::Bin::Any::Multi         | 0.05    |\n| PERLANCAR | Perinci-Examples-Bin-Lite | Perinci::Examples::Bin::Lite               | 0.04    |\n+-----------+---------------------------+--------------------------------------------+---------+\n\n% lcpan modules Perinci::CmdLine:: --detail --format text-simple\nPERLANCAR       Perinci-CmdLine-Any     Perinci::CmdLine::Any   0.08\nPERLANCAR       Perinci-CmdLine-Lite    Perinci::CmdLine::Base  0.83\nPERLANCAR       Perinci-CmdLine-Dump    Perinci::CmdLine::Base::Patch::DumpAndExit      0.02\nPERLANCAR       Perinci-CmdLine Perinci::CmdLine::ColorTheme::Default   1.44\nPERLANCAR       Perinci-CmdLine-Dump    Perinci::CmdLine::Dump  0.02\nSHARYANTO       Perinci-CmdLine-Examples        Perinci::CmdLine::Examples\nPERLANCAR       Perinci-CmdLine-Help    Perinci::CmdLine::Help  0.02\nPERLANCAR       Perinci-CmdLine-Lite    Perinci::CmdLine::Lite  0.83\nSHARYANTO       Perinci-CmdLine-NonOO   Perinci::CmdLine::NonOO 0.01\nPERLANCAR       Perinci-CmdLine Perinci::CmdLine::Role::Help    1.44\nPERLANCAR       Perinci-CmdLine-Server  Perinci::CmdLine::Server        0.04\nPERLANCAR       Perinci-CmdLine-Util    Perinci::CmdLine::Util  0.06\nPERLANCAR       Perinci-CmdLine-Lite    Perinci::CmdLine::Util::Config  0.83\nPERLANCAR       App-dux Perinci::CmdLine::dux   1.48\nPERLANCAR       App-fatten      Perinci::CmdLine::fatten        0.28\nPERLANCAR       Perinci-Examples-Bin-Any        Perinci::Examples::Bin::Any     0.05\nPERLANCAR       Perinci-Examples-Bin-Any        Perinci::Examples::Bin::Any::Multi      0.05\nPERLANCAR       Perinci-Examples-Bin-Lite       Perinci::Examples::Bin::Lite    0.04\n[/code]\n\n\n\n",
+         "post_date" : "20150222T00:00:08",
+         "post_date_gmt" : "20150221T17:00:08",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "140",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:48:05",
+         "post_modified_gmt" : "20160901T01:48:05",
+         "post_name" : "pericmd-021-formatting-output",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 021: Formatting output",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2g",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "376",
+               "key" : "email_notification",
+               "value" : "1424451734"
+            },
+            {
+               "id" : "312",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "371",
+               "key" : "jabber_published",
+               "value" : "1424451732"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=136",
+         "link" : "https://perlancar.wordpress.com/2015/02/21/pericmd-020-schemas/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Now let's talk about schemas:\n\n[code language=\"perl\" highlight=\"7,13\"]\n$SPEC{hello} = {\n    v =&amp;gt; 1.1,\n    summary =&amp;gt; 'Say hello',\n    args =&amp;gt; {\n        name =&amp;gt; {\n            summary =&amp;gt; 'Name',\n            schema  =&amp;gt; 'str*',\n            cmdline_aliases =&amp;gt; {n=&amp;gt;{}},\n            pos =&amp;gt; 0,\n        },\n        salutation =&amp;gt; {\n            summary =&amp;gt; 'Salutation',\n            schema  =&amp;gt; 'str*',\n            cmdline_aliases =&amp;gt; {s=&amp;gt;{}},\n        },\n    },\n};\n[/code]\n\nBoth <tt>name</tt> and <tt>salutation</tt> are assigned a schema of <tt>str*</tt>. This means \"string and required\". Schemas are written in <a href=\"https://metacpan.org/pod/Sah\">Sah</a>, and is another product of me trying to be lazy, minimizing coding and replacing it with declarative statements and code generation.\n\nA schema is either a string to express a type, with optional asterisk <tt>*</tt> to signify required value, or an array of [<i>type</i>, <i>clauses</i>] where <i>clauses</i> is a hash/hashref containing more restrictions on possible values.\n\nSah schemas are geared towards code generation. From the schema, a data validator can be generated. So far, with the implementation <a href=\"https://metacpan.org/pod/Data::Sah\">Data::Sah</a>, Perl and JavaScript code generators are available (PHP code generator was also once written, but currently out of date because I haven't had the need to use it yet.) Perl code generator is useful to let us \"automatically\" validate function arguments (as well as return values), while JavaScript code generator is useful for web-based applications to generate browser-side data validator to accompany server-side validator for our backend Perl code.\n\n<h3>Some more examples of schemas</h3>\n\nSuppose we only want to allow certain values for salutation:\n\n[code language=\"perl\"]\n[&amp;quot;str*&amp;quot;, in=&amp;gt;[&amp;quot;Mr&amp;quot;, &amp;quot;Mrs&amp;quot;, &amp;quot;Miss&amp;quot;]]\n[/code]\n\nNote, during processing sometimes the schema will be normalized. Here's the normalized form of the above schema:\n\n[code language=\"perl\"]\n[&amp;quot;str&amp;quot;, {req=&amp;gt;1, in=&amp;gt;[&amp;quot;Mr&amp;quot;, &amp;quot;Mrs&amp;quot;, &amp;quot;Miss&amp;quot;]}, {}]\n[/code]\n\nThe third element of the array is called <i>extras</i> and is used for advanced stuffs. \n\nAnd suppose we want to require certain lengths for the name: \n\n[code language=\"perl\"]\n[&amp;quot;str*&amp;quot;, min_len=&amp;gt;4, max_len=&amp;gt;50]\n[/code]\n\nIf you put these schemas in the <b>hello</b> program, here's what it looks like:\n\n[code language=\"perl\" highlight=\"13\"]\n$SPEC{hello} = {\n    v =&amp;gt; 1.1,\n    summary =&amp;gt; 'Say hello',\n    args =&amp;gt; {\n        name =&amp;gt; {\n            summary =&amp;gt; 'Name',\n            schema  =&amp;gt; 'str*',\n            cmdline_aliases =&amp;gt; {n=&amp;gt;{}},\n            pos =&amp;gt; 0,\n        },\n        salutation =&amp;gt; {\n            summary =&amp;gt; 'Salutation',\n            schema  =&amp;gt; [&amp;quot;str*&amp;quot;, in=&amp;gt;[&amp;quot;Mr&amp;quot;, &amp;quot;Mrs&amp;quot;, &amp;quot;Miss&amp;quot;]],\n            cmdline_aliases =&amp;gt; {s=&amp;gt;{}},\n        },\n    },\n};\n[/code]\n\nOne thing to note though. At the time of this writing, the Perinci::CmdLine::Lite backend does not yet support schema checking; you have to use the ::Classic backend. The reason is that schema generation with Data::Sah incurs some startup overhead (+- 0.25s or more, increasing as the schema becomes more complex). In the future I'm planning to speed things up so this overhead is back to acceptable level, but for now you can either:\n\n<ul>\n<li>Let users choose the backend itself by PERINCI_CMDLINE_ANY=classic.\n<li>Prefer the use of the classic backend by: <tt>use Perinci::CmdLine::Any -prefer_lite=&gt;0</tt>.\n<li>Force the usage of the classic backend by replacing <tt>Perinci::CmdLine::Any</tt> with <tt>Perinci::CmdLine::Classic</tt>.\n<li>Do schema checking manually using Perl code in the function body.\n</ul>\n\n[code language=\"text\"]\n% PERINCI_CMDLINE_ANY=classic ./hello -s Sir\nERROR 400: Argument 'salutation' fails validation: Must be one of [&amp;quot;Mr&amp;quot;,&amp;quot;Mrs&amp;quot;,&amp;quot;Miss&amp;quot;]\n\n% PERINCI_CMDLINE_ANY=classic ./hello -n X\nERROR 400: Argument 'name' fails validation: Length must be between 4 and 50\n\n% PERINCI_CMDLINE_ANY=classic ./hello -s Mrs -n Postman\nHello, Mrs Postman!\n[/code]\n\n<b>UPDATE 2015-04-09: Perinci::CmdLine::Lite as of version 1.06 now supports argument validation</b>.",
+         "post_date" : "20150221T00:00:15",
+         "post_date_gmt" : "20150220T17:00:15",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "136",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:49:21",
+         "post_modified_gmt" : "20160901T01:49:21",
+         "post_name" : "pericmd-020-schemas",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 020: schemas",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2c",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "369",
+               "key" : "email_notification",
+               "value" : "1424365512"
+            },
+            {
+               "id" : "308",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "364",
+               "key" : "jabber_published",
+               "value" : "1424365511"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=133",
+         "link" : "https://perlancar.wordpress.com/2015/02/20/pericmd-019-more-on-cmdline_aliases/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Recall that in a previous post (pericmd 014), the description property in the example mentions about <tt>-m</tt> and <tt>-f</tt> options as shortcuts for, respectively, <tt>--salutation Mr</tt> and <tt>--salutation Mrs</tt>. How would we implement it?\n\n[code language=\"perl\" highlight=\"16-25\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    args =&gt; {\n        name =&gt; {\n            summary =&gt; 'Name',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {n=&gt;{}},\n            pos =&gt; 0,\n        },\n        salutation =&gt; {\n            summary =&gt; 'Salutation',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {\n                s =&gt; {},\n                f =&gt; {\n                    summary =&gt; 'Set female (shortcut for &quot;-s Mrs&quot;)',\n                    is_flag =&gt; 1,\n                    code =&gt; sub { $_[0]{salutation} = 'Mrs' },\n                },\n                m =&gt; {\n                    summary =&gt; 'Set male (shortcut for &quot;-s Mrs&quot;)',\n                    is_flag =&gt; 1,\n                    code =&gt; sub { $_[0]{salutation} = 'Mr' },\n                },\n            },\n        },\n    },\n};\n[/code]\n\nThe above metadata introduces two new command-line aliases -f and -m. Each alias has their own <b>summary</b> as well as code to set function arguments. The code will receive \\%args as its argument and can modify it accordingly. Also note the <b>is_flag</b> alias property. This is to specify that the option does not take value but is only a flag (FYI, setting is_flag is a shortcut for the equivalent longer method: <tt>schema =&gt; [\"bool\", is=&gt;1]</tt>, but who wants to use the latter).\n\nSo now you can do:\n\n[code language=\"text\"]\n% ./hello Nobody -f\nHello, Mrs Nobody!\n[/code]\n\nThe help message will now also list the command-line aliases separately, as they have their own summaries (as indeed they should, because they are no longer just simple aliases for <tt>--salutation</tt>):\n\n[code language=\"text\" highlight=\"19,20\"]\n% ./hello -h\nhello - Say hello\n\nUsage:\n  hello --help (or -h, -?)\n  hello --version (or -v)\n  hello [options] [name]\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --naked-res         When outputing as JSON, strip result envelope\n  --name=s, -n        Name (=arg[0])\n  --no-config         Do not use any configuration file\n  --salutation=s, -s  Salutation\n  --version, -v       \n  -f                  Set female (shortcut for &quot;-s Mrs&quot;)\n  -m                  Set male (shortcut for &quot;-s Mrs&quot;)\n[/code]\n",
+         "post_date" : "20150220T00:00:03",
+         "post_date_gmt" : "20150219T17:00:03",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "133",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:50:01",
+         "post_modified_gmt" : "20160901T01:50:01",
+         "post_name" : "pericmd-019-more-on-cmdline_aliases",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 019: More on cmdline_aliases",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-29",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "362",
+               "key" : "email_notification",
+               "value" : "1424279088"
+            },
+            {
+               "id" : "304",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "358",
+               "key" : "jabber_published",
+               "value" : "1424279087"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=128",
+         "link" : "https://perlancar.wordpress.com/2015/02/19/pericmd-018-more-on-default-values/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Specifying default values is straightforward enough: you just need to set the <tt>default</tt> property. Unlike in Moose/Moo, you just specify the value and not a coderef to produce the value.\n\n[code language=\"perl\" highlight=\"11,17\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    args =&gt; {\n        name =&gt; {\n            summary =&gt; 'Name',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {n=&gt;{}},\n            req =&gt; 1,\n            pos =&gt; 0,\n            default =&gt; 'Nobody',\n        },\n        salutation =&gt; {\n            summary =&gt; 'Salutation',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {s=&gt;{}},\n            default =&gt; 'Mr',\n        },\n    },\n};\n[/code]\n\nNow when the arguments are not set, Perinci::CmdLine will be giving them default values. But since <tt>name</tt> is required, there is no way for us to use the value because Perinci::CmdLine will complain about missing required argument:\n\n[code language=\"text\"]\n% ./hello\nERROR 400: Missing required argument(s): name\n[/code]\n\nSo we should probably remove the <tt>req =&gt; 1</tt> property first. After that:\n\n[code language=\"text\"]\n% ./hello\nHello, Mr Nobody!\n\n% ./hello -s Mrs\nHello, Mrs Nobody!\n\n% ./hello -n Somebody\nHello, Mr Somebody!\n[/code]\n\nThe help message will show the default values as well:\n\n[code language=\"text\" highlight=\"15,17\"]\n% ./hello -?\nhello - Say hello\n\nUsage:\n  hello --help (or -h, -?)\n  hello --version (or -v)\n  hello [options] [name]\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --naked-res         When outputing as JSON, strip result envelope\n  --name=s, -n        Name (=arg[0]) [&quot;Nobody&quot;]\n  --no-config         Do not use any configuration file\n  --salutation=s, -s  Salutation [&quot;Mr&quot;]\n  --version, -v       \n[/code]\n\nIf you need to set default using some kind of logic (instead of some static value), currently you'll need to do it in the function body. (Though I might add a Rinci property <b>default_code</b> or perhaps <b>default.code</b> in the future, akin to <tt>default</tt> or <tt>builder</tt> clause in Moose/Moo.):\n\n[code language=\"perl\" highlight=\"21-28\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    args =&gt; {\n        name =&gt; {\n            summary =&gt; 'Name',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {n=&gt;{}},\n            pos =&gt; 0,\n        },\n        salutation =&gt; {\n            summary =&gt; 'Salutation',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {s=&gt;{}},\n        },\n    },\n};\nsub hello {\n    my %args = @_;\n\n    my $name = $args{name} // do {\n        # pick an Indonesian default name if locale is Indonesia\n        $ENV{LANG} =~ /id_ID/ ? 'Tak Dikenal' : 'Nobody';\n    };\n    my $salutation = $args{salutation} // do {\n        # pick an Indonesian default salutation if locale is Indonesia\n        $ENV{LANG} =~ /id_ID/ ? 'Bung' : 'Mr';\n    };\n\n    my $msg = &quot;Hello&quot;;\n    $msg .= &quot;,&quot; if $name || $salutation;\n    $msg .= &quot; $salutation&quot; if $salutation;\n    $msg .= &quot; $name&quot; if $name;\n    $msg .= &quot;!&quot;;\n\n    [200, &quot;OK&quot;, $msg];\n}\n[/code]\n\n[code language=\"text\"]\n% LANG=C ./hello\nHello, Mr Nobody!\n\n% LANG=id_ID.UTF-8 ./hello\nHello, Bung Tak Dikenal!\n[/code]\n",
+         "post_date" : "20150219T00:00:49",
+         "post_date_gmt" : "20150218T17:00:49",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "128",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:41:08",
+         "post_modified_gmt" : "20160901T01:41:08",
+         "post_name" : "pericmd-018-more-on-default-values",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 018: More on default values",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-24",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "355",
+               "key" : "email_notification",
+               "value" : "1424192726"
+            },
+            {
+               "id" : "300",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "350",
+               "key" : "jabber_published",
+               "value" : "1424192725"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=119",
+         "link" : "https://perlancar.wordpress.com/2015/02/18/pericmd-017-command-line-options-and-arguments/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Why don't we try out the program we've made in the previous post (pericmd 015):\n\n[code language=\"text\" highlight=\"7,15,17\"]\n% ./hello --help\nhello - Say hello\n\nUsage:\n  hello --help (or -h, -?)\n  hello --version (or -v)\n  hello [options] [name]\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --naked-res         When outputing as JSON, strip result envelope\n  --name=s, -n        Name (=arg[0])\n  --no-config         Do not use any configuration file\n  --salutation=s, -s  Salutation\n  --version, -v       \n[/code]\n\nAfter we've added our two arguments, the help message reflects it (lines 15, 17 and also line 7). Each argument is represented with a command-line option. As you might expect, the properties <b>summary</b> will be used in the help message. Note that the short options are also listed (-n and -s). We can say any of below:\n\n[code language=\"text\"]\n% ./hello --name Ahmad\nHello, Ahmad!\n\n% ./hello -n Ahmad\nHello, Ahmad!\n\n% ./hello -n Ahmad -s Mr\nHello, Mr Ahmad!\n[/code]\n\nSince <tt>name</tt> is specified as having the position of 0 (via <tt>pos =&gt; 0</tt> in the metadata), Perinci::CmdLine also accepts it as arguments. Notice how the help message in lines 7 and 15 also hints about this.\n\n[code language=\"text\"]\n% ./hello Ahmad\nHello, Ahmad!\n\n% ./hello &quot;Ahmad Dahlan&quot;\nHello, Ahmad Dahlan!\n[/code]\n\nHowever, to avoid conflict, an error will be raised if both argument and command-line option are specified:\n\n[code language=\"text\"]\n% ./hello -n Ahmad Achmad\nERROR 400: You specified option --name but also argument #0\n[/code]\n\nIf we want to make some arguments as required, we can use the property <b>req</b>:\n\n[code language=\"perl\" highlight=\"9\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    args =&gt; {\n        name =&gt; {\n            summary =&gt; 'Name',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {n=&gt;{}},\n            req =&gt; 1,\n            pos =&gt; 0,\n        },\n        salutation =&gt; {\n            summary =&gt; 'Salutation',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {s=&gt;{}},\n        },\n    },\n};\n[/code]\n\nNow when we do not specify <tt>name</tt>, the program will exit with an error:\n\n[code language=\"text\"]\n% ./hello\nERROR 400: Missing required argument(s): name\n[/code]\n\nThe help message will also reflects this (see how the bracket surrounding the <tt>name</tt> in the usage line 7 turns into an angle bracket, also notice how an asterisk <tt>*</tt> is added in line 15 to signify required arguments):\n\n[code language=\"text\" highlight=\"7,15\"]\n% ./hello -h\nhello - Say hello\n\nUsage:\n  hello --help (or -h, -?)\n  hello --version (or -v)\n  hello [options] &lt;name&gt;\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --naked-res         When outputing as JSON, strip result envelope\n  --name=s*, -n       Name (=arg[0])\n  --no-config         Do not use any configuration file\n  --salutation=s, -s  Salutation\n  --version, -v       \n[/code]\n\n",
+         "post_date" : "20150218T00:00:48",
+         "post_date_gmt" : "20150217T17:00:48",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "119",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:41:59",
+         "post_modified_gmt" : "20160901T01:41:59",
+         "post_name" : "pericmd-017-command-line-options-and-arguments",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 017: Using command-line options and arguments",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-1V",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "348",
+               "key" : "email_notification",
+               "value" : "1424106752"
+            },
+            {
+               "id" : "273",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "343",
+               "key" : "jabber_published",
+               "value" : "1424106751"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=109",
+         "link" : "https://perlancar.wordpress.com/2015/02/17/pericmd-016-foo-bar-vs-foo_bar/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "An \"rant intermission\" before continuing the topic from previous post. As mentioned before, Perinci::CmdLine will provide a command-line option for each argument specified in the <b>args</b> property of Rinci metadata, with the same name. <i>Except with one rule: underscores will be converted to dashes.</i> So argument named 'foo_bar' will have '--foo-bar' as option, not '--foo_bar'.\n\nThis is purely an issue of taste. I personally can't stand the mixing of dashes and underscores in '--foo_bar'. '--foo-bar' is the variant I see much more often in Unix command line tools. Plus, I see '--foo_bar' as \"lazy\" and more cumbersome to type and to complete (although with <tt>set completion-map-case on</tt> in your <tt>.inputrc</tt> it doesn't matter if you type dash or underscore.\n\nThe same thing happens when I see a mixed case option like '--Foo' or '--fooBar'. It looks like it is just translated from an argument without much regard for \"beauty\" or convention.",
+         "post_date" : "20150217T00:00:30",
+         "post_date_gmt" : "20150216T17:00:30",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "109",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:42:20",
+         "post_modified_gmt" : "20160901T01:42:20",
+         "post_name" : "pericmd-016-foo-bar-vs-foo_bar",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 016: --foo-bar vs --foo_bar",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-1L",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "341",
+               "key" : "email_notification",
+               "value" : "1424019883"
+            },
+            {
+               "id" : "269",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "337",
+               "key" : "jabber_published",
+               "value" : "1424019882"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=106",
+         "link" : "https://perlancar.wordpress.com/2015/02/16/pericmd-015-rinci-metadata-3-args-1/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Now we move on to the most important property in a Rinci function metadata: <strong>args</strong>, which describes the arguments of the function. Since this property is rather complex, I will need several posts to cover the important points.\n\nThe value of this property is a hash with <em>argument names</em> as the keys and <em>argument specification</em> as values. Argument name must only contain letters, numbers, and underscores, like a Latin-only identifier. This makes it easy to ensure uniqueness of arguments, but with the consequence of making it more cumbersome to specify argument ordering (it's a design choice and I picked hash). Argument specification is in turn a hash.\n<h3>Argument specification</h3>\nLike function metadata, argument specification allows the usual properties: <b>summary</b>, <b>description</b>. Other important properties are: <strong>req</strong>, <strong>pos</strong>, <strong>greedy</strong>, <strong>default</strong>, <strong>schema</strong>, <strong>tags</strong>. And, since we are in a CLI application series after all, these properties are also very much relevant: <strong>cmdline_aliases</strong>, <strong>cmdline_src</strong>.\n\n<strong>req</strong>: (short for \"required\"). This property has a boolean value. If you set it to true, you are saying that the argument is required.\n\n<strong>pos:</strong> (short for \"position\"). This property has a positive integer value and specifies the order of arguments (zero-based numbering). Why this is required will be explained in the examples later. In short, we allow function to accept hash/named arguments as well as positional arguments (the usual my ($arg1, $arg2, $arg3) = @_; stuff), so in the latter case we will need to mark which arguments are in which order.\n\n<strong>greedy:</strong> This property accepts a boolean value and is used for slurping positional arguments and will also be explained via an example later.\n\n<strong>default:</strong> Unsurprisingly, this property sets default values. This property accepts references (nested data structures), but for more complex defaults your function will need to do it itself in the function body.\n\n<strong>schema:</strong> A restriction on the possible values of the argument. Currently should be a <a href=\"https://metacpan.org/pod/Sah\">Sah</a> schema, so a string or an array. Sah deserves its own blog posts, but I'll try to explained it as we go along.\n\n<strong>tags:</strong> A list of strings, for tagging each argument. Useful in several occassions, will be demo-ed in examples.\n\n<strong>cmdline_aliases:</strong> Can be used to specify shortcut or extra options.\n\n<strong>cmdline_src:</strong> Can be used to specify that we accept argument value from external sources other than command-line options, such as file or STDIN.\n<h3>Hello, with arguments</h3>\nLet's return to our <strong>hello</strong> script example and add some arguments:\n\n[code language=\"perl\" highlight=\"4-16\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    args =&gt; {\n        name =&gt; {\n            summary =&gt; 'Name',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {n=&gt;{}},\n            pos =&gt; 0,\n        },\n        salutation =&gt; {\n            summary =&gt; 'Salutation',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {s=&gt;{}},\n        },\n    },\n};\nsub hello {\n    my %args = @_;\n\n    my $name = $args{name};\n    my $salutation = $args{salutation};\n\n    my $msg = &quot;Hello&quot;;\n    $msg .= &quot;,&quot; if $name || $salutation;\n    $msg .= &quot; $salutation&quot; if $salutation;\n    $msg .= &quot; $name&quot; if $name;\n    $msg .= &quot;!&quot;;\n\n    [200, &quot;OK&quot;, $msg];\n}\n[/code]\n\nThe above example introduces two arguments: <strong>name</strong> and <strong>salutation</strong>. Now here's how Perinci::CmdLine parses command-line options into function arguments: each argument will get its own command-line options with the same name. In this case, --name and --salutation. Both accept strings. Now each argument also specify an alias, <strong>n</strong> and <strong>s</strong> respectively. As to why we need an empty hash for each alias (as opposed to just saying: cmdline_aliases =&gt; ['s']) is because some complex aliases scenario is allowed, which will be illustrated with an example later.\n\nThe function accepts arguments as hash. If you want your function to accept positional arguments, you can: by specifying a property:\n\n[code language=\"perl\" highlight=\"15,18,21\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    args =&gt; {\n        name =&gt; {\n            summary =&gt; 'Name',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {n=&gt;{}},\n            pos =&gt; 0,\n        },\n        salutation =&gt; {\n            summary =&gt; 'Salutation',\n            schema  =&gt; 'str*',\n            cmdline_aliases =&gt; {s=&gt;{}},\n            pos =&gt; 1,\n        },\n    },\n    args_as =&gt; 'array',\n};\nsub hello {\n    my ($name, $salutation) = @_;\n\n    my $msg = &quot;Hello&quot;;\n    $msg .= &quot;, &quot; if $name || $salutation;\n    $msg .= &quot; $salutation&quot; if $salutation;\n    $msg .= &quot; $name&quot; if $name;\n    $msg .= &quot;!&quot;;\n\n    [200, &quot;OK&quot;, $msg];\n}\n[/code]\n\nYou have to set property args_as to \"array\" (instead of the default \"hash\"), and you have to make sure that all arguments have positions (lines 9 as well as 15). Then you can accept arguments the way a typical Perl sub do (line 21). ",
+         "post_date" : "20150216T00:00:35",
+         "post_date_gmt" : "20150215T17:00:35",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "106",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:42:41",
+         "post_modified_gmt" : "20160901T01:42:41",
+         "post_name" : "pericmd-015-rinci-metadata-3-args-1",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 015: args",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-1I",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "335",
+               "key" : "email_notification",
+               "value" : "1423933417"
+            },
+            {
+               "id" : "255",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "330",
+               "key" : "jabber_published",
+               "value" : "1423933416"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=96",
+         "link" : "https://perlancar.wordpress.com/2015/02/15/pericmd-014-rinci-metadata-2-description-alt-lang/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Let's see what else we can put in Rinci metadata.\n\n<h3>description</h3>\n\n<b>summary</b> is what we use for short (one-line, max +-70 character) description that will show up as the abstract in help message or POD alongside the program name. For longer description (one to several paragraphs), we'll use the appropriately named <b>description</b> property.\n\n[code language=\"perl\" highlight=\"4-13\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    description =&gt; &lt;&lt;'_',\n\nSay hello in English.\n\nIf you give an option `--salutation`, it will actually salute with the\nsalutation. There is also some shortcut options like `-m` (short for male) which\nis equivalent to `--salutation Mr` and `-f` (short for female) which is\nequivalent to `--salutation Mrs`.\n\n_\n};\n[/code]\n\nFor longer text, we usually want markup. The (default) markup defined for description is Markdown. I haven't more specifically specify which flavor of Markdown it should be in, probably CommonMark. <i>Why not POD?</i> you ask. Because Markdown is slightly nicer (especially for bullet points) and more popular and \"language-neutral\" (meaning it's much more well-known outside the Perl world compared to POD). Rinci is intended to be used across languages, after all.\n\nThe description is used also in CLI help message as well as in POD. Under CLI help message, it will just be spewed as-is:\n\n<pre>% ./hello --help\nhello - Say hello\n\nUsage:\n  hello --help (or -h, -?)\n  hello --version (or -v)\n  hello [options]\n\nSay hello in English.\n\nIf you give an option `--salutation`, it will actually salute with the\nsalutation. There is also some shortcut options like `-m` (short for male) which\nis equivalent to `--salutation Mr` and `-f` (short for female) which is\nequivalent to `--salutation Mrs`.\n\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --naked-res         When outputing as JSON, strip result envelope\n  --no-config         Do not use any configuration file\n  --version, -v       </pre>\n\nAnd in POD (please refer to the previous post pericmd 012), if you build the distribution you will get this POD (note that the Markdown markups will be converted to POD formatting):\n\n[code language=\"perl\" highlight=\"9-16\"]\n=pod\n\n=head1 SYNOPSIS\n\nUsage:\n\n % hello [options]\n\n=head1 DESCRIPTION\n\nSay hello in English.\n\nIf you give an option C&lt;--salutation&gt;, it will actually salute with the\nsalutation. There is also some shortcut options like C&lt;-m&gt; (short for male) which\nis equivalent to C&lt;--salutation Mr&gt; and C&lt;-f&gt; (short for female) which is\nequivalent to C&lt;--salutation Mrs&gt;.\n\n=head1 OPTIONS\n\nC&lt;*&gt; marks required options.\n\n...\n[/code]\n\n<h3>alt.lang</h3>\n\nRinci allows you to specify alternate languages (translations) for <b>summary</b> and <b>description</b> (basically any kind of text properties). You do this by appending \"alt.lang.LANGCODE\" after the property name. For example:\n\n[code language=\"perl\" highlight=\"4\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    &quot;summary.alt.lang.id_ID&quot; =&gt; 'Katakan halo',\n};\n[/code]\n\nPerinci::CmdLine will detect locale and display the appropriate language.\n\n<pre>% PERINCI_CMDLINE_ANY=classic LANG=id_ID.UTF-8 ./hello --help\nhello - Katakan halo                                                           \nCara pakai                                                                     \n  hello --help (atau -h, -?)                                                     \n  hello --version (atau -v)                                                    \n  hello [opsi]                                                                 \nOpsi                                                                           \n  --config-path=s                       --config-profile=s                     \n  --debug                               --format-options=s                     \n  --format=s                            --help, -h, -?                         \n  --json                                --log-level=s                          \n  --no-config                           --quiet                                \n  --trace                               --verbose                              \n  --version, -v                                                                \nUntuk bantuan lebih lengkap, gunakan '--help --verbose'.     </pre>\n\nFor now, to see help message in language other than English, you need to add <b>PERINCI_CMDLINE_ANY=classic</b> because Perinci::CmdLine::Lite doesn't support translation yet, only Perinci::CmdLine::Classic does, so the environment variable is used to select the Classic backend. You'll also notice that the Classic backend produces somewhat nicer and more colorful help message, because the focus of the Classic backend is indeed on prettiness (unlike the default Lite backend, which focuses on low startup overhead).\n\nWhat if user's locale is one that we don't have translation for:\n\n<pre>% PERINCI_CMDLINE_ANY=classic LANG=fr_FR.UTF-8 ./hello --help\nhello - {en_US Say hello}                                                      \nUtilisation                                                                    \n  hello --help (ou -h, -?)                                                     \n  hello --version (ou -v)                                                      \n  hello [options]                                                              \nOptions                                                                        \n  --config-path=s                       --config-profile=s                     \n  --debug                               --format-options=s                     \n  --format=s                            --help, -h, -?                         \n  --json                                --log-level=s                          \n  --no-config                           --quiet                                \n  --trace                               --verbose                              \n  --version, -v                                                                \nPour de l'aide plus complète, utilisez '--help --verbose'.                     </pre>\n\nYou'll see that the text is surrounded by {en_US ...} to mark that the text is in English instead of the requested language.\n\n\n",
+         "post_date" : "20150215T00:00:13",
+         "post_date_gmt" : "20150214T17:00:13",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "96",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:42:58",
+         "post_modified_gmt" : "20160901T01:42:58",
+         "post_name" : "pericmd-014-rinci-metadata-2-description-alt-lang",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 014: description, alt.lang",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-1y",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "328",
+               "key" : "email_notification",
+               "value" : "1423847019"
+            },
+            {
+               "id" : "251",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "323",
+               "key" : "jabber_published",
+               "value" : "1423847017"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=92",
+         "link" : "https://perlancar.wordpress.com/2015/02/14/pericmd-013-enveloped-result/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "If you see the <strong>hello</strong> script from the previous post, you'll see one peculiar thing:\n\n[code language=\"perl\" highlight=\"6\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n};\nsub hello {\n    [200, &quot;OK&quot;, &quot;Hello, world!&quot;];\n}\n[/code]\n\nWhy does hello() return an array [200,\"OK\",\"Hello, world!\"] instead of just a string \"Hello, world!\". I'm calling this <strong>enveloped result</strong>, and this is specified in <a href=\"https://metacpan.org/pod/Rinci::function\">Rinci::function</a>. Basically, enveloped result allows returning status of operation (whether the operation succeeds or fails, and its error code) as well as result of operation. Traditionally in C and Perl, error code is returned in another, global variable errno/$!/$? (with all the trappings of being a global variable). With enveloped result, both error code and result are returned together.\n\nThis has a nice property of mapping very nicely to HTTP response, especially since I also steal a lot of HTTP status codes to mean exactly like they are in HTTP, for example: 200 is success, 404 is not found, 500 is general error, 501 is not implemented, and so on. The first element of the enveloped result array is the status code, just like HTTP status code (most of the time). The second element is the error message, just like HTTP status message. The third element contains the actual payload. And there can be a fourth element which is a hash, analogous to HTTP response headers (examples will be given later).\n\nIn a CLI program, normally when the result is a success and shown using the format \"text\" (which is the default format), we don't show the status code and message. We just show the actual result a.k.a. the payload:\n\n<pre>% ./hello\nHello, world!</pre>\n\nBut if we use other formats, for example <b>json</b>, this enveloped result can be displayed in full:\n\n<pre>% ./hello --format json\n[200,\"OK\",\"Hello, world!\",{}]</pre>\n\nAs you can also see, Perinci::CmdLine does some checking and normalization of the enveloped result (fourth element set to empty hash).\n\nLet's see what happens if we return a non-success result in the function:\n\n[code language=\"perl\" highlight=\"6\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n};\nsub hello {\n    [404, &quot;Sorry, world not found&quot;];\n}\n[/code]\n\n<pre>% ./hello\nERROR 404: Sorry, world not found\n\n% ./hello format json\n[404,\"Sorry, world not found\",null,{}]</pre>\n\nWhen we return an error response, we usually don't bother to set an actual result (third element of enveloped result): we only set status code and error message.\n\nNow let's see the exit code:\n\n<pre>% echo $?\n104</pre>\n\nAs a convenient convention, exit code of CLI program is set as <i>(status message - 300)</i>. So if status is 404, exit code is 104. But, for success statuses (2xx) exit code will be 0.\n\n<i>What if I don't want to return enveloped results?</i> You might already have an existing function that you don't want to or can't modify. Or the function is simple and returns simple values, and/or \"never fails\", or just die on failure. In these cases, it's admittedly an overkill to have to return an enveloped result.\n\nYou can return \"naked\" values by setting this metadata property:\n\n[code language=\"perl\" highlight=\"4,7\"]\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n    result_naked =&gt; 1,\n};\nsub hello {\n    &quot;Hello, world!&quot;;\n}\n[/code]\n\nThis way, Perinci::CmdLine knows that your function returns naked values without envelopes, and will adjust accordingly. \n\n ",
+         "post_date" : "20150214T00:00:25",
+         "post_date_gmt" : "20150213T17:00:25",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "92",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:43:21",
+         "post_modified_gmt" : "20160901T01:43:21",
+         "post_name" : "pericmd-013-enveloped-result",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 013: Enveloped result",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-1u",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

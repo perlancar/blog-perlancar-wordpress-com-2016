@@ -1,0 +1,700 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "558",
+               "key" : "email_notification",
+               "value" : "1425488492"
+            },
+            {
+               "id" : "515",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "553",
+               "key" : "jabber_published",
+               "value" : "1425488482"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=205",
+         "link" : "https://perlancar.wordpress.com/2015/03/05/pericmd-031-more-on-tab-completion-3-case-sensitivity-complete/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Continuing from the previous blog's example, you'll notice that by default tab completion is case-insensitive:\n\n[code language=\"text\"]\n% mycomp2 --baz h&lt;tab&gt;\n% mycomp2 --baz H&lt;tab&gt;&lt;tab&gt;\nHISTCONTROL     HISTIGNORE      HISTTIMEFORMAT  \nHISTFILESIZE    HISTSIZE        HOME            \n[/code]\n\nThis is because most completion routines, including <tt>complete_env()</tt> used above, or <tt>complete_array_elem()</tt> used often in custom completion routines, offer <tt>ci</tt> (case-insensitive) option which defaults to <tt>$Complete::OPT_CI</tt> which in turn default to environment variable COMPLETE_OPT_CI or 1.\n\nIf you turn off case-insensitivity, e.g. by:\n\n[code language=\"text\"]\n% export COMPLETE_OPT_CI=0\n[/code]\n\nthen the above completion will no longer work:\n\n[code language=\"text\"]\n% mycomp2 --baz h&lt;tab&gt;&lt;tab&gt;\n[/code]\n\nAlternatively if you need to set case (in-)sensitivity specifically in a routine, you can turn it on or off explicitly. For example:\n\n[code language=\"perl\"]\n# explicitly turn on case-insensitivity, regardless of COMPLETE_OPT_CI or $Complete::OPT_CI setting\ncomplete_array_elem(array=&gt;\\@array, word=&gt;$args{word}, ci=&gt;1);\n[/code]\n\nThere are several other settings in <a href=\"https://metacpan.org/pod/Complete\">Complete</a> that are observed by the other Complete::* modules. Most of these settings' default are optimized for convenience. This will be covered in the next blog post.",
+         "post_date" : "20150305T00:00:23",
+         "post_date_gmt" : "20150304T17:00:23",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "205",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:44:30",
+         "post_modified_gmt" : "20160901T01:44:30",
+         "post_name" : "pericmd-031-more-on-tab-completion-3-case-sensitivity-complete",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 031: More on tab completion (3): case sensitivity, Complete",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3j",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "527",
+               "key" : "email_notification",
+               "value" : "1425402070"
+            },
+            {
+               "id" : "511",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "522",
+               "key" : "jabber_published",
+               "value" : "1425402052"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=199",
+         "link" : "https://perlancar.wordpress.com/2015/03/04/pericmd-030-more-on-tab-completion-2-completing-arguments-element_completion/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Like the previous post, this blog post still focuses on tab completion, particularly on completing arguments.\n\nAside from option names and option values, Perinci::CmdLine can also complete arguments. In Perinci::CmdLine, command-line arguments will also be fed to function as function arguments. The function argument to which the command-line argument(s) will be fed to must be specified with the <tt>pos</tt> (for <i>positional</i>) property, and optionally with the <tt>greedy</tt> property. Example:\n\n[code language=\"perl\"]\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n$SPEC{mycomp2} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        foo =&gt; {\n            schema =&gt; 'str*',\n            pos =&gt; 0,\n            req =&gt; 1,\n        },\n        bar =&gt; {\n            schema =&gt; 'str*',\n            pos =&gt; 1,\n        },\n        baz =&gt; {\n            schema =&gt; 'str*',\n        },\n    },\n};\nsub mycomp2 {\n    my %args = @_;\n    [200, &quot;OK&quot;, join(\n        &quot;&quot;,\n        &quot;foo=&quot;, $args{foo}//'', &quot; &quot;,\n        &quot;bar=&quot;, $args{bar}//'', &quot; &quot;,\n        &quot;baz=&quot;, $args{baz}//'',\n    )];\n}\n\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; '/main/mycomp2',\n)-&gt;run;\n[/code]\n\nIn the above program, the argument <tt>foo</tt> will map to the first\ncommand-line argument (pos=0), <tt>bar</tt> to the second command-line argument\n(pos=1), while <tt>baz</tt> does not map to any command-line argument (must be specified as command-line option, e.g. <tt>--baz val</tt>). Of course, the positional arguments can also be specified as command-line options too, although they cannot be both command-line options and arguments at the same time.\n\n[code language=\"text\"]\n% mycomp2\nERROR 400: Missing required argument(s): foo\n\n% mycomp2 1\nfoo=1 bar= baz=\n\n% mycomp2 --foo 1\nfoo=1 bar= baz=\n\n% mycomp2 1\nERROR 400: You specified option --foo but also argument #0\n\n% mycomp2 1 2\nfoo=1 bar=2 baz=\n\n% mycomp2 1 --bar 2\nfoo=1 bar=2 baz=\n\n% mycomp2 1 --bar 2 2\nERROR 400: You specified option --bar but also argument #1\n\n% mycomp2 1 2 --baz 3\nfoo=1 bar=2 baz=3\n\n% mycomp2 1 2 3\nERROR 400: There are extra, unassigned elements in array: [3]\n[/code]\n\nAs you can see from the last example, Perinci::CmdLine will complain if there are extra arguments that are not unassigned to any function argument. What if we want a function argument to slurp all the remaining command-line arguments? We can declare a function argument as an array and set the <tt>pos</tt> property as well as set <tt>greedy</tt> property to true to express that the argument is slurpy.\n\n[code language=\"perl\" highlight=\"13,15\"]\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n$SPEC{mycomp2} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        foo =&gt; {\n            schema =&gt; 'str*',\n            pos =&gt; 0,\n            req =&gt; 1,\n        },\n        bar =&gt; {\n            schema =&gt; ['array*', of=&gt;'str*'],\n            pos =&gt; 1,\n            greedy =&gt; 1,\n        },\n        baz =&gt; {\n            schema =&gt; 'str*',\n        },\n    },\n};\nsub mycomp2 {\n    my %args = @_;\n    [200, &quot;OK&quot;, join(\n        &quot;&quot;,\n        &quot;foo=&quot;, $args{foo}//'', &quot; &quot;,\n        &quot;bar=&quot;, ($args{bar} ? &quot;[&quot;.join(&quot;,&quot;,@{$args{bar}}).&quot;]&quot; : ''), &quot; &quot;,\n        &quot;baz=&quot;, $args{baz}//'',\n    )];\n}\n\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; '/main/mycomp2',\n)-&gt;run;\n[/code]\n\nWhen run:\n\n[code language=\"text\"]\n% mycomp2 1\nfoo=1 bar= baz=\n\n% mycomp2 1 2\nfoo=1 bar=[2] baz=\n\n% mycomp2 1 2 3 4\nfoo=1 bar=[2,3,4] baz=\n[/code]\n\nNow, since command-line arguments map to function arguments, to specify completion for it we just need to put a <tt>completion</tt> property to the metadata, just like any other argument.\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse Complete::Util qw(complete_array_elem complete_env);\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n$SPEC{mycomp2} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        foo =&gt; {\n            schema =&gt; 'str*',\n            pos =&gt; 0,\n            req =&gt; 1,\n            cmdline_aliases =&gt; {f=&gt;{}},\n            completion =&gt; sub {\n                my %args = @_;\n                complete_array_elem(\n                    word  =&gt; $args{word},\n                    array =&gt; [qw/apple banana blackberry blueberry/],\n                ),\n            },\n        },\n        bar =&gt; {\n            schema =&gt; ['array*', of=&gt;'str*'],\n            pos =&gt; 1,\n            greedy =&gt; 1,\n            element_completion =&gt; sub {\n                my %args = @_;\n                complete_array_elem(\n                    word    =&gt; $args{word},\n                    array   =&gt; [qw/snakefruit durian jackfruit/],\n                    exclude =&gt; $args{args}{bar},\n                );\n            },\n        },\n        baz =&gt; {\n            schema =&gt; 'str*',\n            completion =&gt; \\&amp;complete_env,\n        },\n    },\n};\nsub mycomp2 {\n    my %args = @_;\n    [200, &quot;OK&quot;, join(\n        &quot;&quot;,\n        &quot;foo=&quot;, $args{foo}//'', &quot; &quot;,\n        &quot;bar=&quot;, ($args{bar} ? &quot;[&quot;.join(&quot;,&quot;,@{$args{bar}}).&quot;]&quot; : ''), &quot; &quot;,\n        &quot;baz=&quot;, $args{baz}//'',\n    )];\n}\n\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; '/main/mycomp2',\n)-&gt;run;\n[/code]\n\nCompletion works when function argument is fed as command-line option (including aliases) or command-line argument. Let's test the completion for <tt>foo</tt> (note: from this point onwards, I assume you have activated bash completion for the script, as described in the previous post pericmd 029):\n\n[code language=\"text\"]\n% mycomp2 &lt;tab&gt;&lt;tab&gt;\n-\\?               blackberry        --format          --no-config\napple             blueberry         -h                -v\nbanana            --config-path     --help            --version\n--bar             --config-profile  --json            \n--baz             --foo             --naked-res      \n\n% mycomp2 b&lt;tab&gt;\nbanana      blackberry  blueberry   \n\n% mycomp2 --foo &lt;tab&gt;&lt;tab&gt;\napple       banana      blackberry  blueberry   \n\n% mycomp2 -f &lt;tab&gt;&lt;tab&gt;\napple       banana      blackberry  blueberry   \n[/code]\n\nFrom the last program listing, you'll see several new things. First is that the <tt>bar</tt> argument uses the <tt>element_completion</tt> property (line 27) instead of <tt>completion</tt>. This is because <tt>bar</tt> itself is an argument with type of array (of string), and we are completing the element, not the array itself:\n\n[code language=\"text\"]\n% mycomp2 --bar &lt;tab&gt;&lt;tab&gt;\ndurian      jackfruit   snakefruit  \n\n% mycomp2 --bar durian --bar &lt;tab&gt;&lt;tab&gt;\njackfruit   snakefruit  \n\n% mycomp2 --bar durian --bar jackfruit --bar &lt;tab&gt;\n% mycomp2 --bar durian --bar jackfruit --bar snakefruit _\n[/code]\n\nYou'll also notice that if a <tt>bar</tt> value has been specified, the choice will be removed from the offering in completion for the subsequent <tt>--bar</tt> option value. This is because we are using the <tt>exclude</tt> option in <tt>complete_array_elem()</tt> (line 32). The <tt>$args{args}</tt> contains the function arguments that have been formed at that point.\n\nAnd lastly, in line 38, you see a new function <tt>complete_env</tt> which can complete from environment variable names. Since both <tt>complete_env()</tt> and completion routine expect hash argument as well, and the only required argument is also <tt>word</tt>, we can pass the subroutine reference directly. Let's see it in action:\n\n[code language=\"text\"]\n% mycomp2 --baz H\nHISTCONTROL     HISTIGNORE      HISTTIMEFORMAT  \nHISTFILESIZE    HISTSIZE        HOME            \n[/code]\n",
+         "post_date" : "20150304T00:00:12",
+         "post_date_gmt" : "20150303T17:00:12",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "199",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:45:06",
+         "post_modified_gmt" : "20160901T01:45:06",
+         "post_name" : "pericmd-030-more-on-tab-completion-2-completing-arguments-element_completion",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 030: More on tab completion (2): Completing arguments, element_completion",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3d",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "508",
+               "key" : "email_notification",
+               "value" : "1425315720"
+            },
+            {
+               "id" : "442",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "503",
+               "key" : "jabber_published",
+               "value" : "1425315693"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=174",
+         "link" : "https://perlancar.wordpress.com/2015/03/03/pericmd-029-more-on-tab-completion-1/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "The next several blog posts will focus on tab completion.\n\nLet's get right to it with a simple example. Put the code below to <b>mycomp</b>, chmod +x the file, and put it somewhere in your PATH (e.g. /usr/local/bin or $HOME/bin if your PATH happens to have $HOME/bin as an entry):\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse 5.010;\nuse strict;\nuse warnings;\n\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n$SPEC{mycomp} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        int1 =&gt; {\n            schema =&gt; [int =&gt; min=&gt;1, max=&gt;30],\n        },\n        str1 =&gt; {\n            schema =&gt; [str =&gt; in=&gt;[qw/foo bar baz qux quux/]],\n        },\n        str2 =&gt; {\n            schema =&gt; ['str'],\n        },\n    },\n};\nsub mycomp {\n    [200];\n}\n\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; '/main/mycomp',\n)-&gt;run;\n[/code]\n\nActivate bash completion by executing this command in your shell:\n\n[code language=\"text\"]\n% complete -C mycomp mycomp\n[/code]\n\nIf your script happens to live outside PATH, e.g. in /path/to/mycomp, you can instead use:\n\n[code language=\"text\"]\n% complete -C /path/to/mycomp mycomp\n[/code]\n\nbut normally your CLI programs will reside in PATH, so the above command is for testing only.\n\nNow to test completion:\n\n[code language=\"text\"]\n% mycomp &lt;tab&gt;&lt;tab&gt;\n-\\?               .gitignore        --json            perl-App-hello/\n--config-path     -h                mycomp            --str1\n--config-profile  hello             --naked-res       -v\n--format          --help            --no-config       --version\n.git/             --int1            pause/      \n[/code]\n\nAs you can see, by default Perinci::CmdLine gives you a list of known options as well as files and directives in the current directory.\n\n[code language=\"text\"]\n% mycomp -&lt;tab&gt;&lt;tab&gt;\n-\\?               -h                --naked-res       --version\n--config-path     --help            --no-config       \n--config-profile  --int1            --str1            \n--format          --json            -v  \n[/code]\n\nIf the current word (the word being completed at the cursor) is \"-\", Perinci::CmdLine assumes that you want to complete an option name so it doesn't give a list of files/dirs. (What if, in the rare case, there is a file beginning with a dash and you want to complete it? You can use <tt>./-</tt>.)\n\nIf the option name can be completed unambiguously:\n\n[code language=\"text\"]\n% mycomp --i&lt;tab&gt;&lt;tab&gt;\n[/code]\n\nthen it will be completed directly without showing list of completion candidates (underscore <tt>_</tt> shows the location of cursor):\n\n[code language=\"text\"]\n% mycomp --int1 _\n[/code]\n\nPerinci::CmdLine can also complete option values. Now let's press tab again to complete:\n\n[code language=\"text\"]\n% mycomp --int1 &lt;tab&gt;&lt;tab&gt;\n1   11  13  15  17  19  20  22  24  26  28  3   4   6   8   \n10  12  14  16  18  2   21  23  25  27  29  30  5   7   9   \n[/code]\n\nFrom the argument schema (<tt>[int =&gt; min=&gt;1, max=&gt;30]</tt>), Perinci::CmdLine can provide a list of numbers from 1 to 30 as completion candidates. Now let's try another argument:\n\n[code language=\"text\"]\n% mycomp --str1=&lt;tab&gt;&lt;tab&gt;\nbar   baz   foo   quux  qux   \n[/code]\n\nThe schema (<tt>[str =&gt; in=&gt;[qw/foo bar baz qux quux/]]</tt>) also helps Perinci::CmdLine provide a completion list. Now another argument:\n\n[code language=\"text\"]\n% mycomp --str2 &lt;tab&gt;&lt;tab&gt;\n.git/            hello            mycomp~          perl-App-hello/  \n.gitignore       mycomp           pause/           \n[/code]\n\nWhat happened? Since the schema (<tt>['str']</tt>) doesn't provide any hints about possible values, Perinci::CmdLine falls back to completing using files/dirs in the current directory. Of course, you can also do something like:\n\n[code language=\"text\"]\n% mycomp --str2 ../../foo&lt;tab&gt;&lt;tab&gt;\n[/code]\n\nto list other directories.\n\nThis is all nice and good, but the power of tab completion comes with custom completion: when we are able to provide our own completion to option values (and arguments). Let's try that by adding a completion routine in our Rinci metadata:\n\n[code language=\"perl\" highlight=\"1,8-15\"]\nuse Complete::Util qw(complete_array_elem);\n\n$SPEC{mycomp} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        int1 =&gt; {\n            schema =&gt; [int =&gt; min=&gt;1, max=&gt;30],\n            completion =&gt; sub {\n                my %args = @_;\n                my $word = $args{word};\n\n                # let's provide a list of numbers from 1 to current day of month\n                my $mday = (localtime)[3];\n                complete_array_elem(word=&gt;$word, array=&gt;[1..$mday]);\n            },\n        },\n        str1 =&gt; {\n            schema =&gt; [str =&gt; in=&gt;[qw/foo bar baz qux quux/]],\n        },\n        str2 =&gt; {\n            schema =&gt; ['str'],\n        },\n    },\n};\n[/code]\n\nYou see a couple of things new here. <i>First</i> is the completion routine which is supplied in the <tt>completion</tt> property of the argument specification. A completion routine will receive a hash of arguments (the most important argument is <tt>word</tt>, there are other arguments and we will get to it later). A completion routine is expected to return an array of words or a hash (see <a href=\"https://metacpan.org/pod/Complete\">Complete</a> for the specification of the \"completion answer\"). <i>Second</i> is the use of the module <a href=\"https://metacpan.org/pod/Complete::Util\">Complete::Util</a> and a function from the module called <tt>complete_array_elem</tt> which will return an array filtered by $word as prefix. The module contains some more utility functions which we will discuss later.\n\nNow let's test it (assuming today is Feb 27th, 2015):\n\n[code language=\"text\"]\n% mycomp --int1 &lt;tab&gt;&lt;tab&gt;\n1   11  13  15  17  19  20  22  24  26  3   5   7   9   \n10  12  14  16  18  2   21  23  25  27  4   6   8   \n[/code]\n\n<h3>Debugging completion</h3>\n\nWhen we write completion code, we might make mistakes. For example, suppose we forget to <tt>use Complete::Util qw(complete_array_elem);</tt> then when we test it, we might get unexpected result:\n\n[code language=\"text\"]\n% mycomp --int1 &lt;tab&gt;&lt;tab&gt;\n.git/            hello            mycomp~          perl-App-hello/  \n.gitignore       mycomp           pause/   \n[/code]\n\nWhy is Perinci::CmdLine showing files/dirs from current directory instead?\n\nTo help debug problems when doing custom completion, you can use the <a href=\"https://metacpan.org/pod/testcomp\">testcomp</a> utility (install it via <tt>cpanm App::CompleteUtils</tt>). To use testcomp, specify the command and arguments and put ^ (caret) to signify where the cursor is supposed to be. So type:\n\n[code language=\"text\" highlight=\"16\"]\n% testcomp mycomp --int1 ^\n[testcomp] COMP_LINE=&lt;mycomp --int1 &gt;, COMP_POINT=14\n[testcomp] exec(): [&quot;/mnt/home/s1/perl5/perlbrew/perls/perl-5.18.4/bin/perl&quot;,&quot;-MLog::Any::Adapter=ScreenColoredLevel&quot;,&quot;mycomp&quot;]\n[pericmd] -&gt; run(), @ARGV=[]\n[pericmd] Checking env MYCOMP_OPT: &lt;undef&gt;\n[pericmd] Running hook_after_get_meta ...\n[comp][periscomp] entering Perinci::Sub::Complete::complete_cli_arg(), words=[&quot;--int1&quot;,&quot;&quot;], cword=1, word=&lt;&gt;\n[comp][compgl] entering Complete::Getopt::Long::complete_cli_arg(), words=[&quot;--int1&quot;,&quot;&quot;], cword=1, word=&lt;&gt;\n[comp][compgl] invoking routine supplied from 'completion' argument to complete option value, option=&lt;--int1&gt;\n[comp][periscomp] entering completion routine (that we supply to Complete::Getopt::Long)\n[comp][periscomp] completing option value for a known function argument, arg=&lt;int1&gt;, ospec=&lt;int1=i&gt;\n[comp][periscomp] invoking routine supplied from 'completion' argument\n[comp][periscomp] result from 'completion' routine: &lt;undef&gt;\n[comp][periscomp] entering complete_arg_val, arg=&lt;int1&gt;\n[comp][periscomp] invoking routine specified in arg spec's 'completion' property\n[comp][periscomp] completion died: Undefined subroutine &amp;main::complete_array_elem called at mycomp line 22.\n[comp][periscomp] no completion from metadata possible, declining\n[comp][periscomp] leaving complete_arg_val, result=&lt;undef&gt;\n[comp][periscomp] leaving completion routine (that we supply to Complete::Getopt::Long)\n[comp][compgl] adding result from routine: &lt;undef&gt;\n[comp][compgl] entering default completion routine\n[comp][compgl] completing with file, file=&lt;&gt;\n[comp][compgl] leaving default completion routine, result={path_sep =&gt; &quot;/&quot;,words =&gt; [&quot;.git/&quot;,&quot;.gitignore&quot;,&quot;hello&quot;,&quot;mycomp&quot;,&quot;mycomp~&quot;,&quot;pause/&quot;,&quot;perl-App-hello/&quot;]}\n[comp][compgl] adding result from default completion routine\n[comp][compgl] leaving Complete::Getopt::Long::complete_cli_arg(), result={path_sep =&gt; &quot;/&quot;,words =&gt; [&quot;.git/&quot;,&quot;.gitignore&quot;,&quot;hello&quot;,&quot;mycomp&quot;,&quot;mycomp~&quot;,&quot;pause/&quot;,&quot;perl-App-hello/&quot;]}\n[comp][periscomp] leaving Perinci::Sub::Complete::complete_cli_arg(), result={path_sep =&gt; &quot;/&quot;,words =&gt; [&quot;.git/&quot;,&quot;.gitignore&quot;,&quot;hello&quot;,&quot;mycomp&quot;,&quot;mycomp~&quot;,&quot;pause/&quot;,&quot;perl-App-hello/&quot;]}\n[pericmd] Running hook_display_result ...\n.git/\n.gitignore\nhello\nmycomp\nmycomp~\npause/\nperl-App-hello/\n[pericmd] Running hook_after_run ...\n[pericmd] exit(0)\n[/code]\n\nFrom the debug output, you can see the error message and realize that the completion routine dies. You'll also know that Perinci::CmdLine then falls back to using using files/dirs.\n",
+         "post_date" : "20150303T00:00:50",
+         "post_date_gmt" : "20150302T17:00:50",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "174",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:45:21",
+         "post_modified_gmt" : "20160901T01:45:21",
+         "post_name" : "pericmd-029-more-on-tab-completion-1",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 029: More on tab completion (1)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2O",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "501",
+               "key" : "email_notification",
+               "value" : "1425229293"
+            },
+            {
+               "id" : "438",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "496",
+               "key" : "jabber_published",
+               "value" : "1425229293"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=170",
+         "link" : "https://perlancar.wordpress.com/2015/03/02/pericmd-028-environment-support/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Aside from config file, environment can also be a convenient way to input things. It's more \"secure\" than command-line options because a casual \"ps ax\" command won't show the values of environment variables unlike the command-line. By default, only the user running the program and the superuser can see the environment values of a process (exposed via /proc/PID/environ which has 0700 mode, while /proc/PID/cmdline has 0444 mode).\n\nPerinci::CmdLine gives you environment support. By default, it reads <i>PROGNAME</i>_OPT for you (the value will be prepended to the command-line option). It has a higher precedence than config files (i.e. it can override values from config files) but can be overriden by command-line options.\n\nLet's see an example with <a href=\"https://metacpan.org/pod/pause\">pause</a>. If you run without any configuration file:\n\n[code language=\"text\"]\n% pause ls\nERROR 400: Missing required argument(s): password, username\n[/code]\n\nIf we set <tt>PAUSE_OPT</tt> environment to:\n\n[code language=\"text\"]\n% export PAUSE_OPT=&quot;--username PERLANCAR --password xxx&quot;\n[/code]\n\nthen run the program again:\n\n[code language=\"text\"]\n% pause ls\n...\n[/code]\n\nthen <tt>username</tt> and <tt>password</tt> arguments have been set from the environment.\n\n<h3>Turning off environment (and configuration)</h3>\n\nIf you don't want your CLI program to read from environment or configuration, you can turn these features off via the <tt>read_env</tt> and <tt>read_config</tt> attributes, respectively:\n\n[code language=\"perl\"]\nPerinci::CmdLine::Any-&gt;new(\n    ...\n    read_env =&gt; 0,\n    read_config =&gt; 0,\n)-&gt;run;\n[/code]\n",
+         "post_date" : "20150302T00:00:13",
+         "post_date_gmt" : "20150301T17:00:13",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "170",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:46:29",
+         "post_modified_gmt" : "20160901T01:46:29",
+         "post_name" : "pericmd-028-environment-support",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 028: Environment support",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2K",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "494",
+               "key" : "email_notification",
+               "value" : "1425142818"
+            },
+            {
+               "id" : "434",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "489",
+               "key" : "jabber_published",
+               "value" : "1425142817"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=164",
+         "link" : "https://perlancar.wordpress.com/2015/03/01/pericmd-027-configuration-file-support-2/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "This post is still on config files: I want to mention a couple of features that might be useful.\n\n<h3>Specifying arrays</h3>\n\nIn a traditional INI file, array of strings are written as multiple lines of parameters with the same name, so:\n\n[code language=\"text\"]\narray=value1\narray=value2\n[/code]\n\nwhich will result in array value <tt>[\"value1\", \"value2\"]</tt>. There is a problem with this approach though: you can't specify an array with zero elements. (Actually, specifying array with one element is also problematic in general because you can't tell whether you want to specify a string/scalar or a one-element array, but this is not a problem in Perinci::CmdLine because argument schema helps pointing out which.)\n\nSo the IOD format allows specifying parameter value as JSON:\n\n[code language=\"text\"]\narray=!json [&amp;quot;value1&amp;quot;,&amp;quot;value2&amp;quot;]\narray2=!j []\n[/code]\n\nOr, if you specify an array, you can skip the \"!json\" or \"!j\" part and use \"[...]\" notation directly. IOD recognizes \"[\" as a marker of JSON arrays:\n\n[code language=\"text\"]\narray=[&amp;quot;value1&amp;quot;,&amp;quot;value2&amp;quot;]\narray2=[]\n[/code]\n\n<h3>Specifying hashes</h3>\n\nIn a traditional INI format you can't specify a hash parameter value. Usually, when an INI file is read into a data structure by a reader module, a section is represented by a hash of parameters and their values.\n\nIOD allows specifying values of JSON hashes (objects), or any valid JSON values for that matter. Like in the case of array, you can omit the \"!json\" or \"!j\" part because \"{\" is regarded as the marker for a hash.\n\n[code language=\"text\"]\nhash=!json {&amp;quot;father&amp;quot;:50, &amp;quot;mother&amp;quot;:45}\nalso hash={&amp;quot;father&amp;quot;:50, &amp;quot;mother&amp;quot;:45}\n[/code]\n\nLet's see this in action using <a href=\"https://metacpan.org/pod/fatten\">fatten</a>, a CLI program that uses Perinci::CmdLine. I have the following <tt>~/.config/fatten.conf</tt>:\n\n[code language=\"text\"]\n[profile=parse-id-phone]\ntrace_method=require\noverwrite=1\ninclude=Parse::PhoneNumber::ID\ninclude=Perinci::CmdLine::Lite\n[/code]\n\n<b>fatten</b> has a feature that, instead of using subcommands as section names, it looks for script name in the section, for convenience.\n\n<b>parse-id-phone</b>, in turn, is another Perinci::CmdLine-based script:\n\n[code language=\"perl\"]\nuse Perinci::CmdLine::Any -prefer_lite=&amp;gt;1;\n\nPerinci::CmdLine::Any-&amp;gt;new(\n    url =&amp;gt; &amp;quot;/Parse/PhoneNumber/ID/parse_id_phone&amp;quot;,\n)-&amp;gt;run;\n[/code]\n\nSince fatten detects modules used through trapping the require() statement, modules like Perinci::CmdLine::Lite (the backend used by Perinci::CmdLine::Any) and Parse::PhoneNumber::ID (the backend module for the script itself) fail to be detected and we need to tell fatten via the --include option (or <tt>include</tt> parameter in the config file). Thus, when we run fatten to fatpack the parse-id-phone script:\n\n[code language=\"text\"]\n% fatten --input-file `which parse-id-phone` --output-file /tmp/parse-id-phone --debug\nfatten: Created tempdir /tmp/KYa79g6Qan\nfatten: Will be targetting perl bless( {original =&amp;gt; &amp;quot;v5.18.4&amp;quot;,qv =&amp;gt; 1,version =&amp;gt; [5,18,4]}, 'version' )\nfatten: Tracing dependencies ...\nfatten:   Tracing with method 'require' ...\nERROR 400: Missing required argument(s): text\nfatten: Building lib/ ...\nfatten:   Adding module: Perinci::CmdLine::Any (traced)\nfatten:   Adding module: Perinci::CmdLine::Lite (traced)\nfatten:   Adding module: Log::Any (traced)\nfatten:   Adding module: Log::Any::Manager (traced)\nfatten:   Adding module: Log::Any::Adapter::Util (traced)\nfatten:   Adding module: Log::Any::Adapter::Null (traced)\nfatten:   Adding module: Log::Any::Adapter::Base (traced)\nfatten:   Adding module: Log::Any::Proxy (traced)\nfatten:   Adding module: Mo (traced)\nfatten:   Adding module: Mo::build (traced)\nfatten:   Adding module: Mo::default (traced)\nfatten:   Adding module: experimental (traced)\nfatten:   Adding module: Perinci::CmdLine::Base (traced)\nfatten:   Adding module: Perinci::Access::Lite (traced)\nfatten:   Adding module: Perinci::AccessUtil (traced)\nfatten:   Adding module: Perinci::CmdLine::Util::Config (traced)\nfatten:   Adding module: Parse::PhoneNumber::ID (traced)\nfatten:   Adding module: Function::Fallback::CoreOrPP (traced)\nfatten:   Adding module: Perinci::Sub::Util (traced)\nfatten:   Adding module: Perinci::Sub::Normalize (traced)\nfatten:   Adding module: Sah::Schema::Rinci (traced)\nfatten:   Adding module: Data::Sah::Normalize (traced)\nfatten:   Adding module: Perinci::Object (traced)\nfatten:   Adding module: Perinci::Object::Function (traced)\nfatten:   Adding module: Perinci::Object::Metadata (traced)\nfatten:   Adding module: String::Trim::More (traced)\nfatten:   Adding module: Config::IOD::Reader (traced)\nfatten:   Adding module: Perinci::Sub::GetArgs::Argv (traced)\nfatten:   Adding module: Getopt::Long::Util (traced)\nfatten:   Adding module: Perinci::Sub::GetArgs::Array (traced)\nfatten:   Adding module: Data::Sah::Util::Type (traced)\nfatten:   Adding module: Parse::PhoneNumber::ID (included)\nfatten:   Adding module: Perinci::CmdLine::Lite (included)\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/CmdLine/Any.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/CmdLine/Any.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/CmdLine/Lite.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/CmdLine/Lite.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Log/Any.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Log/Any.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Log/Any/Manager.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Log/Any/Manager.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Log/Any/Adapter/Util.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Log/Any/Adapter/Util.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Log/Any/Adapter/Null.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Log/Any/Adapter/Null.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Log/Any/Adapter/Base.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Log/Any/Adapter/Base.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Log/Any/Proxy.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Log/Any/Proxy.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Mo.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Mo.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Mo/build.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Mo/build.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Mo/default.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Mo/default.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/experimental.pm --&amp;gt; /tmp/KYa79g6Qan/lib/experimental.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/CmdLine/Base.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/CmdLine/Base.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/Access/Lite.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/Access/Lite.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/AccessUtil.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/AccessUtil.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/CmdLine/Util/Config.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/CmdLine/Util/Config.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Parse/PhoneNumber/ID.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Parse/PhoneNumber/ID.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Function/Fallback/CoreOrPP.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Function/Fallback/CoreOrPP.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/Sub/Util.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/Sub/Util.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/Sub/Normalize.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/Sub/Normalize.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Sah/Schema/Rinci.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Sah/Schema/Rinci.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Data/Sah/Normalize.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Data/Sah/Normalize.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/Object.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/Object.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/Object/Function.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/Object/Function.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/Object/Metadata.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/Object/Metadata.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/String/Trim/More.pm --&amp;gt; /tmp/KYa79g6Qan/lib/String/Trim/More.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Config/IOD/Reader.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Config/IOD/Reader.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/Sub/GetArgs/Argv.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/Sub/GetArgs/Argv.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Getopt/Long/Util.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Getopt/Long/Util.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Perinci/Sub/GetArgs/Array.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Perinci/Sub/GetArgs/Array.pm ...\nfatten:   Copying /home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Data/Sah/Util/Type.pm --&amp;gt; /tmp/KYa79g6Qan/lib/Data/Sah/Util/Type.pm ...\nfatten:   Added 31 files (340.6 KB)\nfatten: Packing ...\nfatten:   Produced /tmp/parse-id-phone (372.7 KB)\nfatten: Deleting tempdir /tmp/KYa79g6Qan ...\n[/code]\n\n",
+         "post_date" : "20150301T00:00:02",
+         "post_date_gmt" : "20150228T17:00:02",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "164",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:46:44",
+         "post_modified_gmt" : "20160901T01:46:44",
+         "post_name" : "pericmd-027-configuration-file-support-2",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 027: Configuration file support (2)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2E",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "460",
+               "key" : "email_notification",
+               "value" : "1425061753"
+            },
+            {
+               "id" : "457",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "454",
+               "key" : "jabber_published",
+               "value" : "1425061753"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=183",
+         "link" : "https://perlancar.wordpress.com/2015/02/28/things-that-are-so-last-decadecentury-and-annoying-that-i-encountered-recently-1/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "1) When you download a torrent and inside you see 50 files named *.rar, *.r00, *.r01 and so on.\n\n2) When you open a website and it has a self-glorifying video (like Flash) intro that autoplays and a link you have to click to go to the \"main page\". Ironically, PayPal is now showing exactly this. Of course, in the 00's era you also had to wait up to a minute until that percentage of loading video reaches 100%.\n\n3) When you run CPAN client for the first time and get asked about which mirror host would you like use.\n\nOkay, okay, I know. This is just a cheap shot at how old Perl is :-) While we're at it, let's enumerate other things that are old and annoying in Perl:\n\n<h3>Old and annoying</h3>\n\n1) Context. Does anybody agree that this is more trouble than it's worth? The fact that no other languages steal this feature seem to reinforce the feeling that context probably sucks. But this is such a core feature of Perl that we'll just have to live with it until eternity.\n \n2) No builtin OO. Okay, not my personal rant as I think Perl's OO is fine as it is. But everybody is whining that \"OO support in Perl 5 is {not builtin, bolted on, half-assed, abysmal}, wwweeh!\" so I'll just list it here and be done with it.\n\n3) no builtin clone() function. Data::Clone is not core, Clone::PP is not core, Clone is not core, Storable is core but ... JSON is too simplistic and not core. YAML is not core. Data::Dumper is, well... Everything is slowish to superslow to hyperslow. Sereal is not core. Perhaps at least make Sereal core?\n\n4) JSON is not core? Does this send a message to the world that we don't care about \"the Web\"? Funnily, JSON::PP is core. So perhaps JSON support is core. -ish. Frankly, I don't understand this situation.\n\n5) As already mentioned, the default CPAN client. Many Perl-related websites are old but still perfectly functional; they just don't utilize some niceties like for example AJAX for voting or such that you have to press Submit and load a new page just to vote. And they ooze the old look. The default CPAN client is similar in vein: It retains default settings that are no longer relevant or annoying so that they always remind you of the old era. Things like prompting you with too many questions at the beginning of use or being too verbose with messages by default, which remind you of an era when platforms vary wildly (compare the plethora of incompatible Unices/weird architectures to the today's world of mostly Windows+Linux+OSX) or when download speed is so slow that you have to prompt/update for every file being downloaded.\n\n6) Too many special <strike>rules</strike> exceptions. Consistency and simplicity are good and more valued nowadays when we don't have time for anything. This is the age of distraction and short attention span. Who has time to learn all the quirks and exceptions when new languages, frameworks, and shiny new things come out every week? (XXX Examples.)\n\nThis list is far from complete and I'm sure to update it. But let's also list things in Perl that are old and also rock!\n\n<h3>Old but rock</h3>\n\n1) everything is a manpage. Man rocks, man! I think alternatives like Ruby's ri or <a href=\"http://bropages.org/\">bropages</a> are just inferior bastard children.\n\n2) sigils. Sigil rocks, man. They aid readability. Unfortunately we have too many of them (and even more in Perl 6). I think \"one sigil $ for variables\" is enough. Long live the shell!\n\n<h3>Like Perl even today, this is a post in progress</h3>\n\nAlso, like Perl (or some of its features, to be more exact), I'm too so last {century, decade}. Whether I'm annoying or not is left as an exercise to people around me.\n\nI long for the days when things like tweeting or smartphone is considered so last century and I look to them with great nostalgic feeling. Probably when I'm playing with my grandchild.\n ",
+         "post_date" : "20150228T01:29:13",
+         "post_date_gmt" : "20150227T18:29:13",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "183",
+         "post_mime_type" : "",
+         "post_modified" : "20150322T22:55:45",
+         "post_modified_gmt" : "20150322T15:55:45",
+         "post_name" : "things-that-are-so-last-decadecentury-and-annoying-that-i-encountered-recently-1",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Things that are so last {decade,century} and annoying that I encountered recently (1)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2X",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            },
+            {
+               "count" : "1",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "random",
+               "parent" : "0",
+               "slug" : "random",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "30",
+               "term_taxonomy_id" : "5"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "450",
+               "key" : "email_notification",
+               "value" : "1425056823"
+            },
+            {
+               "id" : "423",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "445",
+               "key" : "jabber_published",
+               "value" : "1425056822"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=162",
+         "link" : "https://perlancar.wordpress.com/2015/02/28/pericmd-026-configuration-file-support/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Perinci::CmdLine supports reading configuration files. I had planned for an abstract configuration system, something like <a href=\"https://metacpan.org/pod/Config::Any\">Config::Any but <a href=\"https://metacpan.org/pod/IOD\">IOD</a>-based, but as that is not ready yet and I needeed config file support immediately, I implemented the bare essentials.\n\nConfiguration is basically a way to use files to supply values for function arguments, just like command-line options which is also a way to use command-line to supply values for function arguments. It is useful for cases where using command-line options is cumbersome (e.g. the values are long/many) or insecure (e.g. supplying password).\n\nConfiguration is searched either in the user's home directory (<tt>~/.config</tt> or <tt>~</tt>) or global directory <tt>/etc</tt> (I'm not sure about the Windows equivalent for <tt>/etc</tt>, any input? So far I've only used <tt>File::HomeDir-&gt;my_home</tt> on Windows). Configuration file name is <i>program_name</i> + <tt>.conf</tt>. The format of configuration file is IOD, which is basically INI with some extra features (it's more INI-compatible than other formats like TOML).\n\nThe configuration section maps to subcommand (if program does not have subcommands, just put the parameters outside any section). Configuration parameter maps to function argument name (without any translation to command-line options, so <tt>foo_bar</tt> function argument is specified as <tt>foo_bar</tt> instead of <tt>foo-bar</tt> or <tt>--foo-bar</tt>).\n\nThere is a concept of \"profiles\", which lets you keep multiple sets of values in a single file by using section. You just need to add \" profile=PROFILENAME\" to any configuration section to make a configuration belong to a certain profile.\n\nParameters outside any section will be applied to all subcommands and profiles. \n\nLet's see an example. Program <tt>myprog</tt>:\n\n[code language=\"perl\"]\nour %SPEC;\n$SPEC{myfunc} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        user =&gt; {schema=&gt;'str*', req=&gt;1},\n        pass =&gt; {schema=&gt;'str*', req=&gt;1},\n    },\n};\nsub myfunc {\n    my %args = @_;\n    if ($args{user} eq 'ujang' &amp;&amp; $args{pass} eq 'alu') {\n        [200, &quot;OK&quot;, &quot;nasi goreng&quot;];\n    } elsif ($args{user} eq 'nyai' &amp;&amp; $args{pass} eq 'nyiru') {\n        [200, &quot;OK&quot;, &quot;sayur asem&quot;];\n    } else {\n        [401, &quot;Wrong password&quot;];\n    }\n}\n\nuse Perinci::CmdLine::Any;\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; '/main/myfunc',\n)-&gt;run;\n[/code]\n\nIf we run this program:\n\n[code language=\"text\"]\n% ./myprog\nERROR 400: Missing required argument(s): pass, user\n[/code]\n\nWe can of course supply the <tt>user</tt> and <tt>pass</tt> arguments via command-line options (--user and --pass), but passing passwords over the command-line is unsafe due to <tt>ps ax</tt> and all. So let's put them in a configuration file. In <tt>~/myprog.conf</tt>:\n\n[code language=\"text\"]\nuser=ujang\npass=alu\n[/code]\n\nThen when we run the program again:\n\n[code language=\"text\"]\n% ./myprog\nnasi goreng\n[/code]\n\nLet's put in several profiles  in the config file:\n\n[code language=\"text\"]\n[profile=u1]\nuser=ujang\npass=alu\n\n[profile=u2]\nuser=nyai\npass=nyiru\n[/code]\n\nWhen we run the program:\n\n[code language=\"text\"]\n% ./myprog --config-profile u1 ;# we pick ujang\nnasi goreng\n% ./myprog --config-profile u2 ;# we pick nyai\nsayur asem\n[/code]\n\nYou can override the value of function arguments from command-line, since the command-line has higher precedence:\n\n[code language=\"text\"]\n% ./myprog --config-profile u1 --pass foo\nERROR 401: Wrong password\n[/code]\n\nYou can also customize the location of config file via <tt>--config-path</tt> or disable searching of config file via <tt>--no-config</tt>.\n",
+         "post_date" : "20150228T00:00:25",
+         "post_date_gmt" : "20150227T17:00:25",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "162",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:46:59",
+         "post_modified_gmt" : "20160901T01:46:59",
+         "post_name" : "pericmd-026-configuration-file-support",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 026: Configuration file support",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2C",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "431",
+               "key" : "email_notification",
+               "value" : "1424970659"
+            },
+            {
+               "id" : "419",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "426",
+               "key" : "jabber_published",
+               "value" : "1424970658"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=152",
+         "link" : "https://perlancar.wordpress.com/2015/02/27/pericmd-025-dynamic-list-of-subcommands/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In one of my applications using Perinci::CmdLine, we have hundreds of subcommands. The subcommands are taken from all the functions in all of the API modules. Instead of updating the CLI application script and adding the subcommand manually to the <tt>subcommands</tt> attribute hash in the Perinci::CmdLine constructor, I decided that the framework should support dynamic list of subcommands.\n\nSo instead of a hash, Perinci::CmdLine also accepts <tt>subcommands</tt> attribute as a coderef, which is expected to return a hash. An example:\n\n[code language=\"perl\"]\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n\n$SPEC{':package'} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Demonstrates dynamic subcommands',\n};\n\n$SPEC{noop} = {\n    v =&gt; 1.1,\n    result_naked =&gt; 1,\n};\nsub noop {}\n\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; '/main/',\n    subcommands =&gt; sub {\n        my %subcommands = map { (&quot;subcmd$_&quot; =&gt; {url=&gt;&quot;/main/noop&quot;}) } &quot;01&quot;..&quot;50&quot;;\n        return \\%subcommands;\n    },\n)-&gt;run;\n[/code]\n\nThe above code will generate 50 subcommands programmatically (although admittedly, in the above contrived example one might as well generate the hash and assign it to the <tt>subcommands</tt> attribute directly).\n\nApplications for this feature include: a remote client which fetches the list of API functions (or modules + functions) dynamically upon run, so the client does not need to be updated whenever there is a new API function on the server. ",
+         "post_date" : "20150227T00:00:29",
+         "post_date_gmt" : "20150226T17:00:29",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "152",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:47:12",
+         "post_modified_gmt" : "20160901T01:47:12",
+         "post_name" : "pericmd-025-dynamic-list-of-subcommands",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 025: Dynamic list of subcommands",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2s",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "418",
+               "key" : "email_notification",
+               "value" : "1424883698"
+            },
+            {
+               "id" : "409",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "413",
+               "key" : "jabber_published",
+               "value" : "1424883668"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=155",
+         "link" : "https://perlancar.wordpress.com/2015/02/26/pericmd-024-getoptlongsubcommand/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Let's take a look at another module in this post. If you are familiar with Getopt::Long but want to support subcommands and do not want (or have the time) to invest too much time on Perinci::CmdLine, you can try another one of my modules instead: <a href=\"https://metacpan.org/pod/Getopt::Long::Subcommand\">Getopt::Long::Subcommand</a>. That module is created precisely for the said situation.\n\nLike Getopt::Long, it also has the GetOptions() function. But the interface is rather different, instead of an options specification hash, you supply a hash of program specification, containing keys like <tt>summary</tt>, <tt>description</tt>, and <tt><b>options</b></tt> (which is the options specification hash).\n\nThe options specification is, like in Getopt::Long, also a hash with keys like 'foo=s', but the value is also different. Instead of just a reference to a variable or a handler coderef, for the value you supply another hash of specification, containing keys like <tt>summary</tt>, and <tt>handler</tt>. For the handler you supply the coderef or reference to value.\n\nThe program specification can also contain the key <tt><b>subcommands</b></tt> which is where you put the subcommands. The value is a hash of subcommand names and specification. A subcommand specification is like program specification, and can also contain another key <tt>subcommands</tt> for nested subcommands.\n\nTaken from the module's Synopsis:\n\n[code language=\"perl\"]\nuse Getopt::Long::Subcommand; # exports GetOptions\n\nmy %opts;\nmy $res = GetOptions(\n\n    summary =&gt; 'Summary about your program ...',\n\n    # common options recognized by all subcommands\n    options =&gt; {\n        'help|h|?' =&gt; {\n            summary =&gt; 'Display help message',\n            handler =&gt; sub {\n                my ($cb, $val, $res) = @_;\n                if ($res-&gt;{subcommand}) {\n                    say &quot;Help message for $res-&gt;{subcommand} ...&quot;;\n                } else {\n                    say &quot;General help message ...&quot;;\n                }\n                exit 0;\n            },\n        'version|v' =&gt; {\n            summary =&gt; 'Display program version',\n            handler =&gt; sub {\n                say &quot;Program version $main::VERSION&quot;;\n                exit 0;\n            },\n        'verbose' =&gt; {\n            handler =&gt; \\$opts{verbose},\n        },\n    },\n\n    # list your subcommands here\n    subcommands =&gt; {\n        subcmd1 =&gt; {\n            summary =&gt; 'The first subcommand',\n            # subcommand-specific options\n            options =&gt; {\n                'foo=i' =&gt; {\n                    handler =&gt; \\$opts{foo},\n                },\n            },\n        },\n        subcmd1 =&gt; {\n            summary =&gt; 'The second subcommand',\n            options =&gt; {\n                'bar=s' =&gt; \\$opts{bar},\n                'baz'   =&gt; \\$opts{baz},\n            },\n        },\n    },\n\n    # tell how to complete option value and arguments. see\n    # Getopt::Long::Complete for more details, the arguments are the same\n    # except there is an additional 'subcommand' that gives the subcommand\n    # name.\n    completion =&gt; sub {\n        my %args = @_;\n        ...\n    },\n\n);\ndie &quot;GetOptions failed!\\n&quot; unless $res-&gt;{success};\nsay &quot;Running subcommand $res-&gt;{subcommand} ...&quot;;\n[/code]\n\nLike in Perinci::CmdLine (and also Getopt::Long::Descriptive), you put the summary text for program, each subcommand, and each option. This allows the module to generate a nice help message for you automatically (which, unfortunately, at the time of this writing is not yet implemented).\n\nAlso like Perinci::CmdLine and Getopt::Long::Complete, there is completion support.\n\nUnlike with Perinci::CmdLine, you write your program \"conventionally\", like you would with Getopt::Long. There is no concept of Rinci metadata or Riap URL.\n\nAlso unfortunately, at the time of this writing there is no \"real-world\" application written using this module, because I write most of my CLI apps using Perinci::CmdLine. Aside from the example in Synopsis, there is a demo script <a href=\"https://metacpan.org/pod/distribution/Getopt-Long-Subcommand/bin/demo-getopt-long-subcommand\">demo-getopt-long-subcommand</a> which shows the features as well as tab completion, but apart from that doesn't do anything useful.\n",
+         "post_date" : "20150226T00:00:42",
+         "post_date_gmt" : "20150225T17:00:42",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "155",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:47:26",
+         "post_modified_gmt" : "20160901T01:47:26",
+         "post_name" : "pericmd-024-getoptlongsubcommand",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 024: Getopt::Long::Subcommand",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2v",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "403",
+               "key" : "email_notification",
+               "value" : "1424876274"
+            },
+            {
+               "id" : "398",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "395",
+               "key" : "jabber_published",
+               "value" : "1424876273"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=150",
+         "link" : "https://perlancar.wordpress.com/2015/02/25/pericmd-023-subcommands/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Complex/large CLI applications usually have subcommands, for example: git, svn, dzil. This lets the program be organized more neatly into separate categories. Each subcommand has their own set of options, aside from some common options. Some CLI applications even have \"nested subcommands\", where a subcommand will have its own subsubcommand, and so on.\n\nPerinci::CmdLine supports subcommands, but it currently does not support nested subcommands (I very rarely see CLI apps that have nested subcommands though).\n\nTo specify subcommands, you set the <tt>subcommands</tt> attribute to a hash of subcommand names and subcommand specs. Each subcommand spec is in turn a hash and must contain at least <tt>url</tt> (function name) and can contain <tt>summary</tt>, <tt>description</tt>, and a few other stuffs.\n\nHere's a full example taken from <a href=\"https://metacpan.org/pod/pause\">pause</a>, a CLI app distributed with <a href=\"https://metacpan.org/pod/WWW::PAUSE::Simple\">WWW::PAUSE::Simple</a>:\n\n[code language=\"perl\"]\nuse 5.010;\nuse strict;\nuse warnings;\n\nuse Perinci::CmdLine::Any;\n\nmy $prefix = '/WWW/PAUSE/Simple/';\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; $prefix,\n    subcommands =&gt; {\n        upload     =&gt; { url =&gt; &quot;${prefix}upload_file&quot; },\n        list       =&gt; { url =&gt; &quot;${prefix}list_files&quot; },\n        ls         =&gt; {\n            url =&gt; &quot;${prefix}list_files&quot;,\n            summary =&gt; 'Alias for list',\n        },\n        delete     =&gt; { url =&gt; &quot;${prefix}delete_files&quot; },\n        rm         =&gt; {\n            url =&gt; &quot;${prefix}delete_files&quot;,\n            summary =&gt; 'Alias for delete',\n        },\n        undelete   =&gt; { url =&gt; &quot;${prefix}undelete_files&quot; },\n        reindex    =&gt; { url =&gt; &quot;${prefix}reindex_files&quot; },\n        password   =&gt; { url =&gt; &quot;${prefix}set_password&quot; },\n        #'account-info' =&gt; { url =&gt; &quot;${prefix}set_account_info&quot; },\n    },\n    log =&gt; 1,\n)-&gt;run;\n[/code]\n\nThe CLI app defines 6 subcommands (upload, list, delete, undelete, reindex, password) along with two aliases (ls for list, and rm for delete).\n\nLet's see the help message for this app:\n\n[code language=\"text\"]\n% pause -h\npause - An API for PAUSE\n\nUsage:\n  pause --help (or -h, -?)\n  pause --subcommands\n  pause --version (or -v)\n  pause [options]\nSubcommands:\n  delete\n  list\n  ls\n  password\n  reindex\n  rm\n  undelete\n  upload\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --debug             Set log level to debug\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --log-level=s       Set log level\n  --naked-res         When outputing as JSON, strip result envelope\n  --no-config         Do not use any configuration file\n  --quiet             Set log level to quiet\n  --subcommands       List available subcommands\n  --trace             Set log level to trace\n  --verbose           Set log level to info\n  --version, -v       \n[/code]\n\nThe summary for the application (\"An API for PAUSE\") is taken from this package variable in WWW::PAUSE::Simple:\n\n[code language=\"perl\" highlight=\"3\"]\n$SPEC{':package'} = {\n    v =&gt; 1.1,\n    summary =&gt; 'An API for PAUSE',\n};\n[/code]\n\nThis is referred to from the <tt>url</tt> attribute of the Perinci::CmdLine::Any object, which is set to <tt>/WWW/PAUSE/Simple/</tt> (this refers to what is called the package entity, instead of function entity, and the above <tt>$SPEC{':package'}</tt> hash supplies the Rinci metadata for the package.\n\nAs explained before, each subcommand's <tt>url</tt> refers to a function entity. For example the <tt>delete</tt> subcommand has its <tt>url</tt> set to <tt>/WWW/PAUSE/Simple/delete_files</tt>, and we have a subroutine <tt>delete_files</tt> in <tt>WWW::PAUSE::Simple</tt>, along with its metadata:\n\n[code language=\"perl\"]\n$SPEC{delete_files} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Delete files',\n    description =&gt; &lt;&lt;'_',\n\nWhen a file is deleted, it is not immediately deleted but has\nscheduled_for_deletion status for 72 hours, then deleted. During that time, the\nfile can be undeleted.\n\n_\n    args =&gt; {\n        %common_args,\n        %file_arg,\n    },\n};\n[/code]\n\nInformation in this metadata is used when we ask for help message for this subcommand:\n\n[code language=\"text\"]\n% pause delete -h\npause delete - Delete files\n\nUsage:\n  pause delete --help (or -h, -?)\n  pause delete --version (or -v)\n  pause delete [options] &lt;file&gt; ...\n\nWhen a file is deleted, it is not immediately deleted but has\nscheduled_for_deletion status for 72 hours, then deleted. During that time, the\nfile can be undeleted.\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --debug             Set log level to debug\n  --file-json=s       File name/wildcard pattern (JSON-encoded)\n  --file=s@*          File name/wildcard pattern (=arg[0-])\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --log-level=s       Set log level\n  --naked-res         When outputing as JSON, strip result envelope\n  --no-config         Do not use any configuration file\n  --password=s*       PAUSE password\n  --quiet             Set log level to quiet\n  --trace             Set log level to trace\n  --username=s*       PAUSE ID\n  --verbose           Set log level to info\n  --version, -v       \n[/code]\n\nThe same will be shown for <tt>rm</tt>:\n\n[code language=\"text\"]\n% pause rm --help\npause rm - Alias for delete\n\nUsage:\n  pause rm --help (or -h, -?)\n  pause rm --version (or -v)\n  pause rm [options] &lt;file&gt; ...\n\nWhen a file is deleted, it is not immediately deleted but has\nscheduled_for_deletion status for 72 hours, then deleted. During that time, the\nfile can be undeleted.\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --debug             Set log level to debug\n  --file-json=s       File name/wildcard pattern (JSON-encoded)\n  --file=s@*          File name/wildcard pattern (=arg[0-])\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --log-level=s       Set log level\n  --naked-res         When outputing as JSON, strip result envelope\n  --no-config         Do not use any configuration file\n  --password=s*       PAUSE password\n  --quiet             Set log level to quiet\n  --trace             Set log level to trace\n  --username=s*       PAUSE ID\n  --verbose           Set log level to info\n  --version, -v       \n[/code]\n\nSubcommand name is taken from the first (non-option) argument. Common options (like --format, --help, --version, etc) will be parsed before getting subcommand name, so you can also say <tt>pause --help upload</tt> aside from <tt>pause upload --help</tt>.\n\nUnknown subcommand will of course result in an error:\n\n[code language=\"text\"]\n% pause foo\nERROR 500: Unknown subcommand: foo\n[/code]\n\nSubcommand must always be specified, unless when we define a default subcommand (this will be covered in a next blog post).\n",
+         "post_date" : "20150225T21:57:53",
+         "post_date_gmt" : "20150225T14:57:53",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "150",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:47:39",
+         "post_modified_gmt" : "20160901T01:47:39",
+         "post_name" : "pericmd-023-subcommands",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 023: Subcommands",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-2q",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

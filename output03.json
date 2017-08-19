@@ -1,0 +1,770 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1904",
+               "key" : "email_notification",
+               "value" : "1481708334"
+            },
+            {
+               "id" : "1899",
+               "key" : "jabber_published",
+               "value" : "1481708332"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1547",
+         "link" : "https://perlancar.wordpress.com/2016/12/14/getopt-modules-14-moosexgetopt/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this mini-article series.</b> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <tt>Getopt::*</tt> namespace). <a href=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</a>.\n\nAfter you parse command-line options, you usually end up with a hash of option names and values (or something similar). These options are then passed to other parts, e.g. to function as arguments or to object constructors. Some modules exist to let you map directly between command-line options and these other entities. I'll review one today, <a href=\"https://metacpan.org/pod/MooseX::Getopt\">MooseX::Getopt</a>, and get to a couple others in the following days.\n\nMooseX::Getopt is a role to let you set your <a href=\"https://metacpan.org/pod/Moose\">Moose</a> object's attributes from command-line options. It uses <a href=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</a> (which in turn uses <a href=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</a>) as the options parser, but you don't need to explicitly specify an options specification: the role will instead figure out the names of options and various rules for you as much as possible.\n\nIt's first released in 2007 by the original author of Moose, Stevan Little (<a href=\"https://metacpan.org/author/STEVAN\">STEVAN</a>), not too long after Moose is released in 2006. Over the years, some people have maintained it and since 2012 Karen Etheridge (<a href=\"https://metacpan.org/author/ETHER\">ETHER</a>) is the primary maintainer. Karen currently also maintains a lot of other modules in the Moose ecosystem.\n\nAbout 94 CPAN distributions depend on this module, making it possibly the most popular way to quickly create CLI script from a (Moose-based) class. Meanwhile, for creating CLI scripts with subcommands, <a href=\"https://metacpan.org/pod/App::Cmd\">App::Cmd</a> (together with <a href=\"https://metacpan.org/pod/MooseX::App::Cmd\">MooseX::App::Cmd</a>) looks to be the most popular way.\n\nTo use MooseX::Getopt, you include this role in your class. Then, instead of using <tt>new</tt> to construct your object, you use <tt>new_with_options</tt> instead.\n\n[sourcecode language=\"perl\"]\npackage My::App;\nuse Moose;\n\nwith 'MooseX::Getopt';\n\nhas 'foo' =&gt; (is =&gt; 'rw', isa =&gt; 'Str', required =&gt; 1);\nhas 'bar' =&gt; (is =&gt; 'rw', isa =&gt; 'Int', default =&gt; 10);\nhas 'baz' =&gt; (is =&gt; 'rw', isa =&gt; 'ArrayRef', documentation =&gt; 'one or more files');[/sourcecode]\n\nYour CLI script is simply something like:\n\n[sourcecode language=\"perl\"]\n#!perl\nuse My::App;\nmy $app = My::App-&gt;new_with_options;\n# perhaps do something with the $app[/sourcecode]\n\nWhen you call your CLI script:\n<pre class=\"fixed_width_section\">% myapp --foo blah --baz a --baz b\n</pre>\nyour object will have its <tt>foo</tt> set to <tt>\"blah\"</tt>, <tt>bar</tt> set to the default <tt>10</tt>, and <tt>baz</tt> set to <tt>[\"a\", \"b\"]</tt>.\n\nIf you do not specify option for required attributes (like not specifying <tt>--foo</tt>), or specify special option <tt>--usage</tt> or <tt>--help</tt>, then an automatically generated usage message will be printed. The usage message will use the attributes' <tt>documentation</tt> option:\n<pre class=\"fixed_width_section\">% myapp -h\nusage: myapp [-?h] [long options...]\n        -h -? --usage --help  Prints this usage information.\n        --foo STR\n        --bar STR\n        --baz STR...          one or more files\n</pre>\nA <tt>--version</tt> handler is also provided:\n<pre class=\"fixed_width_section\">% myapp --version\n/home/u1/test/moosex-getopt/myapp\n(Getopt::Long::GetOptions version 2.48; Perl version 5.24.0)\n</pre>\nSome types like <tt>Str</tt>, <tt>Float</tt>, and <tt>Int</tt> can be mapped easily into Getopt::Long option specification dest type, respectively <tt>--opt=s</tt>, <tt>--opt=f</tt>, and <tt>--opt=i</tt>. Arrayrefs and hashrefs are also mapped to <tt>=s@</tt> and <tt>=s%</tt>. For other types, you can provide a mapping between Moose type and Getopt::Long specification (like mapping between <tt>ArrayOfInts</tt> with <tt>=i@</tt> shown in the documentation). Since Moose also supports coercion, this also makes it possible to do something like:\n<pre class=\"fixed_width_section\">% myapp --since '2016-01-01'\n</pre>\nand your object's attribute will become a <a href=\"https://metacpan.org/pod/DateTime\">DateTime</a> object.\n\nIf you want config file support, there's a separate role <a href=\"https://metacpan.org/pod/MooseX::ConfigFromFile\">MooseX::ConfigFromFile</a>\nor <a href=\"https://metacpan.org/pod/MooseX::SimpleConfig\">MooseX::SimpleConfig</a>. The latter combines MooseX::ConfigFromFile with <a href=\"https://metacpan.org/pod/Config::Any\">Config::Any</a> so you can read any configuration format that Config::Any supports (which includes INI, JSON, YAML, Apache-style, or Perl code). MooseX::Getopt supports these kinds of roles so all you have to do is include them into your class, then you can do:\n<pre class=\"fixed_width_section\">% myapp -h --configfile /etc/myapp.yaml --other-opts=val\n</pre>\nDefault location of config files can also be set. And you can control the mapping of attributes to options, for example there's a variant <a href=\"https://metacpan.org/pod/MooseX::Getopt::Strict\">MooseX::Getopt::Strict</a> which only creates command-line options for object attributes that have the \"Getopt\" attribute. The default is to provide all non-private attributes with their options.\n\nIn short, this module is DRY, DWIM, simple to use so it's hard to complain about. Of course, normally I wouldn't use a startup-heavy Moose object for a CLI script but choose a more lightweight object system or don't use objects at all. And my nitpick is that it doesn't translate underscore to dash, e.g. your attribute <tt>foo_bar</tt> becomes <tt>--foo_bar</tt> instead of <tt>--foo-bar</tt> but this is a matter of personal preference.",
+         "post_date" : "20161214T16:38:49",
+         "post_date_gmt" : "20161214T09:38:49",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1547",
+         "post_mime_type" : "",
+         "post_modified" : "20161214T17:11:30",
+         "post_modified_gmt" : "20161214T10:11:30",
+         "post_name" : "getopt-modules-14-moosexgetopt",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 14: MooseX::Getopt",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oX",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1896",
+               "key" : "email_notification",
+               "value" : "1481625950"
+            },
+            {
+               "id" : "1890",
+               "key" : "jabber_published",
+               "value" : "1481625947"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1544",
+         "link" : "https://perlancar.wordpress.com/2016/12/13/getopt-modules-13-appoptions/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<B>About this mini-article series.</B> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <TT>Getopt::*</TT> namespace). <A HREF=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</A>. \n<p>In the previous article, I reviewed <A HREF=\"https://metacpan.org/pod/Getopt::ArgvFile\">Getopt::ArgvFile</A> which enables you to read options from config file. There&#039;s another module which used to be my favorite when it comes to reading options from command-line as well as config files and environment: <A HREF=\"https://metacpan.org/pod/App::Options\">App::Options</A>. \n<p>App::Options is a module by Stephen Adkins (<A HREF=\"https://metacpan.org/author/SPADKINS\">SPADKINS</A>). The first release is in 2004 and the latest release as of this writing is version 1.12 in 2010. Unlike Getopt::ArgvFile which must be combined with <A HREF=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</A>, App::Options does it all alone. \n<p>Modules like App::Options are terribly convenient. You just need one specification of list of options you want to accept and the module will parse the values from various sources, in specific order like you would expect in a typical Unix program. You are then presented with the final result in a hash. In the case of App::Options, the final hash is <TT>%App::options</TT>. \n<p>Here&#039;s an example of how to use App::Options, taken from one of my scripts called <TT>phpbb3-post</TT>: \n<p>[sourcecode language=\"perl\"]\nuse App::Options (\n    option =&gt; {\n        base_url =&gt; { type =&gt; 'string', required =&gt; 1, description =&gt; 'Address of phpBB3 site'},\n        username =&gt; { type =&gt; 'string', required =&gt; 1, description =&gt; 'Username to login to phpBB3 site'},\n        password =&gt; { type =&gt; 'string', required =&gt; 1, description =&gt; 'Password to login to phpBB3 site'},\n\n        forum_id =&gt; { type =&gt; 'int', required =&gt; 1, },\n        topic_id =&gt; { type =&gt; 'int', required =&gt; 0, },\n        delay =&gt; { type =&gt; 'int', required =&gt; 0, default =&gt; 4, description =&gt; 'Number of seconds to wait between posting'},\n        bbcode =&gt; { type =&gt; 'bool', required =&gt; 0, default =&gt; 0, description =&gt; 'Whether to interpret BBCode'},\n        log_level =&gt; { type =&gt; 'string', required =&gt; 0, default =&gt; 'DEBUG' },\n        obfuscate_link =&gt; { type =&gt; 'bool', required =&gt; 0, default =&gt; 0, },\n    },\n);[/sourcecode]\n\nIf you run the script: \n<p><PRE CLASS=\"fixed_width_section\">% phpbb3-post --help\nError: &quot;base_url&quot; is a required option but is not defined\nError: &quot;forum_id&quot; is a required option but is not defined\nError: &quot;password&quot; is a required option but is not defined\nError: &quot;username&quot; is a required option but is not defined\nUsage: phpbb3-post [options] [args]\n--help                             print this message (also -?)\n--base_url=&lt;value&gt;                 [undef] (string) Address of phpBB3 site\n--bbcode=&lt;value&gt;                   [0] (bool) Whether to interpret BBCode\n--delay=&lt;value&gt;                    [4] (int) Number of seconds to wait between posting\n--forum_id=&lt;value&gt;                 [undef] (int)\n--log_level=&lt;value&gt;                [DEBUG] (string)\n--obfuscate_link=&lt;value&gt;           [0] (bool)\n--password=&lt;value&gt;                 [undef] (string) Password to login to phpBB3 site\n--topic_id=&lt;value&gt;                 [undef] (int)\n--username=&lt;value&gt;                 [undef] (string) Username to login to phpBB3 site\n</PRE>\n\nThe values of the options can be specified directly from the command-line, e.g.: \n<p><PRE CLASS=\"fixed_width_section\">% phpbb3-post --base_url=https://example.com/forum/ --username=foo --password=secret \\\n    --forum_id=10 &lt; post.txt\n</PRE>\n\nor, some of them can be stored in a configuration file (like <TT>password</TT>, which is not apt to be specified via command-line). App::Options searches config files in several locations, from per-user <TT>.app</TT> directory (<TT>$HOME/.app/PROG_NAME.conf</TT>, <TT>$HOME/.app/app.conf</TT>), to program directory (<TT>$PROG_DIR/PROG_NAME.conf</TT>, <TT>$PROG_DIR/app.conf</TT>), until global directory <TT>/etc/app/app.conf</TT>. The location of configuration file can be changed via <TT>--option_file</TT> command-line option or disabled via <TT>--no_option_file</TT>. \n<p>The configuration file is INI-like but with some differences. There is a concept of config profiles to let you store multiple sets of options in a single file which can be selected via <TT>--profile</TT>. For example: \n<p><PRE CLASS=\"fixed_width_section\">[profile=site1]\nsite=https://SITE1/\nusername=USER1\npassword=PASS1\n\n[profile=site2]\nsite=https://SITE2/\nusername=USER2\npassword=PASS2\n</PRE>\n\nHowever, the module has its own peculiarities that over the years finally made me develop my own solution to replace it. \n<p>First of all, it encourages putting the specification in the <TT>use</TT> statement at compile-time phase, which interferes with <TT>perl -c</TT>. You suddenly cannot check your script simply with <TT>perl -c YOURSCRIPT</TT> anymore, as options checking is still done and you&#039;ll still need to provide all the required options or supply a config file. This can be remedied by changing the code from: \n<p>[sourcecode language=\"perl\"]\nuse App::Options (option =&gt; { ... });[/sourcecode]\n\ninto: \n<p>[sourcecode language=\"perl\"]\nuse App::Options ();\nApp::Options-&gt;import(option =&gt; { ... });[/sourcecode]\n\nwhich delays the option parsing to the runtime phase. This is not documented though (instead the documentation seems to be out-of-date and mentions the <TT>init()</TT> method which no longer exists in the code). \n<p>Second, you need to use this syntax to provide an option value on the command-line: \n<p><PRE CLASS=\"fixed_width_section\">--name=VALUE\n</PRE>\n\nThe more common syntax: \n<p><PRE CLASS=\"fixed_width_section\">--name VALUE\n</PRE>\n\nis not accepted and the error message is not clear when you do this. \n<p>The third is more minor and purely personal preference: I prefer the option like <TT>foo_bar</TT> to become <TT>--foo-bar</TT> on the command-line (that is, the underscores become dashes). Or at least support both <TT>--foo-bar</TT> and <TT>--foo_bar</TT>. App::Options only supports the later. \n<p>The fourth: I don&#039;t like the order that App::Options searches configuration files. Since I deploy applications as Perl distributions, I&#039;d much prefer the config files to be in the usual <TT>$HOME/.config/</TT> or <TT>$HOME</TT> or finally <TT>/etc</TT>. I&#039;d hate my applications to become &quot;special&quot; or &quot;different&quot; and need to have their configs put in <TT>$HOME/.app</TT> or <TT>/etc/app</TT>. The ordering is currently fixed and cannot be customized. \n<p>My <A HREF=\"https://metacpan.org/pod/Perinci::CmdLine\">Perinci::CmdLine</A> steals a few ideas from App::Options, mainly the INI-like configuration format and the concept of config profiles. But with all my itches scratched. You can also try <A HREF=\"https://metacpan.org/pod/Smart::Options\">Smart::Options</A> (to be reviewed later) which also supports config files, plus subcommands.",
+         "post_date" : "20161213T17:45:44",
+         "post_date_gmt" : "20161213T10:45:44",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1544",
+         "post_mime_type" : "",
+         "post_modified" : "20161213T17:45:44",
+         "post_modified_gmt" : "20161213T10:45:44",
+         "post_name" : "getopt-modules-13-appoptions",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 13: App::Options",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oU",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1879",
+               "key" : "email_notification",
+               "value" : "1481525120"
+            },
+            {
+               "id" : "1873",
+               "key" : "jabber_published",
+               "value" : "1481525118"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1538",
+         "link" : "https://perlancar.wordpress.com/2016/12/12/getopt-modules-12-getoptargvfile/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<B>About this mini-article series.</B> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <TT>Getopt::*</TT> namespace). <A HREF=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</A>. \n<p>Receiving options from command-line arguments is usually just one of a few ways a CLI program gets its input. Two of the other most popular ways are: environment variables (e.g. <TT>PERL_CPANM_OPT</TT> or perl&#039;s own <TT>PERL5OPT</TT>) and configuration files (e.g. <TT>/etc/wgetrc</TT> or <TT>dzil.ini</TT>). These alternative ways are used when command-line arguments are less appropriate, e.g. when there are lots of options which would make inputting them all to command-line arguments cumbersome or tedious. Another case is when the option contains something sensitive like login name/password, which when specified via command-line makes it easily peekable by other users via a simple `ps ax`. \n<p>Environment variables with name like <TT>FOO_OPT</TT> usually just extend the command-line arguments. You can put command-line options here like you would into command-line arguments. If you use configuration files there&#039;s the additional issue of what format to write the configuration in, and which locations to search the configuration files in. A simple choice is to also assume the configuration files to contain just a bunch of command-line options, separable by newlines. This way, you don&#039;t have to invent a new format or create additional mapping between configuration parameters and command-line options. This method is used by various programs large and small, such as: <B>curl</B>, or <B>mplayer</B> and <B>mpv</B>. \n<p>If you use perl and <A HREF=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</A> (or a Getopt::Long wrapper like <A HREF=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</A>) you can use <A HREF=\"https://metacpan.org/pod/Getopt::ArgvFile\">Getopt::ArgvFile</A> to add this config file reading capability. \n<p>Getopt::ArgvFile is a module first released by Jochen Stenzel (<A HREF=\"https://metacpan.org/author/JSTENZEL\">JSTENZEL</A>) in 1999 (but the copyright message hints that it was first written in 1993). Last update is in 2007. It currently has 20 CPAN distributions depending on it, and looks like Barbie (<A HREF=\"https://metacpan.org/author/BARBIE\">BARBIE)</A> and Kathryn Andersen (<A HREF=\"https://metacpan.org/author/RUBYKAT\">RUBYKAT</A>) are two of its prominent users. The module seems to be well received by the community, if judging from its <A HREF=\"http://cpanratings.perl.org/dist/Getopt-ArgvFile\">CPAN Ratings reviews</A>. \n<p><TABLE BORDER>\n<TR><TD>phase</TD><TD>rel</TD><TD>dist</TD><TD>author</TD><TD>dist_version</TD><TD>req_version</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Bencher-Scenario-GetoptModules</TD><TD>PERLANCAR</TD><TD>0.04</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>CPAN-Testers-Data-Generator</TD><TD>BARBIE</TD><TD>1.21</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>CPAN-Testers-Data-Uploads-Mailer</TD><TD>BARBIE</TD><TD>0.06</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>CPAN-Testers-WWW-Development</TD><TD>BARBIE</TD><TD>2.11</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>CPAN-Testers-WWW-Reports-Mailer</TD><TD>BARBIE</TD><TD>0.37</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>CPAN-Testers-WWW-Statistics</TD><TD>BARBIE</TD><TD>1.21</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>CPAN-Testers-WWW-Statistics-Excel</TD><TD>BARBIE</TD><TD>0.06</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Dist-Inktly-Minty</TD><TD>TOBYINK</TD><TD>0.002</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Graphics-Colourset</TD><TD>RUBYKAT</TD><TD>0.02</TD><TD>1.09</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Module-DevAid</TD><TD>RUBYKAT</TD><TD>0.24</TD><TD>1.1</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Module-Package-RDF</TD><TD>TOBYINK</TD><TD>0.014</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>PAR-Packer</TD><TD>RSCHUPP</TD><TD>1.035</TD><TD>1.07</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>PerlPoint-Converters</TD><TD>LDOMKE</TD><TD>1.0205</TD><TD>1.01</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Pod-PerlPoint</TD><TD>JSTENZEL</TD><TD>0.06</TD><TD>1.06</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>SQLite-Work</TD><TD>RUBYKAT</TD><TD>0.1601</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Tie-FieldVals</TD><TD>RUBYKAT</TD><TD>0.6203</TD><TD>1.08</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>X11-Muralis</TD><TD>RUBYKAT</TD><TD>0.1002</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>html2dbk</TD><TD>RUBYKAT</TD><TD>0.0301</TD><TD>1.09</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>khatgallery</TD><TD>RUBYKAT</TD><TD>0.03</TD><TD>1.09</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>pod2pdf</TD><TD>JONALLEN</TD><TD>0.42</TD><TD>0</TD></TR>\n</TABLE>\n\n\nAs previously stated, this module is not an option parsing module or a Getopt::Long wrapper, but its companion instead. To use it, you put: \n<p>[sourcecode language=\"perl\"]\nuse Getopt::ArgvFile;[/sourcecode]\n\nbefore: \n<p>[sourcecode language=\"perl\"]\nuse Getopt::Long;\nGetOptions(...);[/sourcecode]\n\nThis will make Getopt::ArgvFile scan for @-prefixed arguments like <TT>@myapp.conf</TT>\nin command-line arguments and put the command-line options found in the contents of <TT>myapp.conf</TT> file into <TT>@ARGV</TT>. By the time <TT>GetOptions()</TT> is run, it sees the command-line options from the config file <TT>myapp.conf</TT> already inserted into <TT>@ARGV</TT>. Example, if <TT>myapp.conf</TT> contains: \n<p><PRE CLASS=\"fixed_width_section\">--opt1=foo --opt2=bar\n# a comment\n--opt3=baz\n--opt3 qux\n</PRE>\n\nThen this command-line arguments: \n<p><PRE CLASS=\"fixed_width_section\">% myapp @myapp.conf --opt1 quux --no-opt4\n</PRE>\n\nwill produce this <TT>@ARGV</TT>: \n<p>[sourcecode language=\"perl\"]\n[\"--opt1=foo\", \"--opt2=bar\", \"--opt3=baz\", \"--opt3\", \"qux\", \"--opt1\", \"quux\", \"--no-opt4\"][/sourcecode]\n\nThe config file can contain shell-style comment (<TT># blah</TT>) or even POD. It can contain another <TT>@file</TT> to include other files. \n<p>Since the <TT>@file</TT> syntax is not commonly used, you can also configure Getopt::ArgvFile to scan for a special option to specify config file instead (like <TT>--config</TT>, as commonly used by many programs). \n<p>Getopt::ArgvFile can also be instructed to look for config files in some common locations like the script&#039;s path (using import option <TT>default =&gt; 1</TT>), home directory (<TT>home =&gt; 1</TT>), or current directory (<TT>current =&gt; 1</TT>). The config file name can be configured too, with multiple names if necessary. \n<p>In short, Getopt::ArgvFile is a quick and convenient way to add config file reading support to your application, but the following are some comments about the module: \n<p>First, when a specified config file cannot be read (permission denied, etc), there is no warning or error message whatsoever. This is my main complaint. \n<p>There is no equivalent for <TT>--no-config</TT> special option to disable config file reading. Adding this option to <TT>GetOptions</TT> is also problematic, as Getopt::ArgvFile works <I>before</I> Getopt::Long. But if you use autohelp/autousage like Getopt::Long::Descriptive, you might want to add <TT>--config</TT> and <TT>--no-config</TT> too so they are documented. \n<p>The separated two-step approach also comes with its problem. For example, if you specify a command-line option <TT>--foo @bar</TT>, wanting the <TT>foo</TT> option to contain the value <TT>@bar</TT>, you can&#039;t because <TT>@bar</TT> will already have been stripped by Getopt::ArgvFile. \n<p>The default settings show the module&#039;s age. Finding config files in script path (<TT>default =&gt; 1</TT>) or current directory (<TT>current =&gt; 1</TT>) is not considered proper nowadays. There is also currently no way to disable parsing of <TT>-</TT> and <TT>+</TT>\noption prefixes (like <TT>-config</TT> or <TT>+config</TT>) by Getopt::ArgvFile, although this can be implemented pretty trivially, e.g. by looking at Getopt::Long&#039;s configuration (but this requires Getopt::Long to be loaded first). \n<p>All these considerations make me prefer something more integrated, like <A HREF=\"https://metacpan.org/pod/Perinci::CmdLine\">Perinci::CmdLine</A> or <A HREF=\"https://metacpan.org/pod/App::Options\">App::Options</A> (although those two modules happen to use configuration files in INI/INI-like format instead of raw command-line options).",
+         "post_date" : "20161212T13:45:15",
+         "post_date_gmt" : "20161212T06:45:15",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1538",
+         "post_mime_type" : "",
+         "post_modified" : "20161212T14:00:11",
+         "post_modified_gmt" : "20161212T07:00:11",
+         "post_name" : "getopt-modules-12-getoptargvfile",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 12: Getopt::ArgvFile",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oO",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1871",
+               "key" : "email_notification",
+               "value" : "1481525109"
+            },
+            {
+               "id" : "1863",
+               "key" : "jabber_published",
+               "value" : "1481525106"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1536",
+         "link" : "https://perlancar.wordpress.com/2016/12/12/getopt-modules-11-getoptlucid/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<B>About this mini-article series.</B> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <TT>Getopt::*</TT> namespace). <A HREF=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</A>. \n<p><A HREF=\"https://metacpan.org/pod/Getopt::Lucid\">Getopt::Lucid</A> is David Golden&#039;s (<A HREF=\"https://metacpan.org/author/DAGOLDEN\">DAGOLDEN</A>) take on option parsing. It was first released in 2005 and still sees updates from time to time. The last release is in Aug 2016. Around 20 CPAN distributions use it (some of them are David&#039;s), making it moderately popular (behind <A HREF=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</A> or things like <A HREF=\"https://metacpan.org/pod/MooseX::Getopt\">MooseX::Getopt</A> and <A HREF=\"https://metacpan.org/pod/MooX::Options\">MooX::Options</A>). \n<p><TABLE BORDER>\n<TR><TD>phase</TD><TD>rel</TD><TD>dist</TD><TD>author</TD><TD>dist_version</TD><TD>req_version</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Acme-PDF-rescale</TD><TD>HERVE</TD><TD>0.2</TD><TD>0.16</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>App-CPAN-Mini-Visit</TD><TD>DAGOLDEN</TD><TD>0.008</TD><TD>0.16</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>App-StaticImageGallery</TD><TD>RBO</TD><TD>0.002</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>App-Taskflow</TD><TD>FARHAD</TD><TD>1.0</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>App-Ylastic-CostAgent</TD><TD>DAGOLDEN</TD><TD>0.006</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>App-Zapzi</TD><TD>RUPERTL</TD><TD>0.017</TD><TD>1.05</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>App-grindperl</TD><TD>DAGOLDEN</TD><TD>0.004</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>App-mymeta_requires</TD><TD>DAGOLDEN</TD><TD>0.006</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Bencher-Scenario-GetoptModules</TD><TD>PERLANCAR</TD><TD>0.04</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Decl</TD><TD>MICHAEL</TD><TD>0.11</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Paludis-UseCleaner</TD><TD>KENTNL</TD><TD>0.01000307</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Pod-ROBODoc</TD><TD>MGRIMM</TD><TD>0.3</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Pod-WikiDoc</TD><TD>DAGOLDEN</TD><TD>0.20</TD><TD>0.14</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>String-Dump</TD><TD>PATCH</TD><TD>0.09</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Task-BeLike-DAGOLDEN</TD><TD>DAGOLDEN</TD><TD>1.010</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Task-BeLike-RJRAY</TD><TD>RJRAY</TD><TD>0.009</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>Task-MasteringPerl</TD><TD>BDFOY</TD><TD>1.002</TD><TD>0</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>VJF-Emphase</TD><TD>HERVE</TD><TD>0.11</TD><TD>0.16</TD></TR>\n<TR><TD>runtime</TD><TD>requires</TD><TD>VJF-MITDT</TD><TD>HERVE</TD><TD>1.01</TD><TD>0.16</TD></TR>\n</TABLE>\n\n\nGetopt::Lucid implements its own parsing and does not depend on <A HREF=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</A>. It presents a more OO interface and avoids using symbols like Getopt::Long&#039;s <TT>:s</TT>\nor <TT>=s@</TT>. Compared to <A HREF=\"https://metacpan.org/pod/Smart::Options\">Smart::Options</A> which also uses method chaining style, I find Getopt::Lucid clearer because the method chains are done on a per-option basis instead of for the whole options set. \n<p>Compared to Getopt::Long, Getopt::Lucid supports: specifying an option&#039;s default value, specifying that an option is required, and specifying extra validation rule for each option. It does not allow specifying per-option summary string for nicer generation of usage message, although with its interface, adding such feature should be easily done. It does not offer automatic <TT>--help</TT> or <TT>--version</TT> message. It does not support auto-abbreviation. \n<p>Getopt::Lucid also allows you to express dependencies between options, a feature not usually found in other option parsing modules. Although currently the dependency relationship supported is just one form: <TT>Param(&#039;foo&#039;)-&gt;needs(&#039;bar&#039;)</TT>\nmeans that when <TT>--foo</TT> is specified then <TT>--bar</TT> also needs to appear. There is no support to express mutual exclusiveness, for example. \n<p>Getopt::Lucid comes with its own peculiarities. For example, a long option can be specified as <TT>--foo</TT> but can also as <TT>foo</TT>. I haven&#039;t found a Unix program that behaves like this. I also notice that it does not allow an option named <TT>-?</TT>. And, case-sensitivity of option is regulated on a per-option basis. \n<p>There is no built-in support for config files, but the documentation shows how to do it. Basically, Getopt::Lucid wants to allow the user to customize how values from config files should be merged with values from the command-line options. \n<p><B>Conclusion:</B> The ability to express dependency between options is useful, especially if the other dependency relationships (like mutual exclusiveness) were supported. Otherwise, I&#039;d probably still reach for modules that allow automatic generation of usage/help/version message.",
+         "post_date" : "20161212T13:45:02",
+         "post_date_gmt" : "20161212T06:45:02",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1536",
+         "post_mime_type" : "",
+         "post_modified" : "20161212T13:49:25",
+         "post_modified_gmt" : "20161212T06:49:25",
+         "post_name" : "getopt-modules-11-getoptlucid",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 11: Getopt::Lucid",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oM",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1861",
+               "key" : "email_notification",
+               "value" : "1481304663"
+            },
+            {
+               "id" : "1855",
+               "key" : "jabber_published",
+               "value" : "1481304658"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1532",
+         "link" : "https://perlancar.wordpress.com/2016/12/10/getopt-modules-10-getoptauto/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this mini-article series.</b> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <tt>Getopt::*</tt> namespace). <a href=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</a>.\n\n<a href=\"https://metacpan.org/pod/Getopt::Auto\">Getopt::Auto</a> is a module that was first written in 2003 by Simon Cozens (<a href=\"https://metacpan.org/author/SIMON\">SIMON</a>) then revived in 2011, 2014 by Geoffrey Leach (<a href=\"https://metacpan.org/author/GLEACH\">GLEACH</a>). There is currently only one CPAN distribution depending on this module.\n<pre class=\"fixed_width_section\">% lcpan rdeps Getopt::Auto\n+---------+----------+--------------+--------+--------------+-------------+\n| phase   | rel      | dist         | author | dist_version | req_version |\n+---------+----------+--------------+--------+--------------+-------------+\n| runtime | requires | Pod-HtmlEasy | GLEACH | v1.1.11      | 1.009006    |\n+---------+----------+--------------+--------+--------------+-------------+\n</pre>\nIt does not require you to write an options spec (but you can, if you want to). You can just do:\n\n[sourcecode language=\"perl\"]\nuse Getopt::Auto;[/sourcecode]\n\nand your command-line options will be collected in <tt>main</tt>'s <tt>%options</tt>. You can also define option subroutine named like the option, e.g. <tt>foo()</tt> which will be called when the option is encountered. This is similar to supplying an option handler coderef in Getopt::Long, except in a non-global-clean way.\n\nOf course, when not using a spec there's the usual issue of syntax ambiguity. Getopt::Auto resolves this by assuming that all options in the form of <tt>--foo</tt>\nare flag options that do not take values, and options that want to take value must use the <tt>--foo=value</tt> syntax.\n\nIf you want to specify a spec, you can, in the form of POD (like <a href=\"https://metacpan.org/pod/Getopt::Euclid\">Getopt::Euclid</a>). However, unlike Getopt::Euclid, the rules are far fewer and simpler. You just provide a header (it can be <tt>=head2</tt>, <tt>=head3</tt>, or some other level) in this format:\n<pre class=\"fixed_width_section\">=head2 -a, --add - Some summary\n</pre>\nAnd that's it.\n\nThere's no way of specifying that an option always/never takes value, or whether an option is required, or its default value.\n\nGetopt::Auto offers another way of supplying the spec: via import argument. For example:\n\n[sourcecode language=\"perl\"]\nuse Getopt::Auto ([\n    ['--add', 'Add integer to count', &quot;The integer argument is not checked.\\n&quot;, \\&amp;add],\n    ['-a', 'Add integer to count', &quot;The integer argument is not checked.\\n&quot;, \\&amp;add],\n    ['--inc', 'Bump count by 1', undef, undef],\n]);[/sourcecode]\n\nThis way, you can supply option subroutine in a global-clean way. But for some reason, when it accepts spec this way, you must specify each alias separately. You can't say \"-a, --add\" like you can in POD. This should probably be rectified in the future.\n\nAnother peculiarity is that option subroutine must accept argument in <tt>$ARGV</tt>\ninstead of <tt>$_</tt>. Another non-global-clean way.\n\nVerdict: Getopt::Auto had some potential but is still plagued with enough eccentricities that prevent me from recommending it for general use.",
+         "post_date" : "20161210T00:28:24",
+         "post_date_gmt" : "20161209T17:28:24",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1532",
+         "post_mime_type" : "",
+         "post_modified" : "20161208T00:33:58",
+         "post_modified_gmt" : "20161207T17:33:58",
+         "post_name" : "getopt-modules-10-getoptauto",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 10: Getopt::Auto",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oI",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1853",
+               "key" : "email_notification",
+               "value" : "1481218108"
+            },
+            {
+               "id" : "1847",
+               "key" : "jabber_published",
+               "value" : "1481218107"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1530",
+         "link" : "https://perlancar.wordpress.com/2016/12/09/getopt-modules-09-getoptdeclare-getopteuclid-docopt/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this mini-article series.</b> Each day for 24 days, I will be reviewing a module (but 3 modules for today) that parse command-line options (such modules are usually under the <tt>Getopt::*</tt> namespace). <a href=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</a>.\n\nIn 2012, the Python option parsing library <a href=\"http://docopt.org\">docopt</a> made its first appearance and took the world by storm, so to speak. It was regarded by many as a fresh approach that is quite revolutionary. <a href=\"https://github.com/docopt/\">Ports</a> for other languages follow, from PHP to Ruby, Haskell to Go, C/C++ to Rust. The npm port itself boasts <a href=\"https://www.npmjs.com/package/docopt\">500 dependents</a>. Docopt also eventually inspires a few forks or projects that aim to extend the expressive power of the DSL. Oh, and a <a href=\"https://metacpan.org/pod/Docopt\">Perl port</a> exists too of course, written by Tokuhiro Matsuno (<a href=\"https://metacpan.org/author/TOKUHIROM\">TOKUHIROM</a>). Sadly, Docopt.pm still has the \"under development\" label from the author and hasn't been updated since 2013, although it already works at least for a subset of specification.\n\nMeanwhile, the concept is not new nor invented in the Python community. As far back as 1998 (14 years earlier), Damian Conway (<a href=\"https://metacpan.org/author/DCONWAY\">DCONWAY</a>) released <a href=\"https://metacpan.org/pod/Getopt::Declare\">Getopt::Declare</a> on CPAN which has the same basic idea: parse options based on a documentation-like or usage-message-like specification. And I suspect the Perl folks in turn stole this concept from some other even older language.\n\nIn 2005, the <a href=\"https://en.wikipedia.org/wiki/Perl_Best_Practices\">Perl Best Practices</a> book (also by Damian Conway) came out. In it, a then-yet-unwritten new module called Getopt::Clade is mentioned and is supposed to be the blessed successor to Getopt::Declare. Unfortunately, that module never got written. But <a href=\"https://metacpan.org/pod/Getopt::Euclid\">Getopt::Euclid</a> was born instead, with a similar but slightly different concept: instead of using a usage-message-like specification, the specification is read from the POD.\n\nHow popular are these modules? None of them are very, but at least all of them have some CPAN distributions depending on them, unlike most other Getopt:: modules. Docopt has 5 CPAN distributions depending on it, Getopt::Declare only has 4, while Getopt::Euclid is slightly better at 10.\n<pre class=\"fixed_width_section\">% lcpan rdeps Docopt\n+---------+----------+-----------------------+---------+--------------+-------------+\n| phase   | rel      | dist                  | author  | dist_version | req_version |\n+---------+----------+-----------------------+---------+--------------+-------------+\n| runtime | requires | App-ReorderGoProFiles | VTI     | 0.02         | 0           |\n| runtime | requires | App-WhatTimeIsIt      | BAYASHI | 0.01         | 0.03        |\n| runtime | requires | App-plmetrics         | BAYASHI | 0.06         | 0           |\n| runtime | requires | CLI-Dispatch-Docopt   | BAYASHI | 0.01         | 0.03        |\n| runtime | requires | Devel-Mutator         | VTI     | 0.03         | 0           |\n+---------+----------+-----------------------+---------+--------------+-------------+\n</pre>\n<pre class=\"fixed_width_section\">% lcpan rdeps Getopt::Declare\n+---------+----------+-----------------------+----------+--------------+-------------+\n| phase   | rel      | dist                  | author   | dist_version | req_version |\n+---------+----------+-----------------------+----------+--------------+-------------+\n| runtime | requires | Finnigan              | SELKOVJR | 0.0206       | 1.13        |\n| runtime | requires | MKDoc-Text-Structured | BPOSTLE  | 0.83         |             |\n| runtime | requires | SVN-Churn             | RCLAMP   | 0.02         | 0           |\n| runtime | requires | Task-MasteringPerl    | BDFOY    | 1.002        | 0           |\n+---------+----------+-----------------------+----------+--------------+-------------+\n</pre>\n<pre class=\"fixed_width_section\">% lcpan rdeps Getopt::Euclid\n+---------+----------+------------------------------+-----------+--------------+-------------+\n| phase   | rel      | dist                         | author    | dist_version | req_version |\n+---------+----------+------------------------------+-----------+--------------+-------------+\n| runtime | requires | Audio-MPD                    | JQUELIN   | 2.004        | 0           |\n| runtime | requires | Games-RailRoad               | JQUELIN   | 1.101330     | 0           |\n| runtime | requires | MARC-Record-Stats            | CRUSOE    | v0.0.4       | 0           |\n| runtime | requires | Module-Install-PodFromEuclid | FANGLY    | 0.01         | 0.3.4       |\n| runtime | requires | NetHack-PriceID              | SARTAK    | 0.05         | 0           |\n| runtime | requires | Task-Cpanel-Internal         | CPANEL    | 11.36.001    | 0           |\n| runtime | requires | Test-Approvals               | JRCOUNTS  | v0.0.5       | 0           |\n| runtime | requires | VSGDR-StaticData             | DEDMEDVED | 0.31         | 0           |\n| runtime | requires | VSGDR-TestScriptGen          | DEDMEDVED | 0.16         | 0           |\n| runtime | requires | VSGDR-UnitTest-TestSet       | DEDMEDVED | 1.34         | 0           |\n+---------+----------+------------------------------+-----------+--------------+-------------+\n</pre>\nIf I have to pick betwen Getopt::Declare and Getopt::Euclid, I choose Getopt::Euclid. Getopt::Declare uses Tab character to separate specification fields, which is problematic in some editor configurations. The specification is not exactly a usage message. It mixes in some Perl code in { ... } blocks, so you cannot directly use it as a usage message (although a single usage() will produce the final usage message for you). And, if you are writing a documentation POD for your CLI program anyway, you might as well use the POD and parse your list your options from it.\n\nBut if I have to pick between the abovementioned two and Docopt, I pick Docopt. Using these modules means learning yet another DSL and you might as well learn Docopt's flavor which has implementations in many languages. The docopt syntax also makes it easy to express dependencies between options in a compact way, e.g. which options must be mutually exclusive (e.g. <tt>(--verbose | --debug | --quiet)</tt>) and which option depends on the existence of other option.\n\nBuuut, and this is the final but, if I have to pick between the Docopt UI-first approach and the \"normal\" approach (something like <a href=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</a> or <a href=\"https://metacpan.org/pod/App::Options\">App::Options</a> or <a href=\"https://metacpan.org/pod/Getopt::Long::More\">Getopt::Long::More</a> where a structured specification is used to generate usage/documentation instead of the other way around), I'd pick the latter. True, with Docopt we can tune the exact formatting of the usage message. But I usually prefer my usage message to be generated automatically anyway. Using Perl data structure as the specification is better because the syntax can be checked by your usual IDE (on the other hand, I'm sure someone could create or have created a docopt Emacs mode or something.)\n\nAnd, unless for simpler scripts, I also usually want an option parser module to have the ability to read configuration files (and environment variables). So far, no such Docopt-style modules have been written. Anyone?",
+         "post_date" : "20161209T00:28:14",
+         "post_date_gmt" : "20161208T17:28:14",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1530",
+         "post_mime_type" : "",
+         "post_modified" : "20161208T00:29:02",
+         "post_modified_gmt" : "20161207T17:29:02",
+         "post_name" : "getopt-modules-09-getoptdeclare-getopteuclid-docopt",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 09: Getopt::Declare, Getopt::Euclid, Docopt",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oG",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1838",
+               "key" : "email_notification",
+               "value" : "1481129999"
+            },
+            {
+               "id" : "1833",
+               "key" : "jabber_published",
+               "value" : "1481129997"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1525",
+         "link" : "https://perlancar.wordpress.com/2016/12/07/getopt-modules-08-getopttiny/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this mini-article series.</b> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <tt>Getopt::*</tt> namespace). <a href=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</a>.\n\n<a href=\"https://metacpan.org/pod/Getopt::Tiny\">Getopt::Tiny</a> is a module written in 1999-2002 by David Muir Sharnoff (<a href=\"https://metacpan.org/author/MUIR\">MUIR</a>). David is a veteran Perl programmer who also programs in several other languages like Go, Python, node, Java. This module is admittedly among his earlier works, and the age shows e.g. it only recognizes \"old\" style long option with a single dash prefix (<tt>-foo</tt>) instead of \"new\" one with double dash prefix (<tt>--foo</tt>). But there are a couple of things I want to highlight.\n\nGetopt::Tiny is not a Getopt::Long wrapper; it implements its own parsing. The code is short and simple, as the name ::Tiny would suggest, at around only 115 lines. It currently does not have any CPAN distributions depending on it.\n\nThe feeling that I get looking at this module is that it tries to be less redundant than Getopt::Long. For example, instead of option spec being something like <tt>name=s</tt> or <tt>name=s@</tt> or <tt>name=s%</tt>, this module guesses the destination type from the type of references the option is paired with:\n\n[sourcecode language=\"perl\"]\n    opt1 =&gt; \\$str,  # a scalar/string\n    opt2 =&gt; \\@ary,  # an array\n    opt3 =&gt; \\%hash, # a hash[/sourcecode]\n\nGetting a bit quirky, when generating usage message, instead of letting user specify a summary string like some other modules (e.g. <a href=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</a>, <a href=\"https://metacpan.org/pod/Getopt::Simple\">Getopt::Simple</a>, <a href=\"https://metacpan.org/pod/Getopt::Long::More\">Getopt::Long::More</a>) or by extracting POD like some (e.g. <a href=\"https://metacpan.org/pod/Getopt::Euclid\">Getopt::Euclid</a>, <a href=\"https://metacpan.org/pod/Getopt::Declare\">Getopt::Declare</a>) this module searches from comment in source code. The comment must be particularly formatted, i.e.:\n\n[sourcecode language=\"perl\"]\n# begin usage info\nmy %flags = (\n    opt1 =&gt; \\$str,  # description for opt1\n    opt2 =&gt; \\@ary,  # description for opt2\n    opt3 =&gt; \\%hash, # description for opt3\n);\nmy %switches = (\n    switch1 =&gt; \\$switch1,  # description for switch1\n);\n# end usage info\ngetopt(\\@ARGV, \\%flags, \\%switches);[/sourcecode]\n\nAnother rather quirky thing, also as the result of trying (a bit too hard) to be compact, the fourth option to its <tt>getopt()</tt> option is a string that will be used in the usage message for symbolizing the arguments, e.g. \"files\", which will generate a usage message e.g.:\n<pre class=\"fixed_width_section\">Usage: myprog [flags] [switches] files\n</pre>\nThis means, it's okay if <tt>@ARGV</tt> contains arguments after the options (flags, switches) have been stripped, e.g.:\n<pre class=\"fixed_width_section\">% myprog --opt1 val --opt2 val --opt2 val foo bar\n</pre>\nBut, if the fourth argument is not specified, the usage message is simply:\n<pre class=\"fixed_width_section\">Usage: myprog [flags] [switches]\n</pre>\nAnd the command-line is not allowed to have extra arguments (<tt>foo, bar</tt>). On the other hand, there's no way to express that command-line arguments are required. Or whether a flag is required. Or default value.\n\nBut at least the code is compact as well as very straightforward, which is better than some other modules that I looked at.",
+         "post_date" : "20161207T23:49:31",
+         "post_date_gmt" : "20161207T16:49:31",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1525",
+         "post_mime_type" : "",
+         "post_modified" : "20161207T23:59:55",
+         "post_modified_gmt" : "20161207T16:59:55",
+         "post_name" : "getopt-modules-08-getopttiny",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 08: Getopt::Tiny",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oB",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1825",
+               "key" : "email_notification",
+               "value" : "1481120923"
+            },
+            {
+               "id" : "1819",
+               "key" : "jabber_published",
+               "value" : "1481120921"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1522",
+         "link" : "https://perlancar.wordpress.com/2016/12/07/getopt-modules-07-getoptstdstrict/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<B>About this mini-article series.</B> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <TT>Getopt::*</TT> namespace). <A HREF=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</A>. \n<p><A HREF=\"https://metacpan.org/pod/Getopt::Std::Strict\">Getopt::Std::Strict</A> is a module written by Leo Charre (<A HREF=\"https://metacpan.org/author/LEOCHARRE\">LEOCHARRE</A>) in 2008. The author is using this module in several of his CPAN distributions, but no one else on CPAN seems to be using it. More &quot;recent&quot; option parsing modules, such as those written after the mid-2000&#039;s, even including <A HREF=\"https://metacpan.org/pod/Docopt\">Docopt</A> (port of a popular Python library) do not see much adoption on CPAN. This could be caused by various factors, the speculation of which I don&#039;t intend to get into right now. But I can say that there are two exceptions: <A HREF=\"https://metacpan.org/pod/Getopt::Lucid\">Getopt::Lucid</A> and <A HREF=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</A>, and this might have something to do with the reputation of their authors. \n<p>Back to our module of the day. There are not a lot of wrappers for or &quot;forks&quot; of <A HREF=\"https://metacpan.org/pod/Getopt::Std\">Getopt::Std</A>, simply due to the fact that the module is so simple already. But the author of Getopt::Std::Strict has an itch to scratch. First, when we are in strict mode, instead of this: \n<p>[sourcecode language=\"perl\"]\ngetopts('oif:');[/sourcecode]\n\nor: \n<p>[sourcecode language=\"perl\"]\ngetopts('oif:', \\%opts);[/sourcecode]\n\none has to do this instead: \n<p>[sourcecode language=\"perl\"]\nuse vars qw($opt_o $opt_i $opt_f);\ngetopts('oif:');[/sourcecode]\n\nor: \n<p>[sourcecode language=\"perl\"]\nmy %opts;\ngetopts('oif:', \\%opts);[/sourcecode]\n\nwhich the author probably finds annoying. So he wrote a module to declare the variable(s) for you. And to do this, the option specification needs to be passed/processed at compile time. Thus: \n<p>[sourcecode language=\"perl\"]\nuse Getopt::Std::Strict 'oif:', 'opt'; # will declare the $opt_* for you\nif ($opt_o) { ... } # so $opt_o can be used without you declaring it[/sourcecode]\n\nThis is rather nice because if you mistype <TT>$opt_o</TT> to <TT>$opt_p</TT> (an unknown option), this mistake will be caught at compile-time. \n<p>As a bonus, the module also provides you <TT>%OPT</TT> and <TT>opt()</TT> function. You can access for example the <TT>-o</TT> option via <TT>$OPT{o}</TT>, or via <TT>opt(&#039;o&#039;)</TT>. The former won&#039;t catch a typo e.g. when you type <TT>$OPT{p}</TT> but the later will (<TT>opt(&#039;p&#039;)</TT>\nwill die). \n<p>I personally find all this rather unnecessary: I probably would just bear the cost of typing <TT>my %opts;</TT> or <TT>my ($opt_o, $opt_i, $opt_f);</TT> and be more explicit. \n<p>But I have a couple of suggestions. First, it might be nice if the module dies when user specifies unknown option (to be more inline with the &quot;Strict&quot; spirit in the name). And second, the bonuses are additional cognitive burdens that I&#039;d personally do without. Or, if they are to stay, to be more strict the <TT>%OPT</TT> can be made to die too when fed unknown options too, e.g. using tie mechanism.",
+         "post_date" : "20161207T21:28:38",
+         "post_date_gmt" : "20161207T14:28:38",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1522",
+         "post_mime_type" : "",
+         "post_modified" : "20161207T21:34:31",
+         "post_modified_gmt" : "20161207T14:34:31",
+         "post_name" : "getopt-modules-07-getoptstdstrict",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 07: Getopt::Std::Strict",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-oy",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1811",
+               "key" : "email_notification",
+               "value" : "1481038252"
+            },
+            {
+               "id" : "1804",
+               "key" : "jabber_published",
+               "value" : "1481038249"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1519",
+         "link" : "https://perlancar.wordpress.com/2016/12/06/getopt-modules-05-getoptvalid/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<B>About this mini-article series.</B> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <TT>Getopt::*</TT> namespace). <A HREF=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</A>. \n<p><A HREF=\"https://metacpan.org/pod/Getopt::Valid\">Getopt::Valid</A> is yet another module that wraps Getopt::Long to try to add some features (examples of modules like these that have been reviewed are <A HREF=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</A> and <A HREF=\"https://metacpan.org/pod/Getopt::Compact\">Getopt::Compact</A>). The module starts with a single specific goal (even the name already reflects that goal nicely), which is to add extended validation. Getopt::Long admittedly only allows for expressing limited validation, e.g. that something needs to be an integer (<TT>--name=i</TT>) or a floating point number (<TT>--name=f</TT>). Everything else is not validated, except by ourselves if we assign an option to an option handler (coderef) instead of scalar reference or array/hash reference. \n<p>The actual design of Getopt::Valid, however, breaks down in places. The main thing that pops up the most to me is the inconsistency of names, reflecting the lack of design clarity. The top-level structure to be passed to the <TT>GetOptionsValid()</TT> routine is called <TT>$validation_ref</TT>, but it's not exactly a validation specification: it's the program's specification with its list of options. The options are called \"params\" in one place, \"arguments\" in another places. The <TT>collect_argv</TT> method is described as a method to collect \"args\" (arguments). For an option parsing module which must differentiate between option, arguments (before and after the options are parsed), the convoluted naming really turns me off. \n<p>The OO interface also leaves something to be desired. After instantiation, first you have to <TT>collect_argv()</TT> which again is a misleading name because it actually call <TT>Getopt::Long::GetOptions()</TT> to do the actual parsing. Then we have to manually call <TT>validate()</TT> to do the extra validation. Then, we have to manuall call another method <TT>valid_args()</TT> to get the validated arguments, er, options. \n<p>The validators themselves can be in the form of a coderef: \n<p>[sourcecode language=\"perl\"]\n    'name=s' =&gt; sub { ... }[/sourcecode]\n\nor for more simpler cases, a regex object: \n<p>[sourcecode language=\"perl\"]\n    'name=s' =&gt; qr/^blah.+/,[/sourcecode]\n\nFine by me. But then, a third case is allowed which is a string to mean... a description of the option instead of something related to validation as the former two cases.",
+         "post_date" : "20161206T22:30:46",
+         "post_date_gmt" : "20161206T15:30:46",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1519",
+         "post_mime_type" : "",
+         "post_modified" : "20161206T22:34:16",
+         "post_modified_gmt" : "20161206T15:34:16",
+         "post_name" : "getopt-modules-05-getoptvalid",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 05: Getopt::Valid",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-ov",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1794",
+               "key" : "email_notification",
+               "value" : "1481032859"
+            },
+            {
+               "id" : "1786",
+               "key" : "jabber_published",
+               "value" : "1481032829"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1513",
+         "link" : "https://perlancar.wordpress.com/2016/12/06/getopt-modules-99-optimistic/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<B>About this mini-article series.</B> Each day for 24 days, I will be reviewing a module that parses command-line options (such module is usually under the <TT>Getopt::*</TT> namespace). <A HREF=\"https://perlancar.wordpress.com/2016/12/01/getopt-modules-01-getoptlong/\">First article is here</A>. \n<p>Option parsing modules can be categorized into two: those that require you to write a specification and those that do not (actually there&#039;s a third category: those that allow you to choose to supply a spec or not). Modules that accept a usage text as input like <A HREF=\"https://metacpan.org/pod/Docopt\">Docopt</A>, or POD like <A HREF=\"https://metacpan.org/pod/Getopt::Euclid\">Getopt::Euclid</A>, or some other form, count into the first category. Modules in the second category are usually modules in this category are meant for shorter and simpler scripts. (And the modules are often simple themselves with short implementation, too simple to contain something worth babbling about. Most of them just collect anything that looks like an option in <TT>@ARGV</TT> then put them in a hash, done!) \n<p>Modules that don&#039;t accept a specification face an ambiguity problem when it comes to this syntax: \n<p><PRE CLASS=\"fixed_width_section\">--foo bar\n</PRE>\n\nIs this a flag option <TT>--foo</TT> (an option that does not require a value) followed by a command-line argument <TT>bar</TT>, or an option <TT>--foo</TT> with its value <TT>bar</TT>? \n<p>Some modules resolve this by disallowing the ambiguous syntax. Option value must always be specified using: \n<p><PRE CLASS=\"fixed_width_section\">--foo=bar\n</PRE>\n\nBut this is inconvenient to (some) users and is not how most Unix programs behave. \n<p>Other modules resolve this by simply assuming that all <TT>--foo bar</TT> means option <TT>--foo</TT> with value of <TT>bar</TT>. In other words, user must be careful not to put an argument after a flag option, usually using <TT>--</TT> to separate options and arguments). \n<p>Aside from the abovementioned two, other approaches are possible. One such approach is by looking at <U>how the option value is used in the program</U>. Using a pragma like <A HREF=\"https://metacpan.org/pod/overload\">overload</A>, we can trap boolean, string, even array/hash operations. For example: \n<p>[sourcecode language=\"perl\"]\npackage OptionObject;\n\nuse overload\n    '\"\"'   =&gt; sub { $_[0]{type} = 'scalar'; $_[0]{values}[0] },\n    'bool' =&gt; sub { $_[0]{type} = 'bool'  ; @{$_[0]{values}} ? 1:0 },\n    '@{}'  =&gt; sub { $_[0]{type} = 'array' ; $_[0]{values} },\n    ;\n\nsub new {\n    my $class = shift;\n    bless {@_}, $class;\n}[/sourcecode]\n\nThen: \n<p>[sourcecode language=\"perl\"]\nmy $opt1 = OptionObject-&gt;new(value =&gt; [\"a\", \"b\"]); # e.g. after user specifies --opt1 a --opt1 b\nmy $opt2 = OptionObject-&gt;new(value =&gt; ...);\nmy $opt3 = OptionObject-&gt;new(value =&gt; ...);\n\nif ($opt1 =~ /foo/) {\n    # this is regex matching, meaning user wants opt1 to be a string/scalar option\n}\n\nif ($opt2) {\n    # this is boolean testing, meaning user wants opt2 to be a flag option\n}\n\nfor (@$opt3) {\n    # user array-deferences, she probably wants opt3 to be an array option\n}[/sourcecode]\n\nIn the above example code, the overloading mechanism will trigger to let us know that user wants <TT>--opt1</TT> to be a string/scalar option, <TT>--opt2</TT> a flag option (which does not take value), and <TT>--opt3</TT> an array option. \n<p>CPAN module <A HREF=\"https://metacpan.org/pod/Opt::Imistic\">Opt::Imistic</A> offers something like this approach, although it doesn&#039;t push it that far. The module was written by Alastair McGowan-Douglas (<A HREF=\"https://metacpan.org/author/ALTREUS\">ALTREUS</A>) in 2010, and it sees a new release in 2014 and 2015. It does not yet have any CPAN distribution depending on it. \n<p>Opt::Imistic tries to solve this other ambiguity that non-spec-using modules also faces. When we receive this in the command-line: \n<p><PRE CLASS=\"fixed_width_section\">--foo bar --foo baz\n</PRE>\n\nsometimes <TT>--foo</TT> is not meant to accept multiple values, but user might specify the option multiple times due to mistake or some other cause. With a spec, we can detect this. Without spec, Opt::Imistic tries to detect this by looking at how the option value is used by the program. \n<p>To use Opt::Imistic to parse command-line options, you do this: \n<p>[sourcecode language=\"perl\"]\nuse Opt::Imistic;[/sourcecode]\n\nThis will cause the module to parse <TT>@ARGV</TT> and put the result in <TT>%ARGV</TT>. For example, if your script is called like this: \n<p><PRE CLASS=\"fixed_width_section\">% myapp --foo bar --foo baz --qux 1 2 3\n</PRE>\n\nThen you&#039;ll have <TT>$ARGV{foo}</TT> and <TT>$ARGV{qux}</TT> available for you. All options are assumed to take values. The remaining arguments in <TT>@ARGV</TT> will be <TT>[2, 3]</TT>. \n<p><TT>$ARGV{foo}</TT> and <TT>$ARGV{qux}</TT> are actually overloaded objects. If you use them in a scalar context, then you will get a scalar, for example: \n<p>[sourcecode language=\"perl\"]\nopen my $fh, \"&lt;&quot;, $ARGV{foo}; # here, foo is used in scalar context[/sourcecode]\n\nthen <TT>$ARGV{foo}</TT> will return the value <TT>baz</TT> (the last specified). But actually, Opt::Imistic stores all option values as array. If you use it as an array, you can: \n<p>[sourcecode language=\"perl\"]\nfor my $file (@{ $ARGV{foo} }) { ... }[/sourcecode]\n\nIf this were combined this with lazy/delayed parsing, the module could even resolve the ambiguous <TT>--foo bar</TT> syntax. For example, if it didn&#039;t parse until it sees: \n<p>[sourcecode language=\"perl\"]\nif ($ARGV{foo}) {\n    ...\n}[/sourcecode]\n\nthen it would know that <TT>--foo</TT> is meant to be a flag option and thus does not take value. Then Opt::Imistic could parse options and not slurp <TT>bar</TT> as the option for <TT>--foo</TT>. This can be repeated, command-line can be reparsed whenever a new hint is encountered. \n<p>I am tempted to write such a proof-of-concept. But in general, I am more interested in option parsing that uses specification. Writing specification is not that much of a pain anyway, and it offers so much more, like the ability to check for unknown options, auto-abbreviation, autogeneration of usage messages, and so on.",
+         "post_date" : "20161206T21:00:25",
+         "post_date_gmt" : "20161206T14:00:25",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1513",
+         "post_mime_type" : "",
+         "post_modified" : "20161206T22:33:44",
+         "post_modified_gmt" : "20161206T15:33:44",
+         "post_name" : "getopt-modules-99-optimistic",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Getopt modules 06: Opt::Imistic",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-op",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "27",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "cli",
+               "parent" : "0",
+               "slug" : "cli",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "99185",
+               "term_taxonomy_id" : "23"
+            },
+            {
+               "count" : "24",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "getopt",
+               "parent" : "0",
+               "slug" : "getopt",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5953447",
+               "term_taxonomy_id" : "24"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

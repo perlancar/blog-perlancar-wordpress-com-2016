@@ -1,0 +1,712 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "268",
+               "key" : "email_notification",
+               "value" : "1423760451"
+            },
+            {
+               "id" : "247",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "263",
+               "key" : "jabber_published",
+               "value" : "1423760450"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=84",
+         "link" : "https://perlancar.wordpress.com/2015/02/13/pericmd-012-rinci-metadata-1/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "The previous post has established what <a href=\"https://metacpan.org/pod/Rinci\">Rinci</a> metadata is and what it is for. We'll now go through examples of building a metadata from scratch and see its use in a CLI application.\n\nA Rinci metadata is a normal hash structure. In Perl, we put it in package global variable %SPEC under the key of function name. Example:\n\n[code language=\"perl\"]\nour %SPEC;\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n};\n[/code]\n\nThe only required <strong>property</strong> (that's what we call the key in a metadata hash) is <strong>v</strong> (short for <em>version</em>).  This property is required because there has been a previous version of the metadata hash, the 1.0 version, which is rather incompatible with the current one, 1.1. If v is not specified, it is assumed to be 1.0, so we always need to specify it to mean 1.1.\n\nAnother property you see above is <strong>summary</strong>. In a CLI program, this will show up as the abstract (in POD or help message). Let's write a full CLI program and try it out right now:\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse 5.010;\nuse strict;\nuse warnings;\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n};\nsub hello {\n    [200, &quot;OK&quot;, &quot;Hello, world!&quot;];\n}\n\nPerinci::CmdLine::Any-&gt;new(url=&gt;'/main/hello')-&gt;run;\n[/code]\n\nSave it as <strong>hello</strong> and then run it from the shell:\n<pre>% ./hello\nHello, world! \n\n% ./hello --help\nhello - Say hello\n\nUsage:\n  hello --help (or -h, -?)\n  hello --version (or -v)\n  hello [options]\nOptions:\n  --config-path=s     Set path to configuration file\n  --config-profile=s  Set configuration profile to use\n  --format=s          Choose output format, e.g. json, text\n  --help, -h, -?      Display this help message\n  --json              Set output format to json\n  --naked-res         When outputing as JSON, strip result envelope\n  --no-config         Do not use any configuration file\n  --version, -v       \n</pre>\nIf you want to see what the generated POD would look like, you'll need to install Dist::Zilla and some plugins, and create a proper distribution structure. Let's try that now too:\n\n<pre>% cpanm -n Dist::Zilla Dist::Zilla::Plugin::PodWeaver \\\n    Dist::Zilla::Plugin::Rinci::AbstractFromMeta \\\n    Dist::Zilla::Plugin::PodnameFromFilename Pod::Weaver::Plugin::Rinci</pre>\n\nCreate a directory named <strong>App-hello</strong>, cd into it, and put the script under <strong>bin/</strong> and add/change some bits:\n\n[code language=\"perl\" highlight=\"19,20\"]\n#!perl\n\nuse 5.010;\nuse strict;\nuse warnings;\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n$SPEC{hello} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Say hello',\n};\nsub hello {\n    [200, &quot;OK&quot;, &quot;Hello, world!&quot;];\n}\n\nPerinci::CmdLine::Any-&gt;new(url=&gt;'/main/hello')-&gt;run;\n\n# ABSTRACT:\n# PODNAME:\n[/code]\n\nAlso create <strong>dist.ini</strong>:\n\n<pre>name=App-hello\nversion=0.01\n\n[Rinci::AbstractFromMeta]\n[PodnameFromFilename]\n[@Classic]\n[PodWeaver]\nconfig_plugin=-Rinci</pre>\n\nLastly, also create an empty module <strong>lib/App/hello.pm</strong> containing just:\n\n[code language=\"perl\"]\npackage App::hello;\n1;\n# ABSTRACT: Say hello\n[/code]\n\n(Note: there's a repetition of abstract \"Say hello\", this is because we put the metadata in the script itself and not the module. Normally for more reusability we'll put the Rinci metadata and function body in the module.)\n\nNow, build the distribution:\n\n<pre>% dzil build</pre>\n\nAfter the build, you should see a directory called <strong>App-hello-0.01</strong> as well as a tarball file <strong>App-hello-0.01.tar.gz</strong>. This is the result of the build. If you see the contents of <strong>App-hello-0.01/bin/hello</strong>, at the end you will see:\n\n[code language=\"perl\"]\n# ABSTRACT: Say hello\n# PODNAME: hello\n\n__END__\n\n=pod\n\n=head1 NAME\n\nhello - Say hello\n\n=head1 SYNOPSIS\n\nUsage:\n\n % hello [options]\n\n=head1 OPTIONS\n\nC&lt;*&gt; marks required options.\n\n=over\n\n=item B&lt;--config-path&gt;=I&lt;s&gt;\n\nSet path to configuration file.\n\nCan be specified multiple times.\n\n=item B&lt;--config-profile&gt;=I&lt;s&gt;\n\nSet configuration profile to use.\n\n=item B&lt;--format&gt;=I&lt;s&gt;\n\nChoose output format, e.g. json, text.\n\n=item B&lt;--help&gt;, B&lt;-h&gt;, B&lt;-?&gt;\n\nDisplay this help message.\n\n=item B&lt;--json&gt;\n\nSet output format to json.\n\n=item B&lt;--naked-res&gt;\n\nWhen outputing as JSON, strip result envelope.\n\nBy default, when outputing as JSON, the full enveloped result is returned, e.g.:\n\n    [200,&quot;OK&quot;,[1,2,3],{&quot;func.extra&quot;=&gt;4}]\n\nThe reason is so you can get the status (1st element), status message (2nd\nelement) as well as result metadata/extra result (4th element) instead of just\nthe result (3rd element). However, sometimes you want just the result, e.g. when\nyou want to pipe the result for more post-processing. In this case you can use\n`--naked-res` so you just get:\n\n    [1,2,3]\n\n\n=item B&lt;--no-config&gt;\n\nDo not use any configuration file.\n\n=item B&lt;--version&gt;, B&lt;-v&gt;\n\n=back\n\n=head1 ENVIRONMENT\n\nHELLO_OPT\n\n=head1 FILES\n\n~/hello.conf\n\n/etc/hello.conf\n\n=cut\n[/code]\n",
+         "post_date" : "20150213T00:00:07",
+         "post_date_gmt" : "20150212T17:00:07",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "84",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:43:40",
+         "post_modified_gmt" : "20160901T01:43:40",
+         "post_name" : "pericmd-012-rinci-metadata-1",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 012: Rinci metadata",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-1m",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "242",
+               "key" : "email_notification",
+               "value" : "1423739988"
+            },
+            {
+               "id" : "238",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "235",
+               "key" : "jabber_published",
+               "value" : "1423739987"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=80",
+         "link" : "https://perlancar.wordpress.com/2015/02/12/pericmd-011-give-me-functions-and-i-will-move-the-world/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In the previous posts I've talked about the DRY principle and wanting to avoid repetitions. After thinking a bit more about this again, I am reminded that it boils down to <strong>functions</strong>.\n\nI want to only write the code once for local backend as well as for remote backend.\n\nI also want to only write the code once for each environment: CLI or HTTP API or Perl API module. Because when you think about it, what a CLI program does is essentially parse command-line options and then pass it to some function. And in HTTP API or web forms, we essentially parse HTTP request and eventually pass it to some function. And of course, when we use a Perl module, we deal with functions.\n\n<em>So I only want to write each function once and not be bothered with the plumbing.</em>\n\nI only want to care that I get a list of arguments for my function, do my stuffs that I'm supposed to do in the body of the function, and then return the result. All the rest is mostly just \"fluff\". This is the purest form of programming, because functions are essentially mini programs: they accept input, do processing, and return result/output. They are simple.\n\n<em>What about objects?</em> Sure, they're neat too. But they are less versatile than functions. Functions can be used in a purely stateless way, which maps better to the ubiquitous HTTP request-response stateless protocol. Objects, on the other hand, are stateful by definition. You <em>could</em> use objects in a stateless way too: for each request you instantiate them, call some method, and destroy them at the end of the request. But if you did this then why bother with objects at all.\n\nBut to automate plumbing when working with functions in the different environments, we will need to add more metadata to them. Perl (most programming languages, actually) only let us specify a list of argument names (sometimes types too) for a function, perhaps some attributes, and also the type of return value. If we want to use a function as a CLI program, we will need to specify how to map command-line options to function arguments, for example. We could just let arguments map 1-to-1 to command-line options, for example 'foo' to --foo, 'bar' to --bar, but often it's nice to be able to specify some shortcut options. Adding summary/description text for the function and each argument would be nice as well, as it will allow us to generate a help message automatically.\n\nAnd that's the whole idea of the specification called <a href=\"https://metacpan.org/pod/Rinci\">Rinci</a>, which defines a set of properties and attributes for your functions (and variables and packages and a few other <strong>code entities</strong>).\n\nFrom the previous post's source code, here's the Rinci metadata for the function:\n\n[code language=\"perl\"]\n$SPEC{create_sparse_file} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Create sparse file',\n    description =&gt; &lt;&lt;'_',\n\nSparse file is a file with a predefined size (sometimes large) but does not yet\nallocate all its (blank) data on disk. Sparse file is a feature of filesystem.\n\nI usually create sparse file when I want to create a large disk image but do not\nwant to preallocate its data yet. Creating a sparse file should be virtually\ninstantaneous.\n\n_\n    args =&gt; {\n        name =&gt; {\n            schema =&gt; ['str*'],\n            req =&gt; 1,\n            pos =&gt; 0,\n        },\n        size =&gt; {\n            summary =&gt; 'Size (e.g. 10K, 22.5M)',\n            schema =&gt; ['str*'],\n            cmdline_aliases =&gt; { s =&gt; {} },\n            req =&gt; 1,\n            pos =&gt; 1,\n        },\n        interactive =&gt; {\n            summary =&gt; 'Whether or not the program should be interactive',\n            schema =&gt; 'bool',\n            default =&gt; 1,\n            description =&gt; &lt;&lt;'_',\n\nIf set to false then will not prompt interactively and usually will proceed\n(unless for dangerous stuffs, in which case will bail immediately.\n\n_\n        },\n        override =&gt; {\n            summary =&gt; 'Whether to override existing file',\n            schema =&gt; 'bool',\n            default =&gt; 0,\n            description =&gt; &lt;&lt;'_',\n\nIf se to true then will override existing file without warning. The default is\nto prompt, or bail (if not interactive).\n\n_\n        },\n    },\n    examples =&gt; [\n        {\n            argv =&gt; [qw/file.bin 30G/],\n            summary =&gt; 'Create a sparse file called file.bin with size of 30GB',\n            test =&gt; 0,\n        },\n    ],\n};\n[/code]\n\nYou can see that basically the metadata contains the summary and description of a function, as well as list of arguments and a few of other stuffs. The next several posts will discuss this metadata in more detail.",
+         "post_date" : "20150212T18:19:47",
+         "post_date_gmt" : "20150212T11:19:47",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "80",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:44:02",
+         "post_modified_gmt" : "20160901T01:44:02",
+         "post_name" : "pericmd-011-give-me-functions-and-i-will-move-the-world",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 011: Give me functions and I will move the world",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-1i",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "196",
+               "key" : "email_notification",
+               "value" : "1423578913"
+            },
+            {
+               "id" : "192",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "189",
+               "key" : "jabber_published",
+               "value" : "1423578912"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=71",
+         "link" : "https://perlancar.wordpress.com/2015/02/10/pericmd-010-basic-structure-of-a-cli-application-perincicmdline/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "As mentioned in the previous post, I'll be showing the typical CLI application using Perinci::CmdLine. So after almost 10 posts in the series, this is the first post that contains the actual Perinci::CmdLine-using code.\n\nBut first :-) I want to emphasize that the framework is developed with DRY and laziness as the main principles. Aside from avoiding repetitions, like discussed in the previous posts, I also tend to minimize (or downright avoid) doing unnecessary plumbing, or having to write stuffs or rewrite stuffs if that is also unnecessary. The examples for this will be given along the way. In short, Perinci::CmdLine and the related specifications and libraries are the result of my particular way of being lazy.\n\nSo here's a full example of a Perinci::CmdLine-based CLI application, taken from the <a href=\"https://github.com/perlancar/perl-App-CreateSparseFile\">App-CreateSparseFile</a> repository:\n\n[code language=\"perl\"]\npackage App::CreateSparseFile;\n\n# DATE\n# VERSION\n\nuse 5.010001;\nuse strict;\nuse warnings;\n\nuse File::MoreUtil qw(file_exists);\nuse IO::Prompt::I18N qw(confirm);\n\nour %SPEC;\n\n$SPEC{create_sparse_file} = {\n    v =&gt; 1.1,\n    summary =&gt; 'Create sparse file',\n    description =&gt; &lt;&lt;'_',\n\nSparse file is a file with a predefined size (sometimes large) but does not yet\nallocate all its (blank) data on disk. Sparse file is a feature of filesystem.\n\nI usually create sparse file when I want to create a large disk image but do not\nwant to preallocate its data yet. Creating a sparse file should be virtually\ninstantaneous.\n\n_\n    args =&gt; {\n        name =&gt; {\n            schema =&gt; ['str*'],\n            req =&gt; 1,\n            pos =&gt; 0,\n        },\n        size =&gt; {\n            summary =&gt; 'Size (e.g. 10K, 22.5M)',\n            schema =&gt; ['str*'],\n            cmdline_aliases =&gt; { s =&gt; {} },\n            req =&gt; 1,\n            pos =&gt; 1,\n        },\n        interactive =&gt; {\n            summary =&gt; 'Whether or not the program should be interactive',\n            schema =&gt; 'bool',\n            default =&gt; 1,\n            description =&gt; &lt;&lt;'_',\n\nIf set to false then will not prompt interactively and usually will proceed\n(unless for dangerous stuffs, in which case will bail immediately.\n\n_\n        },\n        override =&gt; {\n            summary =&gt; 'Whether to override existing file',\n            schema =&gt; 'bool',\n            default =&gt; 0,\n            description =&gt; &lt;&lt;'_',\n\nIf se to true then will override existing file without warning. The default is\nto prompt, or bail (if not interactive).\n\n_\n        },\n    },\n    examples =&gt; [\n        {\n            argv =&gt; [qw/file.bin 30G/],\n            summary =&gt; 'Create a sparse file called file.bin with size of 30GB',\n            test =&gt; 0,\n        },\n    ],\n};\nsub create_sparse_file {\n    my %args = @_;\n\n    my $interactive = $args{interactive} // 1;\n\n    # TODO: use Parse::Number::WithPrefix::EN\n    my $size = $args{size} // 0;\n    return [400, &quot;Invalid size, please specify num or num[KMGT]&quot;]\n        unless $size =~ /\\A(\\d+(?:\\.\\d+)?)(?:([A-Za-z])[Bb]?)?\\z/;\n    my ($num, $suffix) = ($1, $2);\n    if ($suffix) {\n        if ($suffix =~ /[Kk]/) {\n            $num *= 1024;\n        } elsif ($suffix =~ /[Mm]/) {\n            $num *= 1024**2;\n        } elsif ($suffix =~ /[Gg]/) {\n            $num *= 1024**3;\n        } elsif ($suffix =~ /[Tt]/) {\n            $num *= 1024**4;\n        } else {\n            return [400, &quot;Unknown number suffix '$suffix'&quot;];\n        }\n    }\n    $num = int($num);\n\n    my $fname = $args{name};\n\n    if (file_exists $fname) {\n        if ($interactive) {\n            return [200, &quot;Cancelled&quot;]\n                unless confirm &quot;Confirm override existing file&quot;, {default=&gt;0};\n        } else {\n            return [409, &quot;File already exists&quot;] unless $args{override};\n        }\n        unlink $fname or return [400, &quot;Can't unlink $fname: $!&quot;];\n    } else {\n        if ($interactive) {\n            my $s = $suffix ? &quot;$num ($size)&quot; : $num;\n            return [200, &quot;Cancelled&quot;]\n                unless confirm &quot;Confirm create '$fname' with size $s&quot;;\n        }\n    }\n\n    open my($fh), &quot;&gt;&quot;, $fname or return [500, &quot;Can't create $fname: $!&quot;];\n    if ($num &gt; 0) {\n        seek $fh, $num-1, 0;\n        print $fh &quot;&#092;&#048;&quot;;\n    }\n    [200, &quot;Done&quot;];\n}\n\n1;\n# ABSTRACT:\n\n=head1 SYNOPSIS\n\nSee L&lt;create-sparse-file&gt;.\n\n=cut\n[/code]\n\nThe above is the source code for the backend module (located in <tt>lib/App/CreateSparseFile.pm</tt>). The script itself is located in <tt>bin/create-sparse-file</tt>. What is the source code for the script? Usually, I don't even care anymore because it's often generated. This is one example of the laziness: creating the actual script itself counts as a plumbing/chore and is rather boring and repetitive, so I often automate it away :-)\n\nTechnically, a <a href=\"https://metacpan.org/pod/Dist::Zilla::Plugin::Rinci::ScriptFromFunc\">Dist::Zilla plugin</a> will create a script which boils down to something like this:\n\n[code language=\"perl\"]\n#!perl\n\nuse Perinci::CmdLine::Any;\nPerinci::CmdLine::Any-&gt;new(url=&gt;'/App/CreateSparseFile/create_sparse_file')-&gt;run;\n[/code]\n\nSo the bulk of the code is in the module anyway.\n\nThere is a lot to explain in the above code, so this will take several posts. For this post, we'll see two things you might notice in the script's code.\n\nFirst of all, <b>why the ::Any in the module name?</b> This is purely historical. There used to be just a single Perinci::CmdLine module, but as feature gets added and the module grows, so does startup overhead and that becomes a bit annoying. Not as much startup overhead as Moose-based application, but still it reaches 0.3-0.4s and this is becoming annoying for shell tab completion, because tab completion is handled dynamically using the script itself so the script must start fast. So at some point I'm developing a \"lite\" alternative called Perinci::CmdLine::Lite which aims to keep startup overhead below 0.05-0.10s. (The original Perinci::CmdLine later became Perinci::CmdLine::Classic.) Perinci::CmdLine::Lite started quite bare-bones, but as it gets developed further it begins to get more features, while still keeping in mind to stay low in startup overhead, because tab completion is IMO one of the most important things to have in a CLI application. There are now only a handful features missing from the ::Lite version. Perinci::CmdLine::Any is used to let user choose/switch/fallback between the two without changing the code. In the future, I envision the two versions to converge eventually.\n\nOK so that's a pretty boring history. Anyway, most of the time you should not care and just use ::Any.\n\nNow the second, more interesting question would be: <b>Why use URL???</b> Well, the framework was first developed for writing a CLI-based API client for an application which serves the API over HTTP (over Unix socket). Again, being lazy, I don't want to have to do local stuffs and remote stuffs twice, if they will almost be the same. So I created a CLI application which can have the <i>exact</i> same code for local backend code (which is, Perl modules on the local filesystem), as well as remote backend code (which, frankly, can be anything over anything as long as it's client-server style. <b>It doesn't have to be Perl.</b>) So that's another example of the lazy principle: if sometime in the future somehow some parts of the application needs to be rewritten in another language, I'd like to be able to keep doing the other things the same and minimize rewriting code to make the whole thing work, unless that's necessary.\n\nTurns out, to do local-remote transparency for a CLI application, I ended up having to \"invent\" a lot of other stuffs first :-(",
+         "post_date" : "20150210T21:35:12",
+         "post_date_gmt" : "20150210T14:35:12",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "71",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:44:22",
+         "post_modified_gmt" : "20160901T01:44:22",
+         "post_name" : "pericmd-010-basic-structure-of-a-cli-application-perincicmdline",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 010: Basic structure of a CLI application (Perinci::CmdLine)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-19",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "185",
+               "key" : "email_notification",
+               "value" : "1423328558"
+            },
+            {
+               "id" : "163",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "180",
+               "key" : "jabber_published",
+               "value" : "1423328557"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=64",
+         "link" : "https://perlancar.wordpress.com/2015/02/08/pericmd-009-avoiding-repetitions/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In the <a href=\"https://perlancar.wordpress.com/2015/02/07/pericmd-008-basic-structure-of-a-cli-application/\">previous post</a>, I showed the basic structure of a Getopt::Long-based CLI application. It's simple and straightforward, but there are several repetitions that could be \"normalized\".\n\nFirst, the help message which often just contains program name, summary, usage line, and list of options. We could've generated this automatically had the specification contains enough metadata (Getopt::Long's certainly isn't because it only specifies list of option names and handlers).\n\nThe version message could also be generated.\n\n(Actually Getopt::Long's auto_help and auto_version can already do the above, although auto_help basically just extracts the help message from sections of the POD.)\n\nThen we have the OPTIONS POD section, where I will also once again repeat listing the options along with the summary and description of each option.\n\nSo I find repeating myself three times for each option. And there are other repetitions involved, like repeating the abstract. These repetition is okay if I just write one or two programs, but I write hundreds. So after the tenth program or so I'm thinking that these repetitions are demoralizing. They're tedious and feel like chore. And it's annoying to often find yourself missing one or two places everytime you have to add/edit/remove an option. DRY (don't repeat yourself) becomes one of my important principles when writing Perinci::CmdLine.\n\nWith tools like <a href=\"https://metacpan.org/pod/Dist::Zilla\">Dist::Zilla</a> and even something like <a href=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</a>, we can actually already remove these repetition. Since GL:Descriptive's specification contains summaries as well as default values of each option, we can generate an automatic help message that is nicer. We can also write a Dist::Zilla plugin that takes this specification and generates the OPTIONS POD section from it.\n\nBut the idea behind Perinci::CmdLine is to take the DRY principle further. I've written tools and plugins to generate the whole POD/manpage (from abstract to the OPTIONS section as well as other sections) from the specification. And the specification goes beyond CLI application too, so I don't have to repeat myself either when I'm outside the context of CLI. We will find out about these later. In the next post, we'll discuss the basic structure of a Perinci::CmdLine-based CLI application.",
+         "post_date" : "20150208T00:00:33",
+         "post_date_gmt" : "20150207T17:00:33",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "64",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:03:18",
+         "post_modified_gmt" : "20160416T10:03:18",
+         "post_name" : "pericmd-009-avoiding-repetitions",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 009: Avoiding repetitions",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-12",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "178",
+               "key" : "email_notification",
+               "value" : "1423242127"
+            },
+            {
+               "id" : "159",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "173",
+               "key" : "jabber_published",
+               "value" : "1423242126"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=60",
+         "link" : "https://perlancar.wordpress.com/2015/02/07/pericmd-008-basic-structure-of-a-cli-application/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Here's the basic structure of a typical CLI application, when using just Getopt::Long. This is the <a href=\"https://metacpan.org/pod/nauniq\">nauniq</a> script, in its entirety:\n\n[code language=\"perl\"]\n#!perl\n\nuse 5.010001;\nuse strict;\nuse warnings;\n\nuse Getopt::Long;\n\n# VERSION\n\nmy %Opts = (\n    append         =&amp;gt; 0,\n    check_chars    =&amp;gt; -1,\n    forget_pattern =&amp;gt; undef,\n    ignore_case    =&amp;gt; 0,\n    md5            =&amp;gt; 0,\n    num_entries    =&amp;gt; -1,\n    read_output    =&amp;gt; 0,\n    show_unique    =&amp;gt; 1,\n    show_repeated  =&amp;gt; 0,\n    skip_chars     =&amp;gt; 0,\n);\n\nsub parse_cmdline {\n    my $res = GetOptions(\n        'repeated|d'       =&amp;gt;\n            sub { $Opts{show_unique} = 0; $Opts{show_repeated} = 1 },\n        'ignore-case|i'    =&amp;gt; \\$Opts{ignore_case},\n        'num-entries=i'    =&amp;gt; \\$Opts{num_entries},\n        'skip-chars|s=i'   =&amp;gt; \\$Opts{skip_chars},\n        'unique|u'         =&amp;gt;\n            sub { $Opts{show_unique} = 1; $Opts{show_repeated} = 0 },\n        'check-chars|w=i'  =&amp;gt; \\$Opts{check_chars},\n        'a'                =&amp;gt; sub {\n            $Opts{append} = 1; $Opts{read_output} = 1;\n        },\n        'append'           =&amp;gt; \\$Opts{append},\n        'forget-pattern=s' =&amp;gt; sub {\n            my ($cbobj, $val) = @_;\n            eval { $val = $Opts{ignore_case} ? qr/$val/i : qr/$val/ };\n            if ($@) {\n                warn &amp;quot;Invalid regex pattern in --forget-pattern: $@\\n&amp;quot;; exit 99;\n            }\n            $Opts{forget_pattern} = $val;\n        },\n        'md5'              =&amp;gt; \\$Opts{md5},\n        'read-output'      =&amp;gt; \\$Opts{read_output},\n        'help|h'           =&amp;gt; sub {\n            print &amp;lt;&amp;lt;USAGE;\nUsage:\n  nauniq [OPTIONS]... [INPUT [OUTPUT]]\n  nauniq --help\nOptions:\n  --repeated, -d\n  --ignore-case, -i\n  --num-entries=N, -n\n  --skip-chars=N, -s\n  --unique, -u\n  --check-chars=N, -w\n  --append\n  --read-output\n  -a\n  --md5\n  --forget-pattern=S\nFor more details, see the manpage/documentation.\nUSAGE\n            exit 0;\n        },\n    );\n    exit 99 if !$res;\n}\n\nsub run {\n    my $ifh; # input handle\n    if (@ARGV) {\n        my $fname = shift @ARGV;\n        if ($fname eq '-') {\n            $ifh = *STDIN;\n        } else {\n            open $ifh, &amp;quot;&amp;lt;&amp;quot;, $fname or die &amp;quot;Can't open input file $fname: $!\\n&amp;quot;;\n        }\n    } else {\n        $ifh = *STDIN;\n    }\n\n    my $phase = 2;\n    my $ofh; # output handle\n    if (@ARGV) {\n        my $fname = shift @ARGV;\n        if ($fname eq '-') {\n            $ofh = *STDOUT;\n        } else {\n            open $ofh,\n                ($Opts{read_output} ? &amp;quot;+&amp;quot; : &amp;quot;&amp;quot;) . ($Opts{append} ? &amp;quot;&amp;gt;&amp;gt;&amp;quot; : &amp;quot;&amp;gt;&amp;quot;),\n                    $fname\n                or die &amp;quot;Can't open output file $fname: $!\\n&amp;quot;;\n            if ($Opts{read_output}) {\n                seek $ofh, 0, 0;\n                $phase = 1;\n            }\n        }\n    } else {\n        $ofh = *STDOUT;\n    }\n\n    my ($line, $memkey);\n    my %mem;\n    my $sub_reset_mem = sub {\n        if ($Opts{num_entries} &amp;gt; 0) {\n            require Tie::Cache;\n            tie %mem, 'Tie::Cache', $Opts{num_entries};\n        } else {\n            %mem = ();\n        }\n    };\n    $sub_reset_mem-&amp;gt;();\n    require Digest::MD5 if $Opts{md5};\n    no warnings; # we want to shut up 'substr outside of string'\n    while (1) {\n        if ($phase == 1) {\n            # phase 1 is just reading the output file\n            $line = &amp;lt;$ofh&amp;gt;;\n            if (!$line) {\n                $phase = 2;\n                next;\n            }\n        } else {\n            $line = &amp;lt;$ifh&amp;gt;;\n            if (!$line) {\n                last;\n            }\n        }\n        if ($Opts{forget_pattern} &amp;amp;&amp;amp; $line =~ $Opts{forget_pattern}) {\n            $sub_reset_mem-&amp;gt;();\n        }\n\n        $memkey = $Opts{check_chars} &amp;gt; 0 ?\n            substr($line, $Opts{skip_chars}, $Opts{check_chars}) :\n                substr($line, $Opts{skip_chars});\n        $memkey = lc($memkey) if $Opts{ignore_case};\n        $memkey = Digest::MD5::md5($memkey) if $Opts{md5};\n\n        if ($phase == 2) {\n            if ($mem{$memkey}) {\n                print $ofh $line if $Opts{show_repeated};\n            } else {\n                print $ofh $line if $Opts{show_unique};\n            }\n        }\n\n        $mem{$memkey} = 1;\n    }\n}\n\n# MAIN\n\nparse_cmdline();\nrun();\n\n1;\n# ABSTRACT: Non-adjacent uniq\n# PODNAME:\n\n=head1 SYNOPSIS\n\n nauniq [OPTION]... [INPUT [OUTPUT]]\n\n\n=head1 DESCRIPTION\n\nC&amp;lt;nauniq&amp;gt; is similar to the Unix command C&amp;lt;uniq&amp;gt; but detects repeated lines even\nif they are not adjacent. To do this, C&amp;lt;nauniq&amp;gt; must remember the lines being\nfed to it. There are options to control memory usage: option to only remember a\ncertain number of unique lines, option to remember a certain number of\ncharacters for each line, and option to only remember the MD5 hash (instead of\nthe content) of each line.\n\n\n=head1 OPTIONS\n\n=over\n\n=item * --repeated, -d\n\nPrint only duplicate lines. The opposite of C&amp;lt;--unique&amp;gt;.\n\n=item * --ignore-case, -i\n\nIgnore case.\n\n=item * --num-entries=N\n\nNumber of unique entries to remember. The default is -1 (unlimited). This option\nis to control memory usage, but the consequence is that lines that are too far\napart will be forgotten.\n\n=item * --skip-chars=N, -s\n\nNumber of characters from the beginning of line to skip when checking\nuniqueness.\n\n=item * --unique, -u\n\nPrint only unique lines. This is the default. The opposite of C&amp;lt;--repeated&amp;gt;.\n\n=item * --check-chars=N, -w\n\nThe amount of characters to check for uniqueness. The default is -1 (check all\ncharacters in a line).\n\n=item * --append\n\nOpen output file in append mode. See also C&amp;lt;-a&amp;gt;.\n\n=item * -a\n\nEquivalent to C&amp;lt;--append --read-output&amp;gt;.\n\n=item * --forget-pattern=S\n\nThis is an alternative to C&amp;lt;--num-entries&amp;gt;. Instead of instructing C&amp;lt;nauniq&amp;gt; to\nremember only a fixed number of entries, you can specify a regex pattern to\ntrigger the forgetting the lines. An example use-case of this is when you have a\nfile like this:\n\n * entries for 2014-03-13\n foo\n bar\n baz\n * entries for 2014-03-14\n foo\n baz\n\nand you want unique lines for each day (in which you'll specify\nC&amp;lt;--forget-pattern '^\\*'&amp;gt;).\n\n=item * --md5\n\nRemember the MD5 hash instead of the actual characters of the line. Might be\nuseful to reduce memory usage if the lines are long.\n\n=item * --read-output\n\nWhether to read output file first. This option works only with C&amp;lt;--append&amp;gt; and\nis usually used via C&amp;lt;-a&amp;gt; to append lines to file if they do not exist yet in\nthe file.\n\n=back\n\n\n=head1 EXIT CODES\n\n0 on success.\n\n255 on I/O error.\n\n99 on command-line options error.\n\n\n=head1 FAQ\n\n=head2 How do I append lines to a file only if they do not exist in the file?\n\nYou cannot do this with C&amp;lt;uniq&amp;gt;:\n\n % ( cat FILE ; produce-lines ) | uniq - FILE\n % ( cat FILE ; produce-lines ) | uniq &amp;gt;&amp;gt; FILE\n\nas it will clobber the file first. But you can do this with C&amp;lt;nauniq&amp;gt;:\n\n % produce-lines | nauniq -a - FILE\n\n\n=head1 SEE ALSO\n\nL&amp;lt;uniq&amp;gt;\n\n=cut\n[/code]\n\nAs you can see, there are three big parts of the application: option/argument parsing (in parse_cmdline() subroutine, lines 24-71), main/core logic (in run() subroutine, lines 73-154), and manpage (POD, lines 161-278).\n<h2>Argument parsing</h2>\nArgument parsing is done as usual. We put the values of the options in a hash %Opts (the initial capital letter is to signify that this is a global variable that is used across subroutines). We predeclare %Opts to set the default values. Then we call Getopt::Long's GetOptions(). There is an option handler for --help and --verbose which displays the help message or version number and exit immediately. The rest of the option handlers set values.\n<h2>Main/core logic</h2>\nThis is the actual program. What it does exactly in this example is irrelevant because I only want to show the structure of a CLI application, but anyway: <strong>nauniq</strong> is a utility like Unix's <strong>uniq</strong>, except that it can maintain uniqueness even though the lines are not adjacent. I use it often, usually to append lines to a log file where I don't want previously added lines to be re-added between runs. The core of the program is basically this loop:\n\n[code language=\"perl\"]\nwhile (&amp;lt;&amp;gt;) {\n    print unless $memory{$_}++;\n}\n[/code]\n\nexcept that there are several options.\n<h2>Manpage/POD</h2>\nPerl grew up in the Unix environment and it shows. Creating a manpage is very easy: you just write POD documentation, which should come natural to any Perl developer. Despite the invention of newer documentation format, and despite lacking fancy stuffs like hypertext or pictures/videos, manpage is still one of the (if not <em>the</em>) most useful and most often used format in Unix CLI land, probably because it is simple and searchable. <a href=\"http://www.gnu.org/software/texinfo/\">Texinfo</a>, for example, is invented later and is meant to replace manpage, but fails to trump manpage and falls out of favor itself.\n\nAside from the NAME, SYNOPSIS, DESCRIPTION, or SEE ALSO sections that are usually present in a Perl module, a CLI application usually also has these sections: <strong>OPTIONS</strong> (list of command-line options and their description, sometimes subdivided into categories if the list is quite long), <strong>EXIT CODES</strong> (list of possible exit codes, for another example see curl's manpage), <strong>ENVIRONMENT</strong> (list of environment variables that are observed by the application), <strong>FILES</strong> (list of configuration file paths that are searched by the application).\n\n&nbsp;",
+         "post_date" : "20150207T00:00:00",
+         "post_date_gmt" : "20150206T17:00:00",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "60",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:01:55",
+         "post_modified_gmt" : "20160416T10:01:55",
+         "post_name" : "pericmd-008-basic-structure-of-a-cli-application",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 008: Basic structure of a CLI application (Getopt::Long)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-Y",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "171",
+               "key" : "email_notification",
+               "value" : "1423155640"
+            },
+            {
+               "id" : "155",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "166",
+               "key" : "jabber_published",
+               "value" : "1423155638"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=58",
+         "link" : "https://perlancar.wordpress.com/2015/02/06/pericmd-007-picking-a-good-abstract-for-applicationmodule/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Now let's move on to abstract. You know, the short sentence that you put after the program name in the NAME POD section:\n\n[code language=\"perl\"]\n=head1 NAME\n\nperlbrew - Perl environment manager.\n\n[/code]\n\nOr, if you use Dist::Zilla, it's usually the sentence you put in the # ABSTRACT: line:\n\n[code language=\"perl\"]\n# ABSTRACT: get, unpack build and install modules from CPAN\n[/code]\n\nThere are already a number of good articles on this topic, for example Neil Bowers' <a href=\"http://neilb.org/2013/07/14/good-abstracts.html\">Give your modules a good abstract</a>. In general I agree with what it says and will not repeat the points here. The issue I want to add is: an application distribution will have both <strong>lib/App/scriptname.pm</strong> which is a module (either one that contains the bulk of the application code, or just a placeholder because a distribution needs the main module) and also <strong>bin/scriptname</strong> which is the binary/script itself. How should their abstract be written?\n\nI tend to give them both exactly the same abstract. Some people will give lib/App/scriptname.pm something like \"Backend module for scriptname\". I avoid this because when the module gets displayed as search results or on MetaCPAN <a href=\"https://metacpan.org/recent\">recent</a> page, that abstract is less useful.",
+         "post_date" : "20150206T00:00:27",
+         "post_date_gmt" : "20150205T17:00:27",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "58",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:01:41",
+         "post_modified_gmt" : "20160416T10:01:41",
+         "post_name" : "pericmd-007-picking-a-good-abstract-for-applicationmodule",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 007: Picking a good abstract for application/module",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-W",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "142",
+               "key" : "email_notification",
+               "value" : "1423066509"
+            },
+            {
+               "id" : "134",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "137",
+               "key" : "jabber_published",
+               "value" : "1423066509"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=51",
+         "link" : "https://perlancar.wordpress.com/2015/02/04/pericmd-006-naming-of-app-module-and-distribution/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Let's get on a different topic first for a change. How should one name a (CLI) application module and distribution for CPAN? Here are my thoughts on the matter:\n\nAs we know, CPAN can (and does) contain applications in addition to modules. And a single CPAN distribution can contain both modules and applications, among other things. The overwhelming convention for a CPAN distribution that mainly contains application(s) is to name them App-<em>subpackage</em>. I release <a href=\"https://metacpan.org/author/PERLANCAR\">lots</a> of those distributions, BTW.\n\nThere is usually the App::<em>subpackage</em> as the main module in the distribution. And of course the application itself which is put under script/<em>scriptname</em> or bin/<em>scriptname</em> subdirectory.\n\nNow the problem is what you should use for <em>subpackage </em>and <em>scriptname</em>. Should they be the same name? What about capitalization? Also remember that <em>scriptname</em> can contain dashes or other characters that are problematic in a module/package name.\n\nWhen an application is being used, users deal mostly with <em>scriptname</em>. They only remember the <em>scriptname</em> and oftentimes do not even know or remember what the name of the module/distribution is. One example of this is: <strong>cpanm</strong> (contained in <strong>App-cpanminus</strong> distribution and installed via something like \"cpan App::cpanminus\"). Or for more difference: <strong>cpan-outdated</strong> (contained in <strong>App-cpanoutdated</strong>), or <strong>ack</strong> (contained in <strong>App::Ack</strong>).\n\nModule installers, since they often operate using only data provided by a regular CPAN mirror, expect a module name. This is because PAUSE does not index script names, only package names (in this file: 02packages.details.txt.gz). Hence, at least once, most users must find out the name of the module name for an application she has in mind. If she does not know or remember it, she will need to resort to searching the name using Google or MetaCPAN. Perhaps installers can be smarter and more helpful in the future by grok-ing script names too, but anyways.\n\nNow, to ease user's pain, I tend to give <em>subpackage</em> and <em>scriptname</em> with the same name, down to the capitalization. Examples: <a href=\"https://metacpan.org/release/App-dux\">App-dux</a>, <a href=\"https://metacpan.org/release/App-fatten\">App-fatten</a>, <a href=\"https://metacpan.org/release/App-nauniq\">App-nauniq</a>, <a href=\"https://metacpan.org/release/App-norepeat\">App-norepeat</a>, and so on. So for example if I want to install say <strong>norepeat</strong> (which since I often use it almost daily, will remember the name of), I'll just type: cpanm -n App::norepeat.\n\nBut some of my applications are named with multiple words, separated by dash (why use dash? Because I hate having to press Shift on my keyboard should I use underscore). For these, I switch <em>subpackage</em> to use camel case. Thus, I have these distributions: <a href=\"https://metacpan.org/release/App-ListDebianReleases\">App-ListDebianReleases</a>, <a href=\"https://metacpan.org/release/App-CreateSelfSignedSSLCert\">App-CreateSelfSignedSSLCert</a>, or <a href=\"https://metacpan.org/release/App-CreateSparseFile\">App-CreateSparseFile</a>. They contain, respectively, these CLI apps: <strong>list-debian-releases</strong>, <strong>create-self-signed-ssl-cert</strong>, and <strong>create-sparse-file</strong>. So, if I happen to need say <strong>create-self-signed-ssl-cert</strong> script, I know that I have to type: \"cpanm -n App::CreateSelfSignedSSLCert\" without looking it up, provided I remember the script's name (and I usually do).\n\nThen there are also CPAN distributions that contain a collection of scripts, instead of a single one. Examples for this include: <a href=\"https://metacpan.org/release/App-DistUtils\">App-DistUtils</a>, <a href=\"https://metacpan.org/release/App-PMUtils\">App-PMUtils</a>, <a href=\"https://metacpan.org/release/App-OrgUtils\">App-OrgUtils</a>. They too use camel casing and follow some extra convention, like the <strong>Utils</strong> suffix.\n\nHow do you name your application module/distribution?",
+         "post_date" : "20150204T23:15:09",
+         "post_date_gmt" : "20150204T16:15:09",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "51",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:01:31",
+         "post_modified_gmt" : "20160416T10:01:31",
+         "post_name" : "pericmd-006-naming-of-app-module-and-distribution",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 006: Naming of App module and distribution",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-P",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "129",
+               "key" : "email_notification",
+               "value" : "1423063976"
+            },
+            {
+               "id" : "125",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "122",
+               "key" : "jabber_published",
+               "value" : "1423063975"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=47",
+         "link" : "https://perlancar.wordpress.com/2015/02/04/pericmd-005-getoptlongdescriptive/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<a href=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</a> is an option parsing library that is based on <a href=\"https://metacpan.org/pod/Getopt::Long\">Getopt::Long</a>, but basically allows you to specify short summary for each option (as well as default value, or whether an option is required, or the list of valid values for the option). This has the effect of allowing the module to generate a nicer help message for you. It's written by <a href=\"https://metacpan.org/author/RJBS\">RJBS</a> and is quite popular: <a href=\"https://metacpan.org/requires/distribution/Getopt-Long-Descriptive?sort=[[2,1]]&amp;size=100\">last I checked,</a> there are a bit over 50 other CPAN distributions using it, making it perhaps the most popular option parsing library aside from Getopt::Long itself.\n\nAs with any sane Getopt::Long-based library, it turns on <strong>bundling</strong> and <strong>no_ignore_case </strong>configurations. It integrates a fast (but minimal) validation library <a href=\"https://metacpan.org/pod/Params::Validate\">Params::Validate</a> to let you specify some restrictions on the values that you want your options to accept.\n\nI guess my minor nitpick with this module is the interface: I would've probably picked another name for its main function <strong>describe_options</strong> and would avoid using OO, but that's a personal taste issue.\n\nI haven't personally used it yet because I've written Perinci::CmdLine which more or less does the same thing (and more). GL::Descriptive is, like Getopt::Long, still <em>just</em> an option parsing library and what I need is an CLI library/framework. For example, it doesn't do tab completion or POD generation, even though the arguments fed to describe_options was quite enough for the features. (A comment was posted on a previous blog post about <a href=\"https://metacpan.org/pod/MooX::Options\">MooX::Options</a> and <a href=\"https://metacpan.org/pod/MooX::Cmd\">MooX::Cmd</a> which <em>are</em> full-blown CLI framework based on GL:Descriptive, and I will most probably discuss those on this series, eventually.)\n\n&nbsp;",
+         "post_date" : "20150204T22:32:55",
+         "post_date_gmt" : "20150204T15:32:55",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "47",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:01:20",
+         "post_modified_gmt" : "20160416T10:01:20",
+         "post_name" : "pericmd-005-getoptlongdescriptive",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 005: Getopt::Long::Descriptive",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-L",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "118",
+               "key" : "email_notification",
+               "value" : "1422810118"
+            },
+            {
+               "id" : "90",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "113",
+               "key" : "jabber_published",
+               "value" : "1422810117"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=39",
+         "link" : "https://perlancar.wordpress.com/2015/02/02/pericmd-004-whats-wrong-with-getoptlong-2/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In the previous post I mentioned about some things I would like to change in Getopt::Long, but this is rather opinionated and I'm not sure they should be implemented. Here goes:\n\n<b>Some old crufts</b>. Since this is a very old library, there are some features that are very seldom needed these days that they make good candidates for removal, to make the library smaller and easier to use. The first one is the <b><tt>ignore_case</tt></b> configuration. I always use <tt>no_ignore_case</tt> nowadays and it's common for programs to have options that differ only in case, like <tt>-v</tt> (for version) vs <tt>-V</tt> (for verbose). I think it'd just be less confusing if Getopt::Long is always case sensitive.\n\nAnother one is the <b><tt>getopt_compat</tt></b> configuration. Any program in circulation you saw lately which uses <tt>+</tt> prefix for options, instead of <tt>--</tt>? The world has mostly standardized on the dashes.\n\n<b>Trapping errors in option handler</b>. Getopt::Long encloses an <tt>eval { }</tt> when executing option handler. I think there should be an option to disable this, so an option handler can make the whole option parsing process exit early. Currently this is not possible, due to the error trapping.\n\nWell, that's about it. Much shorter than I expected :)\n\n\n",
+         "post_date" : "20150202T00:00:46",
+         "post_date_gmt" : "20150201T17:00:46",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "39",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:01:07",
+         "post_modified_gmt" : "20160416T10:01:07",
+         "post_name" : "pericmd-004-whats-wrong-with-getoptlong-2",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 004: What's wrong with Getopt::Long (2)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-D",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            },
+            {
+               "count" : "7",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "Tak Berkategori",
+               "parent" : "0",
+               "slug" : "tak-berkategori",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "3278647",
+               "term_taxonomy_id" : "1"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "111",
+               "key" : "email_notification",
+               "value" : "1422724206"
+            },
+            {
+               "id" : "86",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "106",
+               "key" : "jabber_published",
+               "value" : "1422724204"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=32",
+         "link" : "https://perlancar.wordpress.com/2015/02/01/pericmd-003-whats-wrong-with-getoptlong/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "So what's wrong with Getopt::Long? Nothing really. As an option parser library it's doing perfectly okay. There are some crufts or things I personally would like to change (I'll talk about it later), but these are minor. Also there are alternative libraries with different/\"fresh\" approaches like <a href=\"https://metacpan.org/pod/Docopt\">Docopt</a> which improve options parsing in some aspects, albeit introducing new problems of their own (we'll also get into these later), but really the old Getopt::Long way is still fine for most cases.\n\nAs a CLI library, however, it is inadequate. Well, that's unfair. What I meant to say is that Getopt::Long is not a full CLI library. It can be part of such library, but a CLI library will want functionalities not provided by Getopt::Long. For example, <b>routing</b>, which is just a fancy way of saying a nice way of mapping options to actions/commands. Getopt::Long does not provide such routing; it only deals mostly with assigning values to options. So, in a more complex CLI application you'll see a cascade if statement like this:\n\n[code language=\"perl\"]\nGetOptions(\n    'clean'      =&amp;gt; sub { $action = &amp;quot;clean&amp;quot; },\n    'register'   =&amp;gt; sub { $action = &amp;quot;register&amp;quot; },\n    'unregister' =&amp;gt; sub { $action = &amp;quot;unregister&amp;quot; },\n    'install'    =&amp;gt; sub { $action = &amp;quot;install&amp;quot; },\n    'uninstall'  =&amp;gt; sub { $action = &amp;quot;uninstall&amp;quot; },\n    ...\n);\n\nif ($action eq 'clean') {\n    ...\n} elsif ($action eq 'register') {\n    ...\n} elsif ($action eq 'unregister') {\n    ...\n} elsif ($action eq 'install') {\n    ...\n} elsif ($action eq 'uninstall') {\n    ...\n}\n[/code]\n\nIt would be nice if a CLI library lets us specify a routing of options/subcommands to actions, much like what we usually see in web frameworks.\n\nTechnically speaking, you can perform action directly in an option handler, like I usually do with <tt>--help</tt> or <tt>--version</tt>, but this will be done immediately when that option is encountered by Getopt::Long so you cannot see the options that follow it (this is usually okay for help/version message because they don't need to read options and exit early anyway):\n\n[code language=\"perl\"]\nGetOptions(\n    'help|h|?'  =&amp;gt; sub { say &amp;quot;help message ...&amp;quot;; exit 0 },\n    'version|v' =&amp;gt; sub { say &amp;quot;foo version $VERSION&amp;quot;; exit 0 },\n    ...\n);\n[/code]\n\nAnother feature that Getopt::Long does not provide is <b>automatic help message generation</b>. Well, actually Getopt::Long does have an <tt>auto_help</tt> switch, but this will only dump the POD instead of generating a help message from its options specification. The main reason is that the specification does not contain rich enough (meta)data to generate a proper help message. <a href=\"https://metacpan.org/pod/Getopt::Long::Descriptive\">Getopt::Long::Descriptive</a> attempts to remedy this, and I'll talk about it too in another post.\n\nAlso missing from Getopt::Long is the concept of <b>subcommands</b>, which most CLI application will need to have, when they grow big/complex enough, e.g. git, perlbrew. So Getopt::Long is purely all about options and does not care about arguments or subcommands at all. There are other libraries, some of them based on Getopt::Long, that tackle this, and we'll talk about those libraries in the future.",
+         "post_date" : "20150201T00:00:55",
+         "post_date_gmt" : "20150131T17:00:55",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "32",
+         "post_mime_type" : "",
+         "post_modified" : "20160416T17:00:50",
+         "post_modified_gmt" : "20160416T10:00:50",
+         "post_name" : "pericmd-003-whats-wrong-with-getoptlong",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 003: What's wrong with Getopt::Long",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-w",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

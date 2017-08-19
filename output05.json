@@ -1,0 +1,547 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1455",
+               "key" : "email_notification",
+               "value" : "1465536507"
+            },
+            {
+               "id" : "1450",
+               "key" : "jabber_published",
+               "value" : "1465536504"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1289",
+         "link" : "https://perlancar.wordpress.com/2016/06/10/cascade-bumping-of-prerequisite-version/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<p> Introducing backward-incompatible change to a piece of code, especially if that code has a lot of dependants (i.e. located more upstream in the river, if we're using the <a href=\"http://neilb.org/2015/04/20/river-of-cpan.html\">river of CPAN</a> analogy), will cause pain. But sometimes you need or want to do it anyway. </p>\n\n<p> Suppose you have this tree of dependencies: </p>\n\n<pre class=\"example\">\nAa (0.01)\n    Bb (0.01, requires Aa=0)\n    Cc (0.01, requires Aa=0)\n        Dd (0.01, requires Cc=0)\n        Ee (0.01, requires Cc=0)\n            Ff (0.01, requires Ee=0)\n            Gg (0.01, requires Ee=0)\n    Hh (0.01, requires Aa=0.01)\n</pre>\n\n<p> Now a backward-incompatible change is introduced in Aa, and you release Aa 0.02. Let's say this change happens to affect Bb and Cc but not Hh. </p>\n\n<p> If a system updates Aa to 0.02, suddenly Bb and Cc will break. And Dd, Ee, Ff, Gg will break too because Bb and Cc break. Aa can be updated due to a variety of causes, from manually for testing (like in a CPAN Testers machine) or because user installs something else like say Ii which needs Aa=0.02. </p>\n\n<p> So you now release Bb 0.02 and Cc 0.02 to cope with the changes introduced in Aa. And these updates are not backward-incompatible so users of Bb and Cc can still specify Bb=0 or Cc=0.01. The dependency tree becomes like this: </p>\n\n<pre class=\"example\">\nAa (0.02)\n    Bb (0.02, requires Aa=0.02)\n    Cc (0.02, requires Aa=0.02)\n        Dd (0.01, requires Cc=0)\n        Ee (0.01, requires Cc=0)\n            Ff (0.01, requires Ee=0)\n            Gg (0.01, requires Ee=0)\n    Hh (0.01, requires Aa=0.01)\n</pre>\n\n<p> If a system happens to update just Bb or Cc, Aa will be correctly updated automatically to 0.02. </p>\n\n<p> If a system just updates Aa, the same situation still happens: Bb &amp; Cc will break, Dd, Ee, Ff, Gh will break too because Bb and Cc break. </p>\n\n<p> Now suppose you add a new feature to Ff and release new version of Ff (0.02, requires Ee=0). Even though this does not have to do with backward-incompatible change of A 0.02, breakage might still happen. Let's say a CPAN Testers machine tries to install Ff 0.02. The machine won't automatically upgrade Bb and Cc because the specified dependency of Ff 0.02 doesn't require it too. Now the test will fail when there is a new Aa (0.02) installed but old versions of Bb and Cc. </p>\n\n<p> This is exactly what happens to me a few times, most recently in the case of <a href=\"https://metacpan.org/pod/Data::Sah\">Data::Sah</a> 0.79. After I released Data::Sah 0.79, and then a couple of weeks after that release some other distributions that do not directly depend on it, some CPAN Testers machines will start reporting failure for these distributions. This is because the machines happen to have the updated Data::Sah but some older direct dependants which break under the new Data::Sah. </p>\n\n<p> So back to our Aa example, to properly induce a cascade update, after we release Bb 0.02 and Cc 0.02, we also need to release Dd and Ee just to bump the prerequisite version of Cc to 0.02 <b>even though Dd and Ee don't exactly require Cc 0.02 (they can live with Cc 0.01)</b>. And repeat the process recursively: update Ff and Gg just to bump prerequisite version of Ee, and so on. </p>\n\n<p> Thus, if a system updates Gg 0.02, Ee will automatically be upgraded to 0.02, Cc automatically upgraded to 0.02, and Aa automatically upgraded to 0.02. </p>\n\n<p> To reiterate: after we introduce a backward-incompatible update to a module, we must update all the direct dependants of that module that are affected by the change, <b>and also recursively update all their dependants</b> just to bump the minimum prerequisite version and force pulling the module's and direct dependants' update. </p>\n\n<p> In the case of Data::Sah, this involves hundreds of distributions because <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Lite\">Perinci::CmdLine::Lite</a> is a direct dependant that is affected. And Perinci::CmdLine::Lite (via <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Any\">Perinci::CmdLine::Any</a>) is used by many of my App:: distributions. But fortunately, on a production system, Data::Sah typically won't be updated without Perinci::CmdLine::Lite also being updated. </p>\n",
+         "post_date" : "20160610T12:22:00",
+         "post_date_gmt" : "20160610T05:22:00",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1289",
+         "post_mime_type" : "",
+         "post_modified" : "20160610T12:28:23",
+         "post_modified_gmt" : "20160610T05:28:23",
+         "post_name" : "cascade-bumping-of-prerequisite-version",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Cascade bumping of prerequisite version",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-kN",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1441",
+               "key" : "email_notification",
+               "value" : "1463643174"
+            },
+            {
+               "id" : "1435",
+               "key" : "jabber_published",
+               "value" : "1463643171"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1285",
+         "link" : "https://perlancar.wordpress.com/2016/05/19/using-monotoning-versioning-in-perl/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<p> The <a href=\"http://blog.appliedcompscilab.com/monotonic_versioning_manifesto/\">Monotonic Versioning Manifesto</a> looks interesting. Here's the summary. Version is composed of only two numbers: X.Y. No leading zero is allowed for both numbers (so you must start at 1.1, not 0.1 nor 1.0). X indicates compatibility and must be increased whenever you introduce a backward-incompatible change. Y is the release number and must always increase, even though X is increased. In other words, Y is never reset. In this aspect, Y is akin to build number often used in compiled projects. </p>\n\n<p> If you maintain two versions of your software, e.g. 7.5304 and 8.5822 and want to backport some feature/changes from version 8 to 7, you would release 7.5823. </p>\n\n<p> Oh, and one more thing: since the popular <a href=\"http://semver.org\">semantic versioning scheme</a> uses X.Y.Z, to aid interoperability X.Y.0 is allowed as an alternate display format and is identical to X.Y. Any other number for Z is not allowed. </p>\n\n<p> Sure, the numbering scheme won't be sufficient for larger/complex software, but for many Perl modules it could be a fit. </p>\n\n<p> The important thing is to decide the number of digits you will need for the release number. 1.1, 1.10, 1.100, and so on are all the same in Perl (this is according to version-&gt;parse(V1) == version-&gt;parse(V2)), so you cannot just start with 1.1 and expect to go more than 9 releases without increasing X. </p>\n\n<p> A sane choice is either 3 or 6 digits*). If 3 digits is enough for you, then go for it. A total of 900 releases, <b>ever</b>, sounds limiting at first but I don't think there is a CPAN distribution that has close to 900 releases, are there? Otherwise, go for 6. </p>\n\n<p> *) Because the way version number works in Perl, you should not choose e.g. 2 or 4. Because version-&gt;parse(\"1.10\") &lt; version-&gt;parse(\"1.9\") and version-&gt;parse(\"1.10010\") &lt; version-&gt;parse(\"1.1009\"). </p>\n",
+         "post_date" : "20160519T14:32:00",
+         "post_date_gmt" : "20160519T07:32:00",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1285",
+         "post_mime_type" : "",
+         "post_modified" : "20160519T20:18:17",
+         "post_modified_gmt" : "20160519T13:18:17",
+         "post_name" : "using-monotoning-versioning-in-perl",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Using monotonic versioning in Perl",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-kJ",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1424",
+               "key" : "email_notification",
+               "value" : "1462263733"
+            },
+            {
+               "id" : "1419",
+               "key" : "jabber_published",
+               "value" : "1462263731"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1278",
+         "link" : "https://perlancar.wordpress.com/2016/05/03/blogging-with-org2blog/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<p> This post you're seeing is the first one posted using <a href=\"https://github.com/punchagan/org2blog\">org2blog</a>. Finally, I can blog from Emacs, yay! </p>\n\n<p> Frankly I'm not too fussy with my blog setup: any decent website will do as long as I can type text in, format stuffs, and the final page is readable. My previous blog was on <a href=\"http://blogs.perl.org\">blogs.perl.org</a>, which I had to abandon because the login system was screwed up for many months, preventing me from even logging in, much less posting comments or new entries. </p>\n\n<p> My current blog, the site you're reading now hosted by WordPress, is not too bad. But there are two problems I'm having: first, the in-browser editor is limited and sometimes has annoying couple-of-second freezes every now and then. And second, the worse one, is that I've noticed the text changed at least twice. A few months ago I saw my Perl source code inside &lt;pre&gt; got HTML-escaped, so \"$a &gt; $b\" becomes \"$a &amp;gt; $b\". This does not happen to all posts, only some of them. But I'm just too lazy to check my posts one by one. And more recently, suddenly all my \"pericmd-tut\" (with a lowercase i) tags became \"perlcmd-tut\" (with a lowercase ell), as if someone had run an autocorrect on the tags database. I updated a few dozen posts this time, reverting the tags back to \"pericmd-tut\" and meanwhile starting to ponder for alternatives. </p>\n\n<p> Today I decide to give org2blog a try. I've heard about this tool like a couple of weeks ago and yesterday I had an idea for a blog post. Here are the general steps and some examples if you happen to be interested to follow suit. </p>\n\n<div id=\"outline-container-sec-1\" class=\"outline-2\">\n<h2 id=\"sec-1\">Installation</h2>\n<div class=\"outline-text-2\" id=\"text-1\">\n<p> The first thing I had to do was put the <code>*.el</code> from the org2blog package under my <code>$HOME/.emacs.d</code> directory as <code>M-x install-package</code> didn't work out for me. (<code>$HOME/.emacs.d/lisp</code> should be a better choice, but I haven't bothered to move my <code>*.el</code> files there.) I also had to drop <code>xml-rpc.el</code> and <code>metaweblog.el</code> from into this same directory. Those two are the requirements mentioned in the org2blog README. </p>\n\n<p> Then I appended these lines to my <code>$HOME/.emacs</code>: </p>\n\n<pre class=\"example\">\n(require 'org2blog-autoloads)\n(setq org2blog/wp-blog-alist\n      '((\"perlancar\"\n         :url \"https://perlancar.wordpress.com/xmlrpc.php\"\n         :username \"&lt;censored&gt;\"\n         :password \"&lt;censored&gt;\"\n         :default-title \"Post\"\n         :default-categories (\"perl\")\n         :tags-as-categories nil)\n         ))\n(setq org2blog/wp-use-sourcecode-shortcode t)\n</pre>\n\n<p> I guess the README doesn't recommend putting the password right there along with the username, but for simplicity sake I just put it anyway. </p>\n\n<p> Also note that you can use an existing blog (as in my case). org2blog can add new posts or delete existing ones based on post ID's which you supply later. </p>\n\n<p> Then I restarted my Emacs. </p>\n</div>\n</div>\n\n<div id=\"outline-container-sec-2\" class=\"outline-2\">\n<h2 id=\"sec-2\">Creating a new post</h2>\n<div class=\"outline-text-2\" id=\"text-2\">\n<p> Each post is put in a separate buffer (file). </p>\n\n<p> To create a new post, <code>M-x org2blog/wp-new-entry</code>. org2blog will create a new buffer containing something like this: </p>\n\n<pre class=\"example\">\n#+DATE: [2016-05-03 Tue 14:47]\n#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil\n#+CATEGORY: perl\n#+TAGS:\n#+DESCRIPTION:\n#+TITLE: Post\n</pre>\n\n<p> You can then edit the title, tags, or categories. And start writing. You can save the buffer anywhere as regular files. This post itself is saved as an <code>.org</code> file then put under a <a href=\"https://github.com/perlancar/blog-perlancar-wordpress-com-2016/blob/master/01-blogging-with-org2blog.org\">Git repository</a>. </p>\n</div>\n</div>\n\n<div id=\"outline-container-sec-3\" class=\"outline-2\">\n<h2 id=\"sec-3\">Posting to WordPress</h2>\n<div class=\"outline-text-2\" id=\"text-3\">\n<p> To post the buffer as draft, <code>M-x org2blog/wp-post-buffer</code> (or <code>C-c M-p d</code>). And to publish the buffer <code>C-u M-x org2blog/wp-post-buffer</code> (or <code>C-c M-p p</code>). org2blog will also ask you whether you want to open the post in a browser to see how the final result looks like. </p>\n\n<p> That's it, it's that simple. Now you can write in the cozy and powerful Emacs environment, and your source document is in Org format instead of the default bastardized HTML that WordPress uses. </p>\n\n<p> After the first sending to the server, org2blog will add a <code>#+POST_ID:</code> line containing the post's ID. If you edit the buffer, then re-post, it will update the existing post since the buffer already specifies the post's ID. Editing your blog posts is now as simple as editing a file with an extra single command to push it to WordPress. </p>\n</div>\n</div>\n<div id=\"outline-container-sec-4\" class=\"outline-2\">\n<h2 id=\"sec-4\">Some formatting examples</h2>\n<div class=\"outline-text-2\" id=\"text-4\">\n<p> To see the Org source code that produces these result, see the abovementioned Git repository. </p>\n\n<p> This is a Perl code block: </p>\n\n[sourcecode language=\"perl\" title=\"\" ]\n#!/usr/bin/perl\n\nuse strict;\nuse warnings;\nuse Org::Parser;\n\nmy $orgp = Org::Parser-&gt;new;\nmy $doc = $orgp-&gt;parse_file(\"$ENV{HOME}/todo.org\");\n[/sourcecode]\n\n<p> This is another Perl code block, which we set to begin from line 75 and have its lines 77-78 highlighted: </p>\n\n[sourcecode language=\"perl\" title=\"\" firstline=75 highlight=77,78]\nmy @elems = $doc-&gt;select(\"Table:first TableCell:empty\");\nfor my $elem (@elems) {\n    $log-&gt;trace(\"Deleting empty element %s\", $elem);\n    $elem-&gt;delete;\n}\n[/sourcecode]\n</div>\n</div>\n",
+         "post_date" : "20160503T14:18:00",
+         "post_date_gmt" : "20160503T07:18:00",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1278",
+         "post_mime_type" : "",
+         "post_modified" : "20160722T22:01:56",
+         "post_modified_gmt" : "20160722T15:01:56",
+         "post_name" : "blogging-with-org2blog",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Blogging with org2blog",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-kC",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "1",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "emacs",
+               "parent" : "0",
+               "slug" : "emacs",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "11362",
+               "term_taxonomy_id" : "14"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1386",
+               "key" : "email_notification",
+               "value" : "1458747763"
+            },
+            {
+               "id" : "1382",
+               "key" : "jabber_published",
+               "value" : "1458747760"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1243",
+         "link" : "https://perlancar.wordpress.com/2016/03/23/selecting-elements-of-org-document-with-css-selector-like-syntax/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "If you've dabbled with jQuery or CSS selector, or <a href=\"https://metacpan.org/pod/Mojo::DOM\">Mojo::DOM</a> (or <a href=\"https://metacpan.org/pod/DOM::Tiny\">DOM::Tiny</a>), you'll find that CSS selector offers a nice way to select elements.\n\nI've created <a href=\"https://metacpan.org/pod/Data::CSel\">Data::CSel</a> to extend this concept not just for HTML element tree, but also for any kind of tree object in Perl. The syntax is similar enough so you should be able to get up and running in no time.\n\nFor the first application that uses this, I've added the <a href=\"https://metacpan.org/pod/select-org-elements\">select-org-elements</a> script to <a href=\"https://metacpan.org/release/App-OrgUtils\">App-OrgUtils</a> distribution. This script can select elements of an Org document tree using the CSel language. This should make it easier to select/extract parts of your Org document without having to resort to using <a href=\"https://metacpan.org/pod/Org::Document\">Perl code</a> to manipulate the tree.\n\nExample Org document (you can grab it from https://github.com/perlancar/samples/blob/master/org/table.org ):\n\n<pre> emacs determines whether a column mostly contains numbers or non-numbers. if\nnumbers then a column will be left-justified. if non-numbers then\nright-justified.\n\n| col1   |      col2 | col3 | col4     |    col5 |\n|--------+-----------+------+----------+---------|\n| foo    |      -1.3 |      | abc      |     123 |\n| bar    |   -1900.3 |      | abcdefgh | 1500000 |\n| baz    |      23.1 |      | 10       |     abc |\n| quux   |         0 |      | foo      |     def |\n| garply | 3,000,000 |      | 999      |     234 |\n\ntable without header:\n\n| one   | two  |\n| three | four |\n</pre>\n\nTo help see the structure, first use the <a href=\"https://metacpan.org/pod/dump-org-structure\">dump-org-structure</a> script:\n\n<pre>% dump-org-structure org/tables.org\nDocument:\n  Text: \"emacs determines whether a column mostly...\"\n  Table:\n    TableRow:\n      TableCell:\n        Text: \"col1\"\n      TableCell:\n        Text: \"col2\"\n      TableCell:\n        Text: \"col3\"\n      TableCell:\n        Text: \"col4\"\n      TableCell:\n        Text: \"col5\"\n    TableVLine: \"|---\\n\"\n    TableRow:\n      TableCell:\n        Text: \"foo\"\n      TableCell:\n        Text: \"-1.3\"\n      TableCell:\n      TableCell:\n        Text: \"abc\"\n      TableCell:\n        Text: \"123\"\n    TableRow:\n      TableCell:\n        Text: \"bar\"\n      TableCell:\n        Text: \"-1900.3\"\n      TableCell:\n      TableCell:\n        Text: \"abcdefgh\"\n      TableCell:\n        Text: \"1500000\"\n    TableRow:\n      TableCell:\n        Text: \"baz\"\n      TableCell:\n        Text: \"23.1\"\n      TableCell:\n      TableCell:\n        Text: \"10\"\n      TableCell:\n        Text: \"abc\"\n    TableRow:\n      TableCell:\n        Text: \"quux\"\n      TableCell:\n        Text: \"0\"\n      TableCell:\n      TableCell:\n        Text: \"foo\"\n      TableCell:\n        Text: \"def\"\n    TableRow:\n      TableCell:\n        Text: \"garply\"\n      TableCell:\n        Text: \"3,000,000\"\n      TableCell:\n      TableCell:\n        Text: \"999\"\n      TableCell:\n        Text: \"234\"\n  Text: \"\\ntable without header:\\n\\n\"\n  Table:\n    TableRow:\n      TableCell:\n        Text: \"one\"\n      TableCell:\n        Text: \"two\"\n    TableRow:\n      TableCell:\n        Text: \"three\"\n      TableCell:\n        Text: \"four\"\n</pre>\n\nNow let's select some elements:\n\n<pre>% select-org-elements TableRow org/table.org\n|col1|col2|col3|col4|col5\n|foo|-1.3||abc|123\n|bar|-1900.3||abcdefgh|1500000\n|baz|23.1||10|abc\n|quux|0||foo|def\n|garply|3,000,000||999|234\n|one|two\n|three|four\n\n% select-org-elements TableRow:first org/table.org\n|col1|col2|col3|col4|col5\n\n% select-org-elements 'TableCell:nth-of-type(5):last' org/table.org\n234\n</pre>\n\nSelecting via Perl code is equally easy:\n\n<pre>use Org::Parser;\nuse Data::CSel qw(csel);\n\nmy $doc = Org::Parser-&gt;new-&gt;parse_file(\"yourfile.org\");\nmy @headlines = csel({class_prefixes=&gt;['Org::Element']}, \"Headline[level=2]\", $doc);\n</pre>\n\nEnjoy.\n",
+         "post_date" : "20160323T22:42:39",
+         "post_date_gmt" : "20160323T15:42:39",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1243",
+         "post_mime_type" : "",
+         "post_modified" : "20160323T22:42:39",
+         "post_modified_gmt" : "20160323T15:42:39",
+         "post_name" : "selecting-elements-of-org-document-with-css-selector-like-syntax",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Selecting elements of Org document with CSS-selector-like syntax",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-k3",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1359",
+               "key" : "email_notification",
+               "value" : "1457096382"
+            },
+            {
+               "id" : "1355",
+               "key" : "jabber_published",
+               "value" : "1457096379"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=679",
+         "link" : "https://perlancar.wordpress.com/2016/03/04/lcpan-tips-015-munging-lcpan-text-output-with-td/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nOften the output of lcpan is too wide to view on your terminal, causing wrapped text that's hard to read, e.g.:\n\n<pre>% lcpan related-mods Text::Roman\n+------------------------------+------------------------------------------------------------------+--------------+-----------------------+-----------------------+-----\n--+---------------------------+----------+\n| module                       | abstract                                                         | num_mentions | num_mentions_together | pct_mentions_together | scor\ne | dist                      | author   |\n+------------------------------+------------------------------------------------------------------+--------------+-----------------------+-----------------------+-----\n--+---------------------------+----------+\n| Math::Roman                  | Arbitrary sized Roman numbers and conversion from and to Arabic. | 5            | 3                     | 60                    | 540 \n  | Math-Roman                | TELS     |\n| Convert::Number::Roman       | Convert Between Western and Roman Numeral Systems                | 2            | 2                     | 100                   | 400 \n  | Convert-Number-Roman      | DYACOB   |\n| Roman                        | functions for converting between Roman and Arabic numerals       | 4            | 2                     | 50                    | 200 \n  | Roman                     | CHORNY   |\n| Roman::Unicode               | Make roman numerals, using the Unicode characters for them       | 4            | 2                     | 50                    | 200 \n  | Roman-Unicode             | BDFOY    |\n| Acme::MetaSyntactic::roman   | The roman theme                                                  | 1            | 1                     | 100                   | 100 \n  | Acme-MetaSyntactic-Themes | BOOK     |\n| Acme::Roman                  | Do maths like Romans did                                         | 1            | 1                     | 100                   | 100 \n  | Acme-Roman                | FERREIRA |\n| Convert::Number::Digits      | Convert Digits Between the Scripts of Unicode.                   | 1            | 1                     | 100                   | 100 \n  | Convert-Number-Digits     | DYACOB   |\n| Language::Befunge::lib::ROMA | Roman numerals extension                                         | 1            | 1                     | 100                   | 100 \n  | Language-Befunge          | JQUELIN  |\n| Convert::Number::Coptic      | Convert Between Western and Coptic Numeral Systems               | 4            | 1                     | 25                    | 25  \n  | Convert-Number-Coptic     | DYACOB   |\n+------------------------------+------------------------------------------------------------------+--------------+-----------------------+-----------------------+-----\n--+---------------------------+----------+\n</pre>\n\nIn a GUI terminal emulator, you usually can shrink the font size so more characters can fit in a single row. For example, in Konsole you can press Ctrl-[-] to do this. However, as the font becomes smaller it's harder to read. Sometimes you just want to read some columns and ignore the others.\n\nSince lcpan is using <a href=\"https://metacpan.org/pod/Perinci::CmdLine\">Perinci::CmdLine</a> framework, its text output is actually a data structure, as you can see if you ask it to output in JSON format instead:\n\n<pre>% lcpan related-mods Text::Roman --json\n[\n   {\n      \"abstract\" : \"Arbitrary sized Roman numbers and conversion from and to Arabic.\",\n      \"author\" : \"TELS\",\n      \"dist\" : \"Math-Roman\",\n      \"module\" : \"Math::Roman\",\n      \"num_mentions\" : 5,\n      \"num_mentions_together\" : 3,\n      \"pct_mentions_together\" : 60,                                                                                                                                    \n      \"score\" : 540                                                                                                                                                    \n   },                                                                                                                                                                  \n   {                                                                                                                                                                   \n      \"abstract\" : \"Convert Between Western and Roman Numeral Systems\",                                                                                                \n      \"author\" : \"DYACOB\",\n      \"dist\" : \"Convert-Number-Roman\",\n      \"module\" : \"Convert::Number::Roman\",\n      \"num_mentions\" : 2,\n      \"num_mentions_together\" : 2,\n      \"pct_mentions_together\" : 100,\n      \"score\" : 400\n   },\n   {\n      \"abstract\" : \"functions for converting between Roman and Arabic numerals\",\n      \"author\" : \"CHORNY\",\n      \"dist\" : \"Roman\",\n      \"module\" : \"Roman\",\n      \"num_mentions\" : 4,\n      \"num_mentions_together\" : 2,\n      \"pct_mentions_together\" : 50,\n      \"score\" : 200\n   },\n   {\n      \"abstract\" : \"Make roman numerals, using the Unicode characters for them\",\n      \"author\" : \"BDFOY\",\n      \"dist\" : \"Roman-Unicode\",\n      \"module\" : \"Roman::Unicode\",\n      \"num_mentions\" : 4,\n      \"num_mentions_together\" : 2,\n      \"pct_mentions_together\" : 50,\n      \"score\" : 200\n   },\n   {\n      \"abstract\" : \"The roman theme\",\n      \"author\" : \"BOOK\",\n      \"dist\" : \"Acme-MetaSyntactic-Themes\",\n      \"module\" : \"Acme::MetaSyntactic::roman\",\n      \"num_mentions\" : 1,\n      \"num_mentions_together\" : 1,\n      \"pct_mentions_together\" : 100,\n      \"score\" : 100\n   },\n   {\n      \"abstract\" : \"Do maths like Romans did\",\n      \"author\" : \"FERREIRA\",\n      \"dist\" : \"Acme-Roman\",\n      \"module\" : \"Acme::Roman\",\n      \"num_mentions\" : 1,\n      \"num_mentions_together\" : 1,\n      \"pct_mentions_together\" : 100,\n      \"score\" : 100\n   },\n   {\n      \"abstract\" : \"Convert Digits Between the Scripts of Unicode.\",\n      \"author\" : \"DYACOB\",\n      \"dist\" : \"Convert-Number-Digits\",\n      \"module\" : \"Convert::Number::Digits\",\n      \"num_mentions\" : 1,\n      \"num_mentions_together\" : 1,\n      \"pct_mentions_together\" : 100,\n      \"score\" : 100\n   },\n   {\n      \"abstract\" : \"Roman numerals extension\",\n      \"author\" : \"JQUELIN\",\n      \"dist\" : \"Language-Befunge\",\n      \"module\" : \"Language::Befunge::lib::ROMA\",\n      \"num_mentions\" : 1,\n      \"num_mentions_together\" : 1,\n      \"pct_mentions_together\" : 100,\n      \"score\" : 100\n   },\n   {\n      \"abstract\" : \"Convert Between Western and Coptic Numeral Systems\",\n      \"author\" : \"DYACOB\",\n      \"dist\" : \"Convert-Number-Coptic\",\n      \"module\" : \"Convert::Number::Coptic\",\n      \"num_mentions\" : 4,\n      \"num_mentions_together\" : 1,\n      \"pct_mentions_together\" : 25,\n      \"score\" : 25\n   }\n]\n</pre>\n\nNow you can use a JSON munging tool like <a href=\"https://stedolan.github.io/jq/\">jq</a> to filter the fields of each record, and then later render the JSON back to text table using tool like <a href=\"https://metacpan.org/pod/pretty\">pretty</a>, e.g.:\n\n<pre>% lcpan related-mods Text::Roman --json | jq '[ .[] | {module, abstract} ]'\n[\n  {\n    \"module\": \"Math::Roman\",\n    \"abstract\": \"Arbitrary sized Roman numbers and conversion from and to Arabic.\"\n  },\n  {\n    \"module\": \"Convert::Number::Roman\",\n    \"abstract\": \"Convert Between Western and Roman Numeral Systems\"\n  },\n  {\n    \"module\": \"Roman\",\n    \"abstract\": \"functions for converting between Roman and Arabic numerals\"\n  },\n  {\n    \"module\": \"Roman::Unicode\",\n    \"abstract\": \"Make roman numerals, using the Unicode characters for them\"\n  },\n  {\n    \"module\": \"Acme::MetaSyntactic::roman\",\n    \"abstract\": \"The roman theme\"\n  },\n  {\n    \"module\": \"Acme::Roman\",\n    \"abstract\": \"Do maths like Romans did\"\n  },\n  {\n    \"module\": \"Convert::Number::Digits\",\n    \"abstract\": \"Convert Digits Between the Scripts of Unicode.\"\n  },\n  {\n    \"module\": \"Language::Befunge::lib::ROMA\",\n    \"abstract\": \"Roman numerals extension\"\n  },\n  {\n    \"module\": \"Convert::Number::Coptic\",\n    \"abstract\": \"Convert Between Western and Coptic Numeral Systems\"\n  }\n]\n</pre>\n\n<pre>% lcpan related-mods Text::Roman --json | jq '[ .[] | {module, abstract} ]' | pretty\n┌──────────────────────────────────────────────────────────────────────────────┐\n│ abstract                                        module                       │\n│                                                                              │\n│ Arbitrary sized Roman numbers and conversion    Math::Roman                  │\n│ from and to Arabic.                                                          │\n│ Convert Between Western and Roman Numeral       Convert::Number::Roman       │\n│ Systems                                                                      │\n│ functions for converting between Roman and      Roman                        │\n│ Arabic numerals                                                              │\n│ Make roman numerals, using the Unicode          Roman::Unicode               │\n│ characters for them                                                          │\n│ The roman theme                                 Acme::MetaSyntactic::roman   │\n│ Do maths like Romans did                        Acme::Roman                  │\n│ Convert Digits Between the Scripts of           Convert::Number::Digits      │\n│ Unicode.                                                                     │\n│ Roman numerals extension                        Language::Befunge::lib::ROMA │\n│ Convert Between Western and Coptic Numeral      Convert::Number::Coptic      │\n│ Systems                                                                      │\n└──────────────────────────────────────────────────────────────────────────────┘\n</pre>\n\nOr, if you want to make sure that the order of the columns is maintained:\n\n<pre>% lcpan related-mods Text::Roman --json | jq '[ .[] | [.module, .abstract] ]' | pretty\n┌──────────────────────────────────────────────────────────────────────────────┐\n│ column0                        column1                                       │\n│                                                                              │\n│ Math::Roman                    Arbitrary sized Roman numbers and conversion  │\n│                                from and to Arabic.                           │\n│ Convert::Number::Roman         Convert Between Western and Roman Numeral     │\n│                                Systems                                       │\n│ Roman                          functions for converting between Roman and    │\n│                                Arabic numerals                               │\n│ Roman::Unicode                 Make roman numerals, using the Unicode        │\n│                                characters for them                           │\n│ Acme::MetaSyntactic::roman     The roman theme                               │\n│ Acme::Roman                    Do maths like Romans did                      │\n│ Convert::Number::Digits        Convert Digits Between the Scripts of         │\n│                                Unicode.                                      │\n│ Language::Befunge::lib::ROMA   Roman numerals extension                      │\n│ Convert::Number::Coptic        Convert Between Western and Coptic Numeral    │\n│                                Systems                                       │\n└──────────────────────────────────────────────────────────────────────────────┘\n</pre>\n\nThere's an easier way though, using <a href=\"https://metacpan.org/pod/td\">td</a>. It takes a JSON input, processes it according to the given command, and then renders it back to text table (among other formats). For example:\n\n<pre>% lcpan related-mods Text::Roman --json | td select module abstract\n+------------------------------+------------------------------------------------------------------+\n| module                       | abstract                                                         |\n+------------------------------+------------------------------------------------------------------+\n| Math::Roman                  | Arbitrary sized Roman numbers and conversion from and to Arabic. |\n| Convert::Number::Roman       | Convert Between Western and Roman Numeral Systems                |\n| Roman                        | functions for converting between Roman and Arabic numerals       |\n| Roman::Unicode               | Make roman numerals, using the Unicode characters for them       |\n| Acme::MetaSyntactic::roman   | The roman theme                                                  |\n| Acme::Roman                  | Do maths like Romans did                                         |\n| Convert::Number::Digits      | Convert Digits Between the Scripts of Unicode.                   |\n| Language::Befunge::lib::ROMA | Roman numerals extension                                         |\n| Convert::Number::Coptic      | Convert Between Western and Coptic Numeral Systems               |\n+------------------------------+------------------------------------------------------------------+\n</pre>\n\nIn the above command, we tell <code>td</code> to just select a couple of columns from the table.\n\nThere are a few other td commands available, e.g. to sort rows based on one or more columns, to perform sum/count/and so on. So basically <code>td</code> is the equivalent of Unix toolbox command cut, head, tail, sum, and so on, <i>except that it operates on a table data structure instead of text stream.</i>\n\nThere's an extra convenience put in if you use <code>td</code>. If <a href=\"https://metacpan.org/pod/Pipe::Find\">Pipe::Find</a> module is available, Perinci::CmdLine can use it to check that the program called \"td\" is at the right side of the pipeline and automatically defaults to JSON output, so you don't need to specify <code>--json</code>:\n\n<pre>% lcpan related-mods Text::Roman | td select module abstract</pre>\n\nNote that this tip is not only for lcpan, but for all Perinci::CmdLine-based CLI applications.",
+         "post_date" : "20160304T19:59:37",
+         "post_date_gmt" : "20160304T12:59:37",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "679",
+         "post_mime_type" : "",
+         "post_modified" : "20160304T20:04:08",
+         "post_modified_gmt" : "20160304T13:04:08",
+         "post_name" : "lcpan-tips-015-munging-lcpan-text-output-with-td",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 015: Munging lcpan text output with 'td'",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aX",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1349",
+               "key" : "email_notification",
+               "value" : "1457078178"
+            },
+            {
+               "id" : "1345",
+               "key" : "jabber_published",
+               "value" : "1457078176"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=1147",
+         "link" : "https://perlancar.wordpress.com/2016/03/04/fixing-prereqs-in-dist-ini-automatically/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "This post is relevant to CPAN authors who use <a href=\"https://metacpan.org/pod/Dist::Zilla\">Dist::Zilla</a> as their building tool.\n\nUnless you're using a plugin like <a href=\"https://metacpan.org/pod/Dist::Zilla::Plugin::DynamicPrereqs\">DZP:DynamicPrereqs</a>, you'll be listing prerequisites manually in <code>dist.ini</code> in the <code>[Prereqs/*]</code> sections.\n\nBy default, dzil doesn't check that the prereqs you specify in <code>dist.ini</code> are actually used in the code. So you might potentially put <i>extraneous prereqs</i>: prereqs that are not actually used by your distribution. Or <i>missing prereqs</i>: prereqs that are needed but not yet listed.\n\nI've written a script called <a href=\"https://metacpan.org/pod/lint-prereqs\">lint-prereqs</a> (installable via <code>cpanm -n App::LintPrereqs</code>) to check this (I guess I should also provide a dzil plugin version, maybe later). Just run the script in your top-level distribution directory and it'll report something like:\n\n<pre>% lint-prereqs\n+------------+-------+---------+---------------------------------+------------------------------------------------------------------+\n| module     | req_v | is_core | error                           | remedy                                                           |\n+------------+-------+---------+---------------------------------+------------------------------------------------------------------+\n| strict     | 0     | 1       | Used but not listed in dist.ini | Put 'strict=0' in dist.ini (e.g. in [Prereqs/RuntimeRequires])   |\n| warnings   | 0     | 1       | Used but not listed in dist.ini | Put 'warnings=0' in dist.ini (e.g. in [Prereqs/RuntimeRequires]) |\n| Test::More | 0     | 1       | Used but not listed in dist.ini | Put 'Test::More=0' in dist.ini (e.g. in [Prereqs/TestRequires])  |\n+------------+-------+---------+---------------------------------+------------------------------------------------------------------+\n</pre>\n\nIn addition to extraneous/missing prereqs, lint-prereqs can also check <i>mismatching prereq version</i>: different version is being specified in the source code vs in <code>dist.ini</code> (for example, in your source code you specify <code>use Test::More 0.98;</code> but in <code>dist.ini</code> you put under <code>[Prereqs/TestRequires]</code> the line <code>Test::More=0.96</code>.\n\nlint-prereqs can also check <i>misplaced prereq phase</i>: modules that are only used in tests (under <code>t/</code> or <code>xt/</code>) but put under <code>[Prereqs/RuntimeRequires]</code>, or vice versa modules that are used for runtime (under <code>lib/</code> or <code>bin/</code>) but put under <code>[Prereqs/TestRequires]</code>.\n\nUp until recently I've skipped specifying core modules from dist.ini, but now I'm listing all prerequisites, be them core or not. As I maintain hundreds of dists, this requires editing hundreds of <code>dist.ini</code> files, putting in lines like <code>strict=0</code> or <code>warnings=0</code>. Over the course of a few weeks I've run through about 200-300 of them, but boy that got old quickly. So Perl again to the rescue...\n\nAs of version 0.39, lint-prereqs sports a <code>--fix</code> option to try to automatically fix the prereq errors. It can add/remove/move the prereqs in <code>dist.ini</code>. But not all types of errors can be fixed. For example, if there is a version mismatch between the one specified in the source code vs in <code>dist.ini</code>, lint-prereqs will let you decide which one is actually correct and which should be corrected. \n\nLet's see this in action:\n\n<pre>% lint-prereqs --fix\npdrutil: Added prereq 'strict=0' to section [Prereqs]\npdrutil: Added prereq 'warnings=0' to section [Prereqs]\npdrutil: Added prereq 'Test::More=0' to section [Prereqs / TestRequires]\npdrutil: Sorted prereqs\n+------------+-------+---------+---------------------------------+--------------------------------------------------------------------------+\n| module     | req_v | is_core | error                           | remedy                                                                   |\n+------------+-------+---------+---------------------------------+--------------------------------------------------------------------------+\n| strict     | 0     | 1       | Used but not listed in dist.ini | Put 'strict=0' in dist.ini (e.g. in [Prereqs/RuntimeRequires]) (fixed)   |\n| warnings   | 0     | 1       | Used but not listed in dist.ini | Put 'warnings=0' in dist.ini (e.g. in [Prereqs/RuntimeRequires]) (fixed) |\n| Test::More | 0     | 1       | Used but not listed in dist.ini | Put 'Test::More=0' in dist.ini (e.g. in [Prereqs/TestRequires]) (fixed)  |\n+------------+-------+---------+---------------------------------+--------------------------------------------------------------------------+\n</pre>\n\nAs a bonus, because the configuration is in INI format, and <a href=\"https://metacpan.org/pod/Config::IOD\">Config::IOD</a> is used to modify the <code>.ini</code> file, all comments and formatting are left intact after the script's modification (although I do add a final sorting step to keep the prereqs nicely ordered).\n",
+         "post_date" : "20160304T14:56:14",
+         "post_date_gmt" : "20160304T07:56:14",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "1147",
+         "post_mime_type" : "",
+         "post_modified" : "20160304T20:09:17",
+         "post_modified_gmt" : "20160304T13:09:17",
+         "post_name" : "fixing-prereqs-in-dist-ini-automatically",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Fixing prereqs in dist.ini automatically",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-iv",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1341",
+               "key" : "email_notification",
+               "value" : "1456755110"
+            },
+            {
+               "id" : "1336",
+               "key" : "jabber_published",
+               "value" : "1456755108"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=677",
+         "link" : "https://perlancar.wordpress.com/2016/02/29/lcpan-tips-014-why-use-lcpan/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nOkay, this is not so much a tip but a background story. And this post should be the first in the series. Anyway.\n\nSo, why would you want to use lcpan?\n\nThe first and foremost reason for me is internet connectivity and bandwidth. Back in around 2001 I think, to save bandwidth for the company, our server kept mirrors of Linux distributions (RedHat at the time, and later Debian) as well as CPAN. I started keeping these mirrors too on my harddisk, copied from the company's mirrors, as I worked between two cities and in my hometown Internet availability sucked. At home I only had 56k land-line modems, which due to the bad/noisy phone lines in my neighborhood, almost always connected at lower speeds like 28.8k or even 14.4k. Updating OS packages online would be glacially slow.\n\nA few years ago, I switched to using <a href=\"https://metacpan.org/pod/CPAN::Mini\">CPAN::Mini</a> and updated my local mirror directly instead of using our company's CPAN mirror. I also started keeping CPAN mini mirror on my laptop so CPAN is always with me whenever I go. That helped a lot when hacking on the plane or in cars.\n\nAround last year, I started hacking on <a href=\"https://metacpan.org/pod/WWW::PAUSE::Simple\">WWW::PAUSE::Simple</a>, along with its CLI <a href=\"https://metacpan.org/pod/pause\">pause</a>. Someone posted a comment on <a href=\"/2015/03/25/interacting-with-pause-using-cli/\">my blog post about this module</a>, saying that the dependencies are out of hand. True, in the name of modularity, the <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Classic\">framework</a> (<a href=\"https://metacpan.org/pod/Perinci::CmdLine::Lite\">later trimmed down version</a>) which I use for the CLI has a total dependency of about 150+ modules.\n\nSo I was looking for a way to reduce this dependency, and looks like fatpacking the script would work.\n\nHowever, producing a fatpacked script that would include all the necessary dependencies proved to be somewhat tricky. The default tracer that <a href=\"https://metacpan.org/pod/App::FatPacker\">App::FatPacker</a> provides which traps require() during BEGIN phase didn't cut it, as a lot of the module loading happens at the runtime phase. Also, for some modules like <a href=\"https://metacpan.org/pod/Data::Sah\">Data::Sah</a> or quite a few others, we need to include all the modules in its distribution. This is because depending on the program's execution branch, different data types would need to be validated and different Data::Sah type handler modules would be loaded to produce the validators. And lastly, some dependencies are optional/untraceable using runtime tracing, so we need to look instead at the distribution's dependency information (in META.yml or META.json) to be able to trace them.\n\nBefore lcpan was written, this information was not available offline, so that means during fatpacking the script (which I have to do multiple times during development) I have to launch lots of API requests to MetaCPAN, which is annoyingly slow.\n\nThere is <a href=\"https://metacpan.org/pod/CPAN::SQLite\">CPAN::SQLite</a> which also creates SQLite database index from a local CPAN mirror, but it only indexes dists/modules/files from <code>modules/02packages.details.txt.gz</code>. No META.{yml,json} information is extracted and indexed.\n\nThus, lcpan was born to index dependency information so I could build a fatpacked <code>pause</code>. The rest is history (and feature creep :p).\n\nIn some next post I will share all the other ways I've used lcpan for.",
+         "post_date" : "20160229T21:07:52",
+         "post_date_gmt" : "20160229T14:07:52",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "677",
+         "post_mime_type" : "",
+         "post_modified" : "20160304T20:06:36",
+         "post_modified_gmt" : "20160304T13:06:36",
+         "post_name" : "lcpan-tips-014-why-use-lcpan",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 014: Why use lcpan?",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aV",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1334",
+               "key" : "email_notification",
+               "value" : "1456671419"
+            },
+            {
+               "id" : "1329",
+               "key" : "jabber_published",
+               "value" : "1456671418"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=676",
+         "link" : "https://perlancar.wordpress.com/2016/02/28/lcpan-tips-013-finding-modules/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nThis post is a recap of the various ways you can find CPAN modules using lcpan.\n\n<b>lcpan mods KEYWORD ...</b>. This can search module names and abstracts (and perhaps POD/source full-text search in the future?) For example, <code>lcpan mods color rgb</code> will search for modules that have \"color\" or \"rgb\" in their names/abstracts. If you only want to search in module name, use <code>--query-type name</code>. If you only want to search in abstract, use <code>--query-type abstract</code>. To search for exact module name, use <code>--query-type exact-name</code>. To list modules that match \"color\" <i>OR</i> \"rgb\" (instead of the default AND logic), add <code>--or</code>.\n\n<b>lcpan mods --author CPANID</b>. You might also want to list modules that are published by a certain author.\n\n<b>lcpan mods --namespace NAMESPACE</b>. Suitable for when you are looking for modules that are in a known namespace, for example Dist::Zilla plugins (in <code>Dist::Zilla::Plugin</code> namespace) or PSGI servers (in <code>Plack::Server</code> namespace).\n\n<b>lcpan related-mods</b>. Another way of searching modules are by using the \"related modules\" feature. This is discussed in a <a href=\"/2016/02/21/lcpan-tips-008-finding-related-modules/\">previous post</a>. For example, you are searching for HTTP clients. You can start by looking at: <code>lcpan related-mods LWP</code>. The downside of this method is: you won't find obscure modules that are not mentioned by other modules/POD. Since this feature is using the mentions information to find related modules.",
+         "post_date" : "20160228T21:36:18",
+         "post_date_gmt" : "20160228T14:36:18",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "676",
+         "post_mime_type" : "",
+         "post_modified" : "20160304T20:06:28",
+         "post_modified_gmt" : "20160304T13:06:28",
+         "post_name" : "lcpan-tips-013-finding-modules",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 013: Finding modules",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aU",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1327",
+               "key" : "email_notification",
+               "value" : "1456584228"
+            },
+            {
+               "id" : "1321",
+               "key" : "jabber_published",
+               "value" : "1456584225"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=675",
+         "link" : "https://perlancar.wordpress.com/2016/02/27/lcpan-tips-012-querying-the-sqlite-database-directly/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nAs you might have notices, lcpan indexes the CPAN mirror into a SQLite database. By default the database is the <code>index.db</code> at the top-level directory of the mirror (so, by default it's <code>~/cpan/index.db</code>.\n\nYou can see the schema for the database in the <a href=\"https://metacpan.org/pod/App::lcpan\">App::lcpan</a> source code. Copy-pasted here:\n\n<pre>    install =&gt; [\n        'CREATE TABLE author (\n             cpanid VARCHAR(20) NOT NULL PRIMARY KEY,\n             fullname VARCHAR(255) NOT NULL,\n             email TEXT\n         )',\n \n        'CREATE TABLE file (\n             id INTEGER NOT NULL PRIMARY KEY,\n             name TEXT NOT NULL,\n             cpanid VARCHAR(20) NOT NULL REFERENCES author(cpanid),\n \n             mtime INT,\n             size INT,\n \n             -- file status: ok (archive type is known, content can be listed,\n             -- and at least some files can be extracted), nofile (file does not\n             -- exist in mirror), unsupported (archive type is not supported,\n             -- e.g. rar, pm.gz), err (cannot be opened/extracted for some\n             -- reason)\n \n             file_status TEXT,\n             file_error TEXT,\n \n             -- META.* processing status: ok (meta has been extracted and\n             -- parsed), err (META.json/META.yml has some error), nometa (no\n             -- META.json/META.yml found).\n \n             meta_status TEXT,\n             meta_error TEXT,\n \n             -- POD processing status: ok (POD has been extracted and\n             -- parsed/indexed).\n \n             pod_status TEXT,\n \n             -- sub processing status: ok (sub names have been parsed/indexed)\n \n             sub_status TEXT,\n \n             has_metajson INTEGER,\n             has_metayml INTEGER,\n             has_makefilepl INTEGER,\n             has_buildpl INTEGER\n        )',\n        'CREATE UNIQUE INDEX ix_file__cpanid__name ON file(cpanid,name)',\n \n        # files inside the release archive file\n        'CREATE TABLE content (\n             id INTEGER NOT NULL PRIMARY KEY,\n             file_id INTEGER NOT NULL REFERENCES file(id),\n             path TEXT NOT NULL,\n             package TEXT, -- only the first package declaration will be recorded\n             mtime INT,\n             size INT -- uncompressed size\n        )',\n        'CREATE UNIQUE INDEX ix_content__file_id__path ON content(file_id, path)',\n        'CREATE INDEX ix_content__package ON content(package)',\n \n        'CREATE TABLE module (\n             id INTEGER NOT NULL PRIMARY KEY,\n             name VARCHAR(255) NOT NULL,\n             cpanid VARCHAR(20) NOT NULL REFERENCES author(cpanid), -- [cache]\n             file_id INTEGER NOT NULL,\n             version VARCHAR(20),\n             version_numified DECIMAL,\n             content_id INTEGER REFERENCES content(id),\n             abstract TEXT\n         )',\n        'CREATE UNIQUE INDEX ix_module__name ON module(name)',\n        'CREATE INDEX ix_module__file_id ON module(file_id)',\n        'CREATE INDEX ix_module__cpanid ON module(cpanid)',\n \n        'CREATE TABLE script (\n             id INTEGER NOT NULL PRIMARY KEY,\n             file_id INTEGER NOT NULL REFERENCES file(id), -- [cache]\n             cpanid VARCHAR(20) NOT NULL REFERENCES author(cpanid), -- [cache]\n             name TEXT NOT NULL,\n             content_id INT REFERENCES content(id),\n             abstract TEXT\n        )',\n        'CREATE UNIQUE INDEX ix_script__file_id__name ON script(file_id, name)',\n        'CREATE INDEX ix_script__name ON script(name)',\n \n        'CREATE TABLE mention (\n             id INTEGER NOT NULL PRIMARY KEY,\n             source_file_id INT NOT NULL REFERENCES file(id), -- [cache]\n             source_content_id INT NOT NULL REFERENCES content(id),\n             module_id INTEGER, -- if mention module and module is known (listed in module table), only its id will be recorded here\n             module_name TEXT,  -- if mention module and module is unknown (unlisted in module table), only the name will be recorded here\n             script_name TEXT   -- if mention script\n        )',\n        'CREATE UNIQUE INDEX ix_mention__module_id__source_content_id   ON mention(module_id, source_content_id)',\n        'CREATE UNIQUE INDEX ix_mention__module_name__source_content_id ON mention(module_name, source_content_id)',\n        'CREATE UNIQUE INDEX ix_mention__script_name__source_content_id ON mention(script_name, source_content_id)',\n \n        'CREATE TABLE namespace (\n            name VARCHAR(255) NOT NULL,\n            num_sep INT NOT NULL,\n            has_child BOOL NOT NULL,\n            num_modules INT NOT NULL\n        )',\n        'CREATE UNIQUE INDEX ix_namespace__name ON namespace(name)',\n \n        'CREATE TABLE dist (\n             id INTEGER NOT NULL PRIMARY KEY,\n             name VARCHAR(90) NOT NULL,\n             cpanid VARCHAR(20) NOT NULL REFERENCES author(cpanid), -- [cache]\n             abstract TEXT,\n             file_id INTEGER NOT NULL,\n             version VARCHAR(20),\n             version_numified DECIMAL,\n             is_latest BOOLEAN -- [cache]\n         )',\n        'CREATE INDEX ix_dist__name ON dist(name)',\n        'CREATE UNIQUE INDEX ix_dist__file_id ON dist(file_id)',\n        'CREATE INDEX ix_dist__cpanid ON dist(cpanid)',\n \n        'CREATE TABLE dep (\n             file_id INTEGER,\n             dist_id INTEGER, -- [cache]\n             module_id INTEGER, -- if module is known (listed in module table), only its id will be recorded here\n             module_name TEXT,  -- if module is unknown (unlisted in module table), only the name will be recorded here\n             rel TEXT, -- relationship: requires, ...\n             phase TEXT, -- runtime, ...\n             version VARCHAR(20),\n             version_numified DECIMAL,\n             FOREIGN KEY (file_id) REFERENCES file(id),\n             FOREIGN KEY (dist_id) REFERENCES dist(id),\n             FOREIGN KEY (module_id) REFERENCES module(id)\n         )',\n        'CREATE INDEX ix_dep__module_name ON dep(module_name)',\n        # 'CREATE UNIQUE INDEX ix_dep__file_id__module_id ON dep(file_id,module_id)', # not all module have module_id anyway, and ones with module_id should already be correct because dep is a hash with module name as key\n \n        'CREATE TABLE sub (\n             id INTEGER NOT NULL PRIMARY KEY,\n             file_id INTEGER NOT NULL REFERENCES file(id), --[cache]\n             content_id INTEGER NOT NULL REFERENCES content(id),\n             name TEXT NOT NULL,\n             linum INTEGER NOT NULL\n         )',\n        'CREATE UNIQUE INDEX ix_sub__name__content_id ON sub(name, content_id)',\n \n    ], # install\n...\n</pre>\n\nYou can also peek at what SQL queries each subcommand is doing by installing <a href=\"https://metacpan.org/pod/Log::Any::DBI::Query\">Log::Any::DBI::Query</a> and then, for example:\n\n<pre>% PERL5OPT=-MLog::Any::DBI::Query TRACE=1 lcpan stats\nlcpan: [pericmd] Running hook_before_action ...\nlcpan: [pericmd] Running action_call() ...\nlcpan: [pericmd] Riap request: action=call, url=/App/lcpan/Cmd/stats/handle_cmd\nlcpan: Connecting to SQLite database at /home/s1/cpan/index.db ...\nlcpan: SQL query (prepare): {{PRAGMA database_list}}\nlcpan: SQL query (execute): {{[]}}\nlcpan: SQL query (prepare): {{SELECT *\nFROM\n(\nSELECT NULL         TABLE_CAT\n     ,              TABLE_SCHEM\n     , tbl_name     TABLE_NAME\n     ,              TABLE_TYPE\n     , NULL         REMARKS\n     , sql          sqlite_sql\nFROM (\n    SELECT 'main' TABLE_SCHEM, tbl_name, upper(type) TABLE_TYPE, sql\n    FROM sqlite_master\nUNION ALL\n    SELECT 'temp' TABLE_SCHEM, tbl_name, 'LOCAL TEMPORARY' TABLE_TYPE, sql\n    FROM sqlite_temp_master\nUNION ALL\n    SELECT 'main' TABLE_SCHEM, 'sqlite_master'      tbl_name, 'SYSTEM TABLE' TABLE_TYPE, NULL sql\nUNION ALL\n    SELECT 'temp' TABLE_SCHEM, 'sqlite_temp_master' tbl_name, 'SYSTEM TABLE' TABLE_TYPE, NULL sql\n)\n)\n WHERE TABLE_NAME LIKE 'meta'\n ORDER BY TABLE_TYPE, TABLE_SCHEM, TABLE_NAME\n}}\nlcpan: SQL query (execute): {{[]}}\n...\n</pre>\n\nIn the future I might make query-peeking easier, e.g. adding a <code>--db-trace</code> option or something. ",
+         "post_date" : "20160227T21:16:08",
+         "post_date_gmt" : "20160227T14:16:08",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "675",
+         "post_mime_type" : "",
+         "post_modified" : "20160304T20:06:13",
+         "post_modified_gmt" : "20160304T13:06:13",
+         "post_name" : "lcpan-tips-012-querying-the-sqlite-database-directly",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 012: Querying the SQLite database directly",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aT",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1306",
+               "key" : "email_notification",
+               "value" : "1456483150"
+            },
+            {
+               "id" : "1319",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "1302",
+               "key" : "jabber_published",
+               "value" : "1456483147"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=674",
+         "link" : "https://perlancar.wordpress.com/2016/02/26/lcpan-tips-011-listing-modules-you-depend-on/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nIf you happen to be a CPAN author (and if you don't, why not start now?) you can list all the modules that your distributions depend on using the subcommand <code>author-deps</code>. This subcommand is not that different from <code>deps</code> but instead of looking at dependencies of a single distribution, <code>author-deps</code> collects all your distributions and retrieves the dependencies information from all those distributions. Example:\n\n<pre>% lcpan author-deps PERLANCAR ;# list all the modules that I depend on</pre>\n\nThere are a few options like filtering only core or non-core modules, filtering only dependencies for certain phase and relationship, and filtering only modules from certain authors (or not from certain authors).\n\nThere's another related subcommand you might find interested if you happen to have more than one distribution on CPAN (and if you only have one, why not start uploading more?): <code>author-deps-by-dependent-count</code>. This is exactly like <code>author-deps</code> but for each module will count the number of your distributions that depend on it. So, at the top of the result list you'll see modules that you \"most depend on\" (use over and over again across distributions).\n\nHere's an example of result for my distributions:\n\n<pre>% lcpan author-deps-by-dependent-count perlancar\n+--------------------------------------------------------+-----------+------------+---------+-----------------+\n| module                                                 | author    | version    | is_core | dependent_count |\n+--------------------------------------------------------+-----------+------------+---------+-----------------+\n| Log::Any::IfLOG                                        | PERLANCAR | 0.07       | 0       | 123             |\n| Perinci::CmdLine::Any                                  | PERLANCAR | 0.12       | 0       | 101             |\n| strict                                                 | SHAY      | 1.09       | 1       | 77              |\n| warnings                                               | SHAY      | 1.34       | 0       | 77              |\n| experimental                                           | LEONT     | 0.016      | 0       | 69              |\n| Dist::Zilla                                            | RJBS      | 5.043      | 0       | 46              |\n| Complete::Util                                         | PERLANCAR | 0.45       | 0       | 36              |\n| JSON                                                   | MAKAMAKA  | 2.90       | 0       | 36              |\n| Exporter                                               | TODDR     | 5.72       | 1       | 29              |\n| Data::Dmp                                              | PERLANCAR | 0.14       | 0       | 25              |\n| Perinci::Sub::Util                                     | PERLANCAR | 0.45       | 0       | 25              |\n| File::Which                                            | PLICEASE  | 1.19       | 0       | 24              |\n| WordList                                               | PERLANCAR | 0.001001   | 0       | 24              |\n| Module::Path::More                                     | PERLANCAR | 0.30       | 0       | 22              |\n| Perinci::Sub::Gen::AccessTable                         | PERLANCAR | 0.55       | 0       | 22              |\n| File::Slurper                                          | LEONT     | 0.008      | 0       | 21              |\n| Module::List                                           | ZEFRAM    | 0.003      | 0       | 21              |\n| Perinci::Sub::Normalize                                | PERLANCAR | 0.15       | 0       | 21              |\n| Module::Patch                                          | PERLANCAR | 0.22       | 0       | 20              |\n| Complete::Common                                       | PERLANCAR | 0.22       | 0       | 19              |\n| Moo                                                    | HAARG     | 2.000002   | 0       | 17              |\n...\n</pre>\n\nI'm in the middle of a process of listing core modules for my distributions (previously I didn't), so currently more than half of my distributions do not yet list core prereqs. Over time, core modules like <code>strict</code> or <code>warnings</code> should be at the top since I use them practically always (except when I use Moo or Moose, in which case strict/warnings are already enabled by those modules.)\n\nFiltering out my own modules, we get:\n\n<pre>% lcpan author-deps-by-dependent-count perlancar --module-author-isnt perlancar\n+-------------------------------------------+-----------+------------+---------+-----------------+\n| module                                    | author    | version    | is_core | dependent_count |\n+-------------------------------------------+-----------+------------+---------+-----------------+\n| strict                                    | SHAY      | 1.09       | 1       | 77              |\n| warnings                                  | SHAY      | 1.34       | 0       | 77              |\n| experimental                              | LEONT     | 0.016      | 0       | 69              |\n| Dist::Zilla                               | RJBS      | 5.043      | 0       | 46              |\n| JSON                                      | MAKAMAKA  | 2.90       | 0       | 36              |\n| Exporter                                  | TODDR     | 5.72       | 1       | 29              |\n| File::Which                               | PLICEASE  | 1.19       | 0       | 24              |\n| File::Slurper                             | LEONT     | 0.008      | 0       | 21              |\n| Module::List                              | ZEFRAM    | 0.003      | 0       | 21              |\n| Moo                                       | HAARG     | 2.000002   | 0       | 17              |\n| Capture::Tiny                             | DAGOLDEN  | 0.34       | 0       | 16              |\n| utf8                                      | SHAY      | 1.17       | 1       | 16              |\n| DBI                                       | TIMB      | 1.634      | 0       | 15              |\n| Data::Dump                                | GAAS      | 1.23       | 0       | 15              |\n| List::MoreUtils                           | REHSACK   | 0.413      | 0       | 15              |\n| Moose                                     | ETHER     | 2.1605     | 0       | 15              |\n| DateTime                                  | DROLSKY   | 1.21       | 0       | 14              |\n| Log::Any                                  | DAGOLDEN  | 1.038      | 0       | 14              |\n...\n</pre>\n",
+         "post_date" : "20160226T17:37:54",
+         "post_date_gmt" : "20160226T10:37:54",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "674",
+         "post_mime_type" : "",
+         "post_modified" : "20160304T20:05:56",
+         "post_modified_gmt" : "20160304T13:05:56",
+         "post_name" : "lcpan-tips-011-listing-modules-you-depend-on",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 011: Listing modules you depend on",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aS",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

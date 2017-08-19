@@ -1,0 +1,530 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1286",
+               "key" : "email_notification",
+               "value" : "1456333027"
+            },
+            {
+               "id" : "1281",
+               "key" : "jabber_published",
+               "value" : "1456333024"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=673",
+         "link" : "https://perlancar.wordpress.com/2016/02/23/lcpan-tips-010-updating-your-installed-perl-modules/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nThe <a href=\"https://metacpan.org/pod/cpan-outdated\">cpan-outdated</a> script (or its faster variant <a href=\"https://metacpan.org/pod/cpan-outdated-coro\">cpan-outdated-coro</a>) can compare the version of installed CPAN modules against the version that is indexed in <code>modules/02packages.details.txt.gz</code> file in a CPAN mirror. If your local CPAN mirror is sufficiently up to date (i.e. you have just or quite recently updated it using <code>lcpan update</code>), you can use your local CPAN mirror for this purpose. This can be a bit faster than using a CPAN mirror on the Internet:\n\n<pre>% time cpan-outdated-coro\nM/ML/MLEHMANN/AnyEvent-7.12.tar.gz\nK/KA/KAZEBURO/Apache-LogFormat-Compiler-0.33.tar.gz\nD/DA/DAGOLDEN/Capture-Tiny-0.34.tar.gz\nL/LE/LEEJO/CGI-4.26.tar.gz\nE/ET/ETHER/Moose-2.1605.tar.gz\nD/DR/DROLSKY/DateTime-Format-Strptime-1.64.tar.gz\nD/DR/DROLSKY/DateTime-TimeZone-1.95.tar.gz\nI/IS/ISHIGAKI/DBD-SQLite-1.50.tar.gz\nR/RI/RIBASUSHI/DBIx-Class-0.082821.tar.gz\n...\n\nreal    0m14.681s\nuser    0m7.664s\nsys     0m0.284s\n\n% time cpan-outdated-coro --mirror file:/home/perlancar/cpan\n...\n\nreal    0m8.030s\nuser    0m7.464s\nsys     0m0.196s\n</pre>\n\nThe saving is basically just from not having to download the (currently ~1.7MB) <code>modules/02packages.details.txt.gz</code> file.\n\nWhat can give you more saving is the installation part, because each of the release file is also already available on your local filesystem.\n\n<pre>% cpan-outdated-coro --mirror file:/home/perlancar/cpan | cpanm -n --mirror file:/home/perlancar/cpan --mirror-only</pre>\n\nUsing <a href=\"https://metacpan.org/pod/cpm\">cpm</a> can be even faster:\n\n<pre>% cpan-outdated-coro -p --mirror file:/home/perlancar/cpan | xargs cpm install --mirror file:/home/perlancar/cpan</pre>\n",
+         "post_date" : "20160223T23:59:14",
+         "post_date_gmt" : "20160223T16:59:14",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "673",
+         "post_mime_type" : "",
+         "post_modified" : "20160304T20:05:29",
+         "post_modified_gmt" : "20160304T13:05:29",
+         "post_name" : "lcpan-tips-010-updating-your-installed-perl-modules",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 010: Updating your installed Perl modules",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aR",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1270",
+               "key" : "email_notification",
+               "value" : "1456218039"
+            },
+            {
+               "id" : "1266",
+               "key" : "jabber_published",
+               "value" : "1456218037"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=873",
+         "link" : "https://perlancar.wordpress.com/2016/02/23/lcpan-tips-009-finding-subroutines/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\n<h2>About the feature</h2>\n\nAs of version 0.78, lcpan supports indexing of subroutines. This is still an experimental version, and not enabled by default. To enable it, you'll have to update your index using:\n\n<pre>% lcpan update --no-skip-sub-indexing</pre>\n\nOr, you can also put this in your <code>~/lcpan.conf</code>:\n\n<pre>[subcommand=update]\nskip_sub_indexing=0</pre>\n\nWhat's implemented so far is also very basic. lcpan parses each indexed module's <code>.pm</code> file using <a href=\"https://metacpan.org/pod/Compiler::Lexer\">Compiler::Lexer</a> (I skip <a href=\"https://metacpan.org/pod/PPI\">PPI</a> because I'd reckon it would be rather annoyingly slow. There is also <a href=\"https://metacpan.org/pod/Perl::Lexer\">Perl::Lexer</a> but the module's POD gives a hard warning against using it and I don't know if it can execute Perl code during lexing, which would be unsafe.) Subroutine declaration is searched and the subroutine name collected, along with the declaration's line number in the source file.\n\nI haven't skipped any special subroutine names (e.g. new, DESTROY, AUTOLOAD) except the ones prefixed with underscore. I haven't parsed any subroutine signature (either from the perl 5.20+ new signature feature, or from the POD). I also haven't tried to guess whether a subroutine is method/static method/regular function/role/all of them. And lastly, there is no support yet for things like Moose or other fancy modules like <a href=\"https://metacpan.org/pod/Function::Parameters\">Function::Parameters</a> (which lets you define subroutine using the <code>fun</code> keyword).\n\n<h2>Searching for functions</h2>\n\nI also don't know yet how useful this feature is going to be. I know that in one or two occasions I'm looking to use a function from a CPAN module, but I don't remember the module's name. I remember the function's name but not exactly. In that case, I can try searching the function:\n\n<pre>% lcpan subs rgb -l --query-type name ;# search any function that contain the string 'rgb' in its name\n% lcpan subs 'convert%color%' -l --query-type name ;# search using SQL LIKE expression\n% lcpan subs 'set_position' -l --query-type exact-name ;# search for exact name</pre>\n\nAnd basically that's about it.\n\nI plan (and am also looking for ideas on how) to make this more useful. For example, indexing the calling/using relationship between subroutines, so you can know which subroutines are most popular/used. Or, creating statistics of the average number of subroutines per module, the average subroutine name's length, the average subroutine's length (in number of lines), and so on. Ideas welcome.\n\n \n\n",
+         "post_date" : "20160223T16:00:36",
+         "post_date_gmt" : "20160223T09:00:36",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "873",
+         "post_mime_type" : "",
+         "post_modified" : "20160223T16:03:04",
+         "post_modified_gmt" : "20160223T09:03:04",
+         "post_name" : "lcpan-tips-009-finding-subroutines",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 009: Finding subroutines",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-e5",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1262",
+               "key" : "email_notification",
+               "value" : "1456056098"
+            },
+            {
+               "id" : "1257",
+               "key" : "jabber_published",
+               "value" : "1456056096"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=671",
+         "link" : "https://perlancar.wordpress.com/2016/02/21/lcpan-tips-008-finding-related-modules/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nSuppose you are using or evaluating a CPAN module. You want to find an alternative for that module, or just want to know what other modules are related to that module. lcpan (version 0.79 or later) can help you with this using the subcommand <b>related-mods</b>.\n\nThis subcommand utilizes the \"mentions\" information built by lcpan from parsing the PODs of CPAN modules/scripts. It finds related modules by listing what modules that tend to be mentioned together with the target module.\n\nFirst example, let's list modules related to <a href=\"https://metacpan.org/pod/Carp::Always\">Carp::Always</a>:\n\n<pre>% lcpan related-mods Carp::Always --format text-pretty | less -S\n+---------------------------------+-------------------------------------------------------------------+--------------+-----------------------+-----------------------+--------+-----------+\n| module                          | abstract                                                          | num_mentions | num_mentions_together | pct_mentions_together | score  | author    |\n+---------------------------------+-------------------------------------------------------------------+--------------+-----------------------+-----------------------+--------+-----------+\n| Carp::Always::Color             | Carp::Always, but with color                                      | 9            | 4                     | 44.44                 | 711.04 | DOY       |\n| Regexp::Debugger                | Visually debug regexes in-place                                   | 7            | 3                     | 42.86                 | 385.74 | DCONWAY   |\n| V                               | Print version of the specified module(s).                         | 9            | 3                     | 33.33                 | 299.97 | ABELTJE   |\n| App::cpanoutdated               | detect outdated CPAN modules in your environment.                 | 24           | 4                     | 16.67                 | 266.72 | TOKUHIROM |\n| Carp::Source::Always            | Warns and dies with stack backtraces and source code context      | 3            | 2                     | 66.67                 | 266.68 | MARCEL    |\n| Devel::bt                       | Automatic gdb backtraces on errors                                | 3            | 2                     | 66.67                 | 266.68 | FLORA     |\n| Module::Install::AuthorRequires | declare author-only dependencies                                  | 3            | 2                     | 66.67                 | 266.68 | FLORA     |\n| MooseX::Types::LoadableClass    | ClassName type constraint with coercion to load the class.        | 12           | 3                     | 25                    | 225    | ETHER     |\n| List::AllUtils                  | Combines List::Util and List::MoreUtils in one bite-sized package | 30           | 4                     | 13.33                 | 213.28 | DROLSKY   |\n| App::Software::License          | Command-line interface to Software::License                       | 4            | 2                     | 50                    | 200    | ETHER     |\n+---------------------------------+-------------------------------------------------------------------+--------------+-----------------------+-----------------------+--------+-----------+\n</pre>\n\n<b>num_mentions</b> is the total number of POD documents that mention a related module. So, the in above example, <a href=\"https://metacpan.org/pod/Carp::Always::Color\">Carp::Always::Color</a> is mentioned in 9 POD documents. (BTW, you can see each individual mention using the <code>lcpan mentions --mentioned-module Carp::Always::Color</code> command.) <b>num_mentions_together</b> is the number of POD documents that mention <i>both</i> Carp::Always and the related module (in this case, Carp::Always::Color, and there are 4 POD documents that mention both C:A and C:A:C). <b>pct_mentions_together</b> is the ratio of <i>num_mentions_together</i> divided by <i>num_mentions</i>, expressed in percentage.\n\n<b>score</b> is used to sort the list and is currently calculated as the square of <i>num_mentions_together</i> multiplied by <i>pct_num_mentions_together</i>. BTW, the scoring still needs to be tuned at this point of writing. So, a <code>--sort</code> option is also provided if you want to sort using, e.g. <i>num_mentions_together</i> or <i>pct_mentions_together</i>.\n\nAlso, only related modules having a minimum score of 200 is listed. This number is also currently arbitrarily chosen and still needs to be tuned. You might see that some related modules, e.g. <a href=\"https://metacpan.org/pod/Devel::Confess\">Devel::Confess</a> doesn't make the cut. To see more results, use the <code>--min-score</code> option, e.g.:\n\n<pre>% lcpan related-mods Carp::Always --min-score 0 --format text-pretty | less -S</pre>\n\nNote that only modules that are mentioned in POD documents can be used. If you have an obscure module that nobody ever mentions, you can't find other modules related to it, e.g.:\n\n<pre>% lcpan related-mods Module::CoreList::More\nlcpan: ERROR 400: No mentions for module(s)</pre>\n\nThe quality of the result depends on how all CPAN authors references other modules in their CPAN module documentation (e.g., in See Also section).\n\nAnd of course, there are other ways to find related CPAN modules. <b>lcpan related-mods</b> only utilizes data from PODs of CPAN modules/scripts. The other simplest thing you can do to find related modules is listing modules in the same namespace, if the module happens to be put in a clear and specific namespace. Or, simply by searching for some names and keywords. For example, to find modules related to <a href=\"https:://metacpan.org/pod/Dist::Zilla::Plugin::TidyAll\">Dist::Zilla::Plugin::TidyAll</a>, one can simply list all other modules in the <code>Dist::Zilla::Plugin</code> namespace(<code>lcpan mods --namespace Dist::Zilla::Plugin -l</code>). There aren't too many modules in that namespace there yet. Or, to search for other file slurping modules, you can simply do an <code>lcpan mods slurp -l</code> or <code>lcpan mods file slurp -l</code>, which will search from the module names as well as abstract.\n\nThere are also other sources of information outside of it, like <a href=\"http://cpanratings.perl.org/\">CPANRatings</a> or other Perl websites, Google search, and the community itself (e.g. asking on perl IRC channels or <a href=\"http://perlmonks.org\">PerlMonks</a>), and so on.\n\nSome other examples so you can see the results:\n\n<pre>% lcpan related-mods Sort::ByExample\n+-------------------------------+-----------------------------------------------------------------+--------------+-----------------------+-----------------------+-------+-----------+\n| module                        | abstract                                                        | num_mentions | num_mentions_together | pct_mentions_together | score | author    |\n+-------------------------------+-----------------------------------------------------------------+--------------+-----------------------+-----------------------+-------+-----------+\n| Bencher::Scenario::SortBySpec |                                                                 | 1            | 1                     | 100                   | 100   | PERLANCAR |\n| Data::Dump::Filtered          | Pretty printing with filtering                                  | 2            | 1                     | 50                    | 50    | GAAS      |\n| Sort::BySpec                  | Sort array (or create a list sorter) according to specification | 2            | 1                     | 50                    | 50    | PERLANCAR |\n+-------------------------------+-----------------------------------------------------------------+--------------+-----------------------+-----------------------+-------+-----------+\n\n% lcpan related-mods Module::Path\n+--------------------+-------------------------------------------------------+--------------+-----------------------+-----------------------+---------+-----------+\n| module             | abstract                                              | num_mentions | num_mentions_together | pct_mentions_together | score   | author    |\n+--------------------+-------------------------------------------------------+--------------+-----------------------+-----------------------+---------+-----------+\n| Module::Version    | Get module versions                                   | 10           | 9                     | 90                    | 7290    | XSAWYERX  |\n| App::IODUtils      | IOD utilities                                         | 9            | 8                     | 88.89                 | 5688.96 | PERLANCAR |\n| App::DistUtils     | Collection of utilities related to Perl distributions | 8            | 7                     | 87.5                  | 4287.5  | PERLANCAR |\n| App::DzilUtils     | Collection of CLI utilities for Dist::Zilla           | 8            | 7                     | 87.5                  | 4287.5  | PERLANCAR |\n| App::LedgerUtils   | Command-line utilities related Ledger files           | 8            | 7                     | 87.5                  | 4287.5  | PERLANCAR |\n| App::ProgUtils     | Command line to manipulate programs in PATH           | 8            | 7                     | 87.5                  | 4287.5  | PERLANCAR |\n| App::WeaverUtils   | Collection of CLI utilities for Pod::Weaver           | 8            | 7                     | 87.5                  | 4287.5  | PERLANCAR |\n| App::GitUtils      | Day-to-day command-line utilities for git             | 9            | 7                     | 77.78                 | 3811.22 | PERLANCAR |\n| App::PMUtils       | Command-line utilities related to Perl modules        | 10           | 7                     | 70                    | 3430    | PERLANCAR |\n| App::PlUtils       | Command-line utilities related to Perl scripts        | 10           | 7                     | 70                    | 3430    | PERLANCAR |\n| Pod::Weaver        | weave together a Pod document from an outline         | 151          | 8                     | 5.3                   | 339.2   | RJBS      |\n| Module::Path::More | Get path to locally installed Perl module             | 4            | 2                     | 50                    | 200     | PERLANCAR |\n+--------------------+-------------------------------------------------------+--------------+-----------------------+-----------------------+---------+-----------+\n\n% lcpan related-mods WWW::Mechanize --format text-pretty --min-score 3000\n+------------------------------------------+-------------------------------------------------------+--------------+-----------------------+-----------------------+----------+----------+\n| module                                   | abstract                                              | num_mentions | num_mentions_together | pct_mentions_together | score    | author   |\n+------------------------------------------+-------------------------------------------------------+--------------+-----------------------+-----------------------+----------+----------+\n| WWW::Scraper::ISBN::Record               | Book Record class for L module.   | 39           | 33                    | 84.62                 | 92151.18 | BARBIE   |\n| WWW::Scraper::ISBN                       | Retrieve information about books from online sources. | 43           | 34                    | 79.07                 | 91404.92 | BARBIE   |\n| WWW::Scraper::ISBN::Driver               | Driver class for WWW::Scraper::ISBN module.           | 40           | 33                    | 82.5                  | 89842.5  | BARBIE   |\n| Test::WWW::Mechanize                     | Testing-specific WWW::Mechanize subclass              | 53           | 34                    | 64.15                 | 74157.4  | PETDANCE |\n| HTML::Form                               | Class that represents an HTML form element            | 58           | 33                    | 56.9                  | 61964.1  | GAAS     |\n| LWP::UserAgent                           | Web user agent class                                  | 1431         | 61                    | 4.26                  | 15851.46 | ETHER    |\n| Finance::Bank::LloydsTSB                 | Check your bank accounts from Perl                    | 39           | 18                    | 46.15                 | 14952.6  | ASPIERS  |\n| WWW::Mechanize::Shell                    | An interactive shell for WWW::Mechanize               | 15           | 12                    | 80                    | 11520    | CORION   |\n| Template::Extract                        | Use TT2 syntax to extract data from documents         | 25           | 14                    | 56                    | 10976    | AUDREYT  |\n| WWW::Mechanize::Link                     | Link object for WWW::Mechanize                        | 11           | 10                    | 90.91                 | 9091     | ETHER    |\n| Jifty::Test::WWW::Mechanize              | Subclass of L with              | 14           | 10                    | 71.43                 | 7143     | ALEXMV   |\n| WWW::Mechanize::Cached                   | Cache response to be polite                           | 16           | 10                    | 62.5                  | 6250     | OALDERS  |\n| HTML::TokeParser                         | Alternative HTML::Parser interface                    | 66           | 16                    | 24.24                 | 6205.44  | GAAS     |\n| IO::Socket::SSL                          | a SSL socket interface class                          | 256          | 24                    | 9.38                  | 5402.88  | SULLR    |\n| HTTP::Response                           | HTTP style response message                           | 692          | 33                    | 4.77                  | 5194.53  | ETHER    |\n| Plagger::Plugin::Subscription::HatenaRSS | HatenaRSS Subscription via OPML                       | 7            | 7                     | 100                   | 4900     | MIYAGAWA |\n| Crypt::SSLeay                            | OpenSSL support for LWP                               | 145          | 19                    | 13.1                  | 4729.1   | NANIS    |\n| HTML::Form::Input                        |                                                       | 8            | 7                     | 87.5                  | 4287.5   | GAAS     |\n| WWW::Mechanize::Pluggable                | A WWW::Mechanize that's custmomizable via plugins     | 13           | 8                     | 61.54                 | 3938.56  | MCMAHON  |\n| HTTP::Cookies                            | HTTP cookie jars                                      | 108          | 16                    | 14.81                 | 3791.36  | GAAS     |\n| Plagger::Plugin::Notify::Campfire        | Notification bot for Campfire                         | 6            | 6                     | 100                   | 3600     | MIYAGAWA |\n| WWW::Sucksub::Divxstation                | automated access to divxstation.com                   | 6            | 6                     | 100                   | 3600     | TFOUCART |\n| Test::Pod                                | check for POD errors in files                         | 101          | 15                    | 14.85                 | 3341.25  | ETHER    |\n| Devel::NYTProf                           | Powerful fast feature-rich Perl source code profiler  | 55           | 12                    | 21.82                 | 3142.08  | TIMB     |\n| Test::Pod::Coverage                      | Check for pod coverage in your distribution.          | 89           | 14                    | 15.73                 | 3083.08  | NEILB    |\n+------------------------------------------+-------------------------------------------------------+--------------+-----------------------+-----------------------+----------+----------+\n</pre>\n",
+         "post_date" : "20160221T18:51:25",
+         "post_date_gmt" : "20160221T11:51:25",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "671",
+         "post_mime_type" : "",
+         "post_modified" : "20160219T19:09:30",
+         "post_modified_gmt" : "20160219T12:09:30",
+         "post_name" : "lcpan-tips-008-finding-related-modules",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 008: Finding related modules",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aP",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1255",
+               "key" : "email_notification",
+               "value" : "1455984469"
+            },
+            {
+               "id" : "1249",
+               "key" : "jabber_published",
+               "value" : "1455984467"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=670",
+         "link" : "https://perlancar.wordpress.com/2016/02/20/lcpan-tips-007-showing-new-dists/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\n<a href=\"https://github.com/perlancar/scripts/blob/master/lcpan-update-and-show-new-dists\">Here</a>'s a simple wrapper script for <code>lcpan update</code> (hopefully it will be integrated into some kind of hook/plugin later for lcpan) that shows new dists after updating the mirror. It simply list distributions newer than the last index time of the mirror.\n\nSample output:\n\n<pre>% lcpan-update-and-show-new-dists\n+------------------------------------------+----------+----------+------------------------------------------------------+----------+------------+-----------------------------------------------------------------------+\n| dist                                     | author   | version  | release                                              | rel_size | rel_mtime  | abstract                                                              |\n+------------------------------------------+----------+----------+------------------------------------------------------+----------+------------+-----------------------------------------------------------------------+\n| Map-Tube-Barcelona                       | MANWAR   | 0.28     | Map-Tube-Barcelona-0.28.tar.gz                       | 17971    | 1455621083 | Interface to the Barcelona Metro Map.                                 |\n| Data-Peek                                | HMBRAND  | 0.45     | Data-Peek-0.45.tgz                                   | 60698    | 1455619251 | Modified and extended debugging facilities                            |\n| PONAPI-Server                            | MICKEY   | 0.002015 | PONAPI-Server-0.002015.tar.gz                        | 89130    | 1455617402 | PONAPI - Perl implementation of {JSON:API} (http://jsonapi.org/) v1.0 |\n| Math-MPFR                                | SISYPHUS | 3.32     | Math-MPFR-3.32.tar.gz                                | 109598   | 1455617315 | Perl interface to the MPFR (floating point) library                   |\n| Inferno-RegMgr                           | POWERMAN | v1.0.0   | Inferno-RegMgr-v1.0.0.tar.gz                         | 16742    | 1455617143 | Keep connection to OS Inferno's registry(4) and it tasks              |\n| Tapper-Config                            | TAPPER   | 5.0.1    | Tapper-Config-5.0.1.tar.gz                           | 13075    | 1455616295 | Tapper - Context sensitive configuration hub for all Tapper libs      |\n| Tapper-MCP                               | TAPPER   | 5.0.1    | Tapper-MCP-5.0.1.tar.gz                              | 86189    | 1455615949 | Tapper - Central master control program of Tapper automation          |\n| Tapper-Metadata                          | TAPPER   | 5.0.1    | Tapper-Metadata-5.0.1.tar.gz                         | 19863    | 1455613737 | Save and search Metadata points by database                           |\n| Scientist                                | LANCEW   | 0.003    | Scientist-0.003.tar.gz                               | 2693     | 1455612965 | Perl module inspired by https://github.com/github/scientist           |\n| Plack-Middleware-StackTrace-LinkedSource | BAYASHI  | 0.04     | Plack-Middleware-StackTrace-LinkedSource-0.04.tar.gz | 13330    | 1455612268 | Adding links to library source codes in stacktrace                    |\n| Narada                                   | POWERMAN | v2.3.4   | Narada-v2.3.4.tar.gz                                 | 103789   | 1455611796 | framework for ease deploy and support microservice projects           |\n| Date-Pregnancy                           | JONASBN  | 0.06     | Date-Pregnancy-0.06.tar.gz                           | 12680    | 1455610099 | calculate birthdate and week numbers for a pregnancy                  |\n| Net-OpenNebula                           | STDWEIRD | 0.305.0  | Net-OpenNebula-0.305.0.tar.gz                        | 31673    | 1455610012 | Access OpenNebula RPC via Perl.                                       |\n| File-Rsync-Mirror-Recent                 | ANDK     | v0.4.2   | File-Rsync-Mirror-Recent-0.4.2.tar.bz2               | 77280    | 1455606667 | unknown                                                               |\n| Algorithm-Networksort-Chooser            | FRACTAL  | 0.110    | Algorithm-Networksort-Chooser-0.110.tar.gz           | 5695     | 1455604080 | unknown                                                               |\n| Mojo-Weixin                              | SJDY     | v1.0.3   | Mojo-Weixin-1.0.3.tar.gz                             | 765865   | 1455603274 | A Weixin Client Framework base on Mojolicious                         |\n| MooseX-AttributeHelpers                  | ETHER    | 0.25     | MooseX-AttributeHelpers-0.25.tar.gz                  | 54105    | 1455600583 | (DEPRECATED) Extend your attribute interfaces                         |\n| MooseX-Daemonize                         | ETHER    | 0.21     | MooseX-Daemonize-0.21.tar.gz                         | 44322    | 1455599805 | Role for daemonizing your Moose based application                     |\n+------------------------------------------+----------+----------+------------------------------------------------------+----------+------------+-----------------------------------------------------------------------+\n</pre>\n\nThis can be an alternative to seeing <a href=\"https://metacpan.org/recent\">recent dists on MetaCPAN</a>. The script's version shows you the dist's abstract, author, and file size.",
+         "post_date" : "20160220T22:56:56",
+         "post_date_gmt" : "20160220T15:56:56",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "670",
+         "post_mime_type" : "",
+         "post_modified" : "20160219T19:09:07",
+         "post_modified_gmt" : "20160219T12:09:07",
+         "post_name" : "lcpan-tips-007-showing-new-dists",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 007: Showing new dists",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aO",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1217",
+               "key" : "email_notification",
+               "value" : "1455816842"
+            },
+            {
+               "id" : "1211",
+               "key" : "jabber_published",
+               "value" : "1455816840"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=666",
+         "link" : "https://perlancar.wordpress.com/2016/02/19/lcpan-tips-004-lcpanm/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\n<a href=\"https://metacpan.org/pod/lcpanm\">lcpanm</a> is a thin wrapper for <a href=\"https://metacpan.org/pod/App::cpanminus\">cpanm</a> and comes with the <code>App-lcpan</code> distribution (which means that when you install lcpan you automatically get lcpanm). It sets <code>--mirror</code> to your local CPAN mirror. Also, its tab completion uses the lcpan database to be able to complete CPAN module names.\n\nSome examples:\n\n<pre>% lcpanm -n File::Lock[tab]\nLock    Lock::    lockf    Lockfile</pre>\n\n",
+         "post_date" : "20160219T00:32:57",
+         "post_date_gmt" : "20160218T17:32:57",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "666",
+         "post_mime_type" : "",
+         "post_modified" : "20160219T19:12:06",
+         "post_modified_gmt" : "20160219T12:12:06",
+         "post_name" : "lcpan-tips-004-lcpanm",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 006: lcpanm",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aK",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1209",
+               "key" : "email_notification",
+               "value" : "1455810209"
+            },
+            {
+               "id" : "1203",
+               "key" : "jabber_published",
+               "value" : "1455810208"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=669",
+         "link" : "https://perlancar.wordpress.com/2016/02/18/lcpan-tips-005-monitoring-newchanged-dependants-and-mentions/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nOne thing I'd like to keep an eye on whenever I update my CPAN mirror is whether there are new distributions that declare dependencies on one of my modules (new dependants), or whether a distribution no longer depends on my modules. Or, whether someone now mentions one of my modules/scripts (new mentions), or whether someone no longer mentions them.\n\nI plan to add some sort of hook mechanism to lcpan, so that after <code>lcpan update</code> is run, the above things can be performed. But, until that feature is implemented, I'm using a wrapper script <a href=\"https://github.com/perlancar/scripts/blob/master/lcpan-update-and-diff-rdeps-and-mentions\">like this</a>.\n\nWhen the script is run:\n\n<pre>% lcpan-update-and-diff-rdeps-and-mentions PERLANCAR</pre>\n\nthen your CPAN mirror is updated with <code>lcpan update</code>, and after that a diff output (or nothing, if nothing changes) will be shown detailing new/changed dependants and mentions for modules/scripts by author PERLANCAR.\n",
+         "post_date" : "20160218T22:28:16",
+         "post_date_gmt" : "20160218T15:28:16",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "669",
+         "post_mime_type" : "",
+         "post_modified" : "20160219T19:08:37",
+         "post_modified_gmt" : "20160219T12:08:37",
+         "post_name" : "lcpan-tips-005-monitoring-newchanged-dependants-and-mentions",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 005: Monitoring new/changed dependants and mentions",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aN",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1201",
+               "key" : "email_notification",
+               "value" : "1455720263"
+            },
+            {
+               "id" : "1196",
+               "key" : "jabber_published",
+               "value" : "1455720261"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=668",
+         "link" : "https://perlancar.wordpress.com/2016/02/17/lcpan-tips-004-who-mentions-my-modulesscripts/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nSince 0.67, lcpan indexes scripts in addition to modules. To do this, lcpan uses a heuristic: all files inside release tarballs that have paths matching <code>^([^/]+/)?(bin/scripts?)/([^/]+)$</code>. It might miss a few and also get a few false-positives. But the alternative way of parsing Makefile.PL (e.g. from <code>WriteMakefile</code> argument <code>EXE_FILES</code>) is considered unsafe.\n\nAlso since 0.67, lcpan parses POD of .pm/.pod files and scripts (extracted from release tarballs) and indexes POD links as well as module names that are mentioned in the PODs.\n\nTo view this information from the command-line, lcpan provides the <b>mentions</b> subcommand. For example, to list who mentions my module <a href=\"https://metacpan.org/pod/Text::ANSITable\">Text::ANSITable</a>:\n\n<pre>% lcpan mentions --mentioned-module Text::ANSITable\n+-----------------+---------------+-----------------------------------------------+------------------+---------------------------------------------------------------------------------+\n| module          | module_author | release                                       | mentioner_author | content_path                                                                    |\n+-----------------+---------------+-----------------------------------------------+------------------+---------------------------------------------------------------------------------+\n| Text::ANSITable | PERLANCAR     | App-DistUtils-0.08.tar.gz                     | PERLANCAR        | App-DistUtils-0.08/bin/packlist-for                                             |\n| Text::ANSITable | PERLANCAR     | Bencher-Scenario-TextTableModules-0.04.tar.gz | PERLANCAR        | Bencher-Scenario-TextTableModules-0.04/lib/Bencher/Scenario/TextTableModules.pm |\n| Text::ANSITable | PERLANCAR     | Color-Theme-0.01.tar.gz                       | PERLANCAR        | Color-Theme-0.01/lib/Color/Theme.pm                                             |\n| Text::ANSITable | PERLANCAR     | Color-Theme-0.01.tar.gz                       | PERLANCAR        | Color-Theme-0.01/lib/Color/Theme/Role.pm                                        |\n| Text::ANSITable | PERLANCAR     | Color-Theme-0.01.tar.gz                       | PERLANCAR        | Color-Theme-0.01/lib/Color/Theme/Util.pm                                        |\n| Text::ANSITable | PERLANCAR     | Complete-Module-0.24.tar.gz                   | PERLANCAR        | Complete-Module-0.24/lib/Complete/Module.pm                                     |\n| Text::ANSITable | PERLANCAR     | Data-Format-Pretty-Console-0.35.tar.gz        | PERLANCAR        | Data-Format-Pretty-Console-0.35/lib/Data/Format/Pretty/Console.pm               |\n| Text::ANSITable | PERLANCAR     | Dist-Util-0.06.tar.gz                         | PERLANCAR        | Dist-Util-0.06/lib/Dist/Util.pm                                                 |\n| Text::ANSITable | PERLANCAR     | Dist-Zilla-Plugin-Preload-0.01.tar.gz         | PERLANCAR        | Dist-Zilla-Plugin-Preload-0.01/lib/Dist/Zilla/Plugin/Preload.pm                 |\n| Text::ANSITable | PERLANCAR     | Perinci-CmdLine-1.48.tar.gz                   | PERLANCAR        | Perinci-CmdLine-1.48/lib/Perinci/CmdLine/Manual/FAQ.pod                         |\n| Text::ANSITable | PERLANCAR     | Perinci-CmdLine-Any-Lumped-0.09.tar.gz        | PERLANCAR        | Perinci-CmdLine-Any-Lumped-0.09/lib/Text/ANSI/Util.pm                           |\n| Text::ANSITable | PERLANCAR     | Term-Detect-Software-0.21.tar.gz              | PERLANCAR        | Term-Detect-Software-0.21/lib/Term/Detect/Software.pm                           |\n| Text::ANSITable | PERLANCAR     | Text-ANSI-Util-0.21.tar.gz                    | PERLANCAR        | Text-ANSI-Util-0.21/lib/Text/ANSI/Util.pm                                       |\n| Text::ANSITable | PERLANCAR     | Text-Table-Any-0.01.tar.gz                    | PERLANCAR        | Text-Table-Any-0.01/lib/Text/Table/Any.pm                                       |\n| Text::ANSITable | PERLANCAR     | Text-Table-Manifold-1.00.tgz                  | RSAVAGE          | Text-Table-Manifold-1.00/lib/Text/Table/Manifold.pm                             |\n| Text::ANSITable | PERLANCAR     | Tickit-Widget-Table-0.214.tar.gz              | TEAM             | Tickit-Widget-Table-0.214/lib/Tickit/Widget/Table.pm                            |\n| Text::ANSITable | PERLANCAR     | Tickit-Widget-Table-0.214.tar.gz              | TEAM             | Tickit-Widget-Table-0.214/lib/Tickit/Widget/Table.pod                           |\n| Text::ANSITable | PERLANCAR     | Tickit-Widget-Table-Paged-0.004.tar.gz        | TEAM             | Tickit-Widget-Table-Paged-0.004/lib/Tickit/Widget/Table/Paged.pm                |\n| Text::ANSITable | PERLANCAR     | Tickit-Widget-Table-Paged-0.004.tar.gz        | TEAM             | Tickit-Widget-Table-Paged-0.004/lib/Tickit/Widget/Table/Paged.pod               |\n| Text::ANSITable | PERLANCAR     | App-lcpan-0.73.tar.gz                         | PERLANCAR        | App-lcpan-0.73/bin/lcpan                                                        |\n+-----------------+---------------+-----------------------------------------------+------------------+---------------------------------------------------------------------------------+\n</pre>\n\nAs you can see, there's a lot of self mentions there (one of my modules/scripts mentioning my own module). To filter those out, add the option <code>--mentioner-author-isnt</code>. You can add more than one instance of this option.\n\n<pre>% lcpan mentions --mentioned-module Text::ANSITable --mentioner-author-isnt PERLANCAR\n+-----------------+---------------+----------------------------------------+------------------+-------------------------------------------------------------------+\n| module          | module_author | release                                | mentioner_author | content_path                                                      |\n+-----------------+---------------+----------------------------------------+------------------+-------------------------------------------------------------------+\n| Text::ANSITable | PERLANCAR     | Text-Table-Manifold-1.00.tgz           | RSAVAGE          | Text-Table-Manifold-1.00/lib/Text/Table/Manifold.pm               |\n| Text::ANSITable | PERLANCAR     | Tickit-Widget-Table-0.214.tar.gz       | TEAM             | Tickit-Widget-Table-0.214/lib/Tickit/Widget/Table.pm              |\n| Text::ANSITable | PERLANCAR     | Tickit-Widget-Table-0.214.tar.gz       | TEAM             | Tickit-Widget-Table-0.214/lib/Tickit/Widget/Table.pod             |\n| Text::ANSITable | PERLANCAR     | Tickit-Widget-Table-Paged-0.004.tar.gz | TEAM             | Tickit-Widget-Table-Paged-0.004/lib/Tickit/Widget/Table/Paged.pm  |\n| Text::ANSITable | PERLANCAR     | Tickit-Widget-Table-Paged-0.004.tar.gz | TEAM             | Tickit-Widget-Table-Paged-0.004/lib/Tickit/Widget/Table/Paged.pod |\n+-----------------+---------------+----------------------------------------+------------------+-------------------------------------------------------------------+\n</pre>\n\n<h2>Top modules/scripts/authors ranked by mention count</h2>\n\nAside from the <b>mentions</b> subcommand to list individual mentions, there are also various <code>*-by-mention-count</code> subcommands to rank modules/scripts/authors by mention count. Some examples:\n\n<pre>% lcpan authors-by-mod-mention-count | head -n 10\nSWALTERS        49901\nETHER   9000\nSUNDQUIST       4767\nRJBS    4609\nJRADCLIFF       3672\nRIBASUSHI       3616\nSHAY    3226\nDROLSKY 3042\nPMATTHEWS       2442\nALEXMV  2032\n</pre>\n\nThe number after each author is number of mentions by other authors. Whenever a module by the author gets mentioned in another module/script's POD, it gets a count (this means, we are counting per content/mentioning POD). There are other count types that can be used for the ranking: per-dist (where each distribution that mentions a module by author is counted as one count, so an author will get a maximum of one count per mentioning dist), per-author (where an author will get a maximum of one count per mentioning author).\n\n<pre>% lcpan authors-by-mod-mention-count --count-per dist | head -n 10\nlcpan authors-by-mod-mention-count --count-per dist | head -n 10\nETHER   3535\nRJBS    2296\nSHAY    1643\nSMUELLER        1294\nDROLSKY 1111\nGAAS    1076\nGBARR   961\nEXODIST 931\nMIYAGAWA        838\nDAGOLDEN        726\n</pre>\n\n<pre>% lcpan authors-by-mod-mention-count --count-per author | head -n 10\nETHER   1255\nRJBS    866\nSMUELLER        730\nSHAY    714\nGAAS    601\nGBARR   592\nDROLSKY 543\nEXODIST 470\nTODDR   389\nSHLOMIF 387\n</pre>\n",
+         "post_date" : "20160217T21:43:34",
+         "post_date_gmt" : "20160217T14:43:34",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "668",
+         "post_mime_type" : "",
+         "post_modified" : "20160219T19:08:17",
+         "post_modified_gmt" : "20160219T12:08:17",
+         "post_name" : "lcpan-tips-004-who-mentions-my-modulesscripts",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 004: Who mentions my modules/scripts?",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-aM",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1194",
+               "key" : "email_notification",
+               "value" : "1455642274"
+            },
+            {
+               "id" : "1189",
+               "key" : "jabber_published",
+               "value" : "1455642273"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=625",
+         "link" : "https://perlancar.wordpress.com/2016/02/16/lcpan-tips-003-who-depends-on-my-modules/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nWhen you maintain a module on CPAN, it's good to know who (which other CPAN distributions) declares dependencies on your module so when you update your module, you can test your downstreams to find out whether you break them. Or perhaps you just want to know \"how popular\" or \"how important\" your module is by looking at how many people are using your modules (although actually this only gives a partial picture because people can use your modules in their scripts or private modules, and they won't be listed here).\n\nThis information is available on <a href=\"https://metacpan.org\">MetaCPAN</a> by clicking on the \"Reverse dependencies\" link. <a href=\"https://metacpan.org/requires/distribution/Color-ANSI-Util?sort=[[2,1]]\">Example</a> for one of my modules. But you can also use <b>lcpan rdeps</b> to view this information, with some options available.\n\n<pre>% lcpan rdeps Color::ANSI::Util\n+---------+----------+------------------------------------------+-----------+--------------+-------------+\n| phase   | rel      | dist                                     | author    | dist_version | req_version |\n+---------+----------+------------------------------------------+-----------+--------------+-------------+\n| runtime | requires | App-256colors                            | CALID     | 0.001        | 0           |\n| runtime | requires | App-riap                                 | PERLANCAR | 0.34         | 0           |\n| runtime | requires | Color-Theme                              | PERLANCAR | 0.01         | 0           |\n| runtime | requires | Games-ArrangeNumber                      | PERLANCAR | 0.05         | 0           |\n| runtime | requires | Perinci-Result-Format                    | PERLANCAR | 0.45         | 0           |\n| runtime | requires | Progress-Any-Output-TermProgressBarColor | PERLANCAR | 0.21         | 0           |\n+---------+----------+------------------------------------------+-----------+--------------+-------------+\n</pre>\n\nTo show more than one level of information (e.g. you want to know your downstreams' downstreams, and so on), use the <code>-l</code> (<code>--level</code>) option or <code>-R</code>.\n\nTo show only certain phases or relationship, use the options <code>--phase</code> and <code>--rel</code> respectively. For example, to show which dists declare an optional (rel=recommends) runtime dependency of my module <code>App::lcpan::Call</code>:\n \n<pre>% lcpan rdeps --phase runtime --rel recommends App::lcpan::Call\n+-------------------+-----------+--------------+-------------+\n| dist              | author    | dist_version | req_version |\n+-------------------+-----------+--------------+-------------+\n| App-GamesWordlist | PERLANCAR | 0.15         | 0           |\n| App-wordlist      | PERLANCAR | 0.20         | 0           |\n+-------------------+-----------+--------------+-------------+\n</pre>\n\nThere's also another subcommand <b>author-rdeps</b> which shows you downstream dists for all of your modules. For example, to list all other people who are using my modules:\n\n<pre>% lcpan author-rdeps PERLANCAR --user-author-isnt PERLANCAR --user-author-isnt SHARYANTO\n+---------+------------+---------------------------------------------+---------------------------------------------------+-----------+--------------+-------------+\n| phase   | rel        | module                                      | dist                                              | author    | dist_version | req_version |\n+---------+------------+---------------------------------------------+---------------------------------------------------+-----------+--------------+-------------+\n| develop | requires   | Pod::Weaver::Section::Source::DefaultGitHub | Acme-Resume                                       | CSSON     | 0.0102       | 0           |\n| runtime | requires   | Color::ANSI::Util                           | App-256colors                                     | CALID     | 0.001        | 0           |\n| runtime | requires   | Web::Detect                                 | App-Kit                                           | DMUEY     | 0.62         | 0           |\n| runtime | requires   | JSON::Color                                 | App-LJ                                            | SONGMU    | 0.02         | 0           |\n...\n</pre>\n\n\n",
+         "post_date" : "20160216T23:54:13",
+         "post_date_gmt" : "20160216T16:54:13",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "625",
+         "post_mime_type" : "",
+         "post_modified" : "20160219T19:07:44",
+         "post_modified_gmt" : "20160219T12:07:44",
+         "post_name" : "lcpan-tips-003-who-depends-on-my-modules",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 003: Who depends on my modules?",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-a5",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1180",
+               "key" : "email_notification",
+               "value" : "1455554909"
+            },
+            {
+               "id" : "1174",
+               "key" : "jabber_published",
+               "value" : "1455554908"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=606",
+         "link" : "https://perlancar.wordpress.com/2016/02/15/lcpan-tips-002-install-cpan-distribution-when-you-only-know-a-scripts-name/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nA CPAN distribution can contain scripts in addition to modules. Sometimes you only remember the name of the script but not the module/dist name, so there is a difficulty (read: an additional Google search) to install the script from CPAN because CPAN clients normally expect module/dist name. lcpan to the rescue: a <b>script2mod</b> (as well as <b>script2dist</b>, <b>script2rel</b>) is provided to find out the name of CPAN module for a known script. So you can install module with:\n\n<pre>% cpanm -n `lcpan script2mod pm-uninstall`\n% cpanm -n `lcpan script2mod pmuninst`</pre>\n",
+         "post_date" : "20160215T23:33:00",
+         "post_date_gmt" : "20160215T16:33:00",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "606",
+         "post_mime_type" : "",
+         "post_modified" : "20160219T19:06:47",
+         "post_modified_gmt" : "20160219T12:06:47",
+         "post_name" : "lcpan-tips-002-install-cpan-distribution-when-you-only-know-a-scripts-name",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 002: Install CPAN distribution when you only know a script's name",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-9M",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1145",
+               "key" : "email_notification",
+               "value" : "1455466661"
+            },
+            {
+               "id" : "1139",
+               "key" : "jabber_published",
+               "value" : "1455466658"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=567",
+         "link" : "https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<b>About this series</b>: a collection of short, daily blog posts about lcpan tips/recipes. Some posts will also end up in the upcoming <code>App::lcpan::Manual::Cookbook</code> POD to be included in the App-lcpan distribution.\n\n<b>About <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a></b>: an application to download and index a mini CPAN mirror on your local filesystem, so in effect you will have something like your own CPAN with a command-line tool (or perl API) to query and extract information from your mirror. I find it perfect for my own personal use when working offline.\n\nThe first post will be about the <b>doc</b> subcommand, new in lcpan 0.69. This can be used to view POD documentation for CPAN modules or scripts, even those that are not installed on your system:\n\n<pre>% lcpan doc Win32::HTA\n% lcpan doc meta  ;# view script documentation</pre>\n\nThere are a few options available. First, sometimes there's both the .pm and .pod (one such case: PSGI.pod and PSGI.pm, and the doc is in .pod). lcpan will sometimes guess incorrectly which one you want, so to choose specifically the .pod or .pm:\n\n<pre>% lcpan doc PSGI.pod\n% lcpan doc PSGI.pm</pre>\n\nAlso, there might be cases where a script name is the same as module name. By default, the module will be chosen first. To specifically choose script, use <code>-s</code> (<code>--script</code>).\n\nTo dump the raw version instead of rendering the POD, use <code>-r</code> (<code>--raw</code>):\n\n<pre>% lcpan PSGI.pm -r</pre>\n\n\n",
+         "post_date" : "20160214T23:17:37",
+         "post_date_gmt" : "20160214T16:17:37",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "567",
+         "post_mime_type" : "",
+         "post_modified" : "20160219T19:06:19",
+         "post_modified_gmt" : "20160219T12:06:19",
+         "post_name" : "lcpan-tips-001-doc",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan tips 001: doc",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-99",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "15",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "lcpan-tips",
+               "parent" : "0",
+               "slug" : "lcpan-tips",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "463147745",
+               "term_taxonomy_id" : "10"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

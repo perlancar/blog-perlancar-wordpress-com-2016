@@ -1,0 +1,688 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "673",
+               "key" : "email_notification",
+               "value" : "1426266225"
+            },
+            {
+               "id" : "566",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "668",
+               "key" : "jabber_published",
+               "value" : "1426266222"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=240",
+         "link" : "https://perlancar.wordpress.com/2015/03/14/pericmd-040-riap/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Perinci::CmdLine, as it name reflects, centers around the concept of <a href=\"https://metacpan.org/pod/Rinci\">Rinci</a>. Functions, as well as packages (and variables and other types of code entities) are added with rich metadata so tools interacting with them can have a better idea about the details of the entities and do useful things with them.\n\nIn Perl module/script, Rinci metadata is placed in a package variable called <tt>%SPEC</tt>, with the name of the function or variable (along with its sigil) serves as the key (for package, the key is <tt>:package</tt>).\n\nBut, for flexibility Rinci metadata should be able to be put elsewhere, even remotely.\n\nThus <a href=\"https://metacpan.org/pod/Riap\">Riap</a>, as the other side of the coin, is born. It is a client-server, request-response protocol to exchange Rinci metadata or do things with code entities. Request is represented with a hash, with the minimum keys of: <tt>v</tt> (protocol version, default to 1.1), <tt>uri</tt> (location to code entity), <tt>action</tt>.\n\nThe Riap response is an enveloped result, which has been discussed previously (pericmd 013). Riap adds several keys in the result metadata (fourth element), mainly: <tt>riap.v</tt> (server Riap protocol version), and some optional others. \n\nThe server side is viewed as a tree of code entities, with packages having the ability to contain other subentities.\n\nThe URL can be schemeless path like <tt>/WWW/PAUSE/Simple/</tt> (notice the ending slash) which in Perl application maps to Perl package (<tt>WWW::PAUSE::Simple</tt>) or <tt>/WWW/PAUSE/Simple/list_files</tt> (notice the lack of ending slash) which maps to a Perl function (or variable, or other non-package entity).\n\n<h3>meta</h3>\n\nThe <tt>meta</tt> action is one of the most important actions. This is a request for Rinci metadata itself. So a Riap request like <tt>{action=&gt;\"meta\", uri=&gt;\"/WWW/PAUSE/Simple/\"}</tt> will return a response of something like below (this is providing you have installed WWW::PAUSE::Simple from CPAN):\n\n[code language=\"javascript\"]\n[\n   200,\n   &quot;OK (meta action)&quot;,\n   {\n      &quot;entity_date&quot; : &quot;2015-02-26&quot;,\n      &quot;entity_v&quot; : &quot;0.07&quot;,\n      &quot;summary&quot; : &quot;An API for PAUSE&quot;,\n      &quot;v&quot; : 1.1\n   },\n   {}\n]\n[/code]\n\nHow about request for a function metadata: <tt>{action=&gt;\"meta\", uri=&gt;\"/WWW/PAUSE/Simple/list_files\"}</tt>? This might return something like:\n\n[code language=\"javascript\"]\n[\n   200,\n   &quot;OK (meta action)&quot;,\n   {\n      &quot;args&quot; : {\n         &quot;del&quot; : {\n            &quot;schema&quot; : [\n               &quot;bool&quot;,\n               {},\n               {}\n            ],\n            &quot;summary&quot; : &quot;Only list files which are scheduled for deletion&quot;,\n            &quot;summary.alt.bool.not&quot; : &quot;Only list files which are not scheduled for deletion&quot;,\n            &quot;tags&quot; : [\n               &quot;category:filtering&quot;\n            ]\n         },\n         &quot;detail&quot; : {\n            &quot;schema&quot; : [\n               &quot;bool&quot;,\n               {},\n               {}\n            ],\n            &quot;summary&quot; : &quot;Whether to return detailed records&quot;\n         },\n         &quot;file&quot; : {\n            &quot;greedy&quot; : 1,\n            &quot;pos&quot; : 0,\n            &quot;schema&quot; : [\n               &quot;array&quot;,\n               {\n                  &quot;of&quot; : &quot;str*&quot;,\n                  &quot;req&quot; : 1\n               },\n               {}\n            ],\n            &quot;summary&quot; : &quot;File name/wildcard pattern&quot;\n         },\n         &quot;password&quot; : {\n            &quot;is_password&quot; : 1,\n            &quot;req&quot; : 1,\n            &quot;schema&quot; : [\n               &quot;str&quot;,\n               {\n                  &quot;req&quot; : 1\n               },\n               {}\n            ],\n            &quot;summary&quot; : &quot;PAUSE password&quot;,\n            &quot;tags&quot; : [\n               &quot;common&quot;\n            ]\n         },\n         &quot;username&quot; : {\n            &quot;req&quot; : 1,\n            &quot;schema&quot; : [\n               &quot;str&quot;,\n               {\n                  &quot;match&quot; : &quot;\\\\A\\\\w{2,9}\\\\z&quot;,\n                  &quot;max_len&quot; : 9,\n                  &quot;req&quot; : 1\n               },\n               {}\n            ],\n            &quot;summary&quot; : &quot;PAUSE ID&quot;,\n            &quot;tags&quot; : [\n               &quot;common&quot;\n            ]\n         }\n      },\n      &quot;args_as&quot; : &quot;hash&quot;,\n      &quot;entity_date&quot; : &quot;2015-02-26&quot;,\n      &quot;entity_v&quot; : &quot;0.07&quot;,\n      &quot;result_naked&quot; : 0,\n      &quot;summary&quot; : &quot;List files on your PAUSE account&quot;,\n      &quot;v&quot; : &quot;1.1&quot;,\n      &quot;x.perinci.sub.wrapper.logs&quot; : [\n         {\n            &quot;normalize_schema&quot; : 1,\n            &quot;validate_args&quot; : 1,\n            &quot;validate_result&quot; : 1\n         }\n      ]\n   },\n   {}\n]\n[/code]\n\nYou can use a convenient command-line utility called <a href=\"https://metacpan.org/pod/riap\">riap</a> to launch Riap requests and browse around a Riap server as if it were a filesystem (install the utility via <tt>cpanm -n App::riap</tt>), e.g.:\n\n[code language=\"text\"]\n% riap\n\nriap / &gt; meta /WWW/PAUSE/Simple/\n┌────────────────────────────────┒\n│ key           value            ┃\n│                                ┃\n│ entity_date   2015-02-26       ┃\n│ entity_v      0.07             ┃\n│ summary       An API for PAUSE ┃\n│ v             1.1              ┃\n┕━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n\nriap / &gt; meta /WWW/PAUSE/Simple/ --json \n[\n   200,\n   &quot;OK (meta action)&quot;,\n   {\n      &quot;entity_date&quot;: &quot;2015-02-26&quot;,\n      &quot;entity_v&quot;: &quot;0.07&quot;,\n      &quot;summary&quot;: &quot;An API for PAUSE&quot;,\n      &quot;v&quot;: 1.1\n   }\n]\n[/code]\n\n<h3>call</h3>\n\nAside from <tt>meta</tt>, <tt>call</tt> is another important action. It is used to call a function and return its result. Another request key <tt>args</tt> (hash) can be added to specify function arguments. A Riap request like <tt>{action=&gt;\"call\", uri=&gt;\"/Perinci/Examples/gen_array\", args=&gt;{len=&gt;5}}</tt> might return (assuming you have installed Perinci::Examples from CPAN):\n\n[code language=\"text\"]\n[200,&quot;OK&quot;,[4,2,1,3,5]]\n[/code]\n\nObviously, only functions can be called. If you try to call a non-function entity, an error will be returned:\n\n[code language=\"text\"]\n% riap\n\nriap / &gt; cd /Perinci\nriap /Perinci &gt; call Examples/\nERROR 501: Action 'call' not implemented for 'package' entity (at ... line ...)\n[/code]\n\nNote that the <b>riap</b> utility regards Riap packages as directories and Riap functions as executable files, so instead of:\n\n[code language=\"text\"]\n% riap\n\nriap / &gt; call /Perinci/Examples/gen_array --args '{&quot;len&quot;:5}'\n┌────────────────────────┒\n│  3    1    2    3    5 ┃\n┕━━━━━━━━━━━━━━━━━━━━━━━━┛\n[/code]\n\nyou can also \"run\" a function like it is an executable program:\n\n[code language=\"text\"]\nriap / &gt; /Perinci/Examples/gen_array --len 5 --json \n[\n   200,\n   &quot;OK&quot;,\n   [\n      &quot;2&quot;,\n      &quot;1&quot;,\n      &quot;4&quot;,\n      &quot;3&quot;,\n      &quot;2&quot;\n   ],\n   {}\n]\n[/code]",
+         "post_date" : "20150314T00:00:11",
+         "post_date_gmt" : "20150313T17:00:11",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "240",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:39:31",
+         "post_modified_gmt" : "20160901T01:39:31",
+         "post_name" : "pericmd-040-riap",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 040: Riap",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3S",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "666",
+               "key" : "email_notification",
+               "value" : "1426180063"
+            },
+            {
+               "id" : "562",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "662",
+               "key" : "jabber_published",
+               "value" : "1426180062"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=235",
+         "link" : "https://perlancar.wordpress.com/2015/03/13/pericmd-039-creating-api-friendly-cli-applications-with-parseable-outputs/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Traditional Unix commands present their result in a nice text output, often tabular. Examples:\n\n[code language=\"text\"]\n% fdisk -l\nDisk /dev/sda: 250.0 GB, 250059350016 bytes 255 heads, 63 sectors/track, 30401 cylinders\nUnits = cylinders of 16065 * 512 = 8225280 bytes\nDevice     Boot  Start  End    Blocks      Id  System\n/dev/sda1  *     1      191    1534176     83  Linux\n/dev/sda2        192    2231   16386300    83  Linux\n/dev/sda3        2232   3506   10241437+   83  Linux\n/dev/sda4        3507   30401  216034087+  5   Extended\n/dev/sda5        3507   3767   2096451     82  Linux swap / Solaris\n/dev/sda6        3768   3832   522081      83  Linux\n/dev/sda7        3833   30401  213415461   83  Linux Disk\n\n/dev/sdb: 250.0 GB, 250059350016 bytes 255 heads, 63 sectors/track, 30401 cylinders\nUnits = cylinders of 16065 * 512 = 8225280 bytes\nDevice     Boot  Start  End    Blocks      Id  System\n/dev/sdb1  *     1      30401  244196001   83  Linux\n[/code]\n\n[code language=\"text\"]\n% top -b\ntop - 13:34:07 up 23 days,  9:54, 17 users,  load average: 0.32, 0.35, 0.40\nTasks: 253 total,   1 running, 252 sleeping,   0 stopped,   0 zombie\n%Cpu(s):  4.5 us,  2.6 sy, 15.5 ni, 76.4 id,  0.9 wa,  0.0 hi,  0.0 si,  0.0 st\nKiB Mem:  12240268 total, 12015528 used,   224740 free,  1993828 buffers\nKiB Swap:        0 total,        0 used,        0 free,  2537996 cached\n\n  PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND\n 6182 s1        20   0 2731m 1.4g  22m S  12.6 12.1 987:50.33 opera\n 2173 s1        20   0 25196 1504 1020 R   6.3  0.0   0:00.01 top\n 5500 root      20   0  440m 282m  32m S   6.3  2.4   3414:24 Xorg\n 5634 s1        20   0 1117m  20m 7648 S   6.3  0.2   8:54.64 Thunar\n 5646 s1        20   0  382m  12m 6520 S   6.3  0.1   0:40.34 xfdesktop\n 6054 s1        20   0  912m  92m  23m S   6.3  0.8  65:20.28 konsole\n23398 s2        20   0 1951m 656m  38m S   6.3  5.5  37:25.52 iceweasel\n    1 root      20   0 10768  784  648 S   0.0  0.0   0:11.71 init\n    2 root      20   0     0    0    0 S   0.0  0.0   0:01.01 kthreadd\n...\n[/code]\n\n[code language=\"text\"]\n% ls -l\ntotal 100\n-rw-r--r-- 1 s1 s1 14754 Feb 27 20:35 Changes\n-rw-r--r-- 1 s1 s1  1126 Feb 27 20:35 dist.ini\ndrwxr-xr-x 4 s1 s1  4096 Jul 23  2014 lib/\ndrwxr-xr-x 4 s1 s1  4096 Feb 27 20:35 Perinci-CmdLine-Lite-0.88/\n-rw-r--r-- 1 s1 s1 61148 Feb 27 20:35 Perinci-CmdLine-Lite-0.88.tar.gz\ndrwxr-xr-x 2 s1 s1  4096 Feb 27 21:57 t/\n-rw-r--r-- 1 s1 s1    21 Aug 26  2014 weaver.ini\n[/code]\n\n[code language=\"text\"]\n% df\nFilesystem                                              1K-blocks       Used Available Use% Mounted on\nrootfs                                                  115378728   79636360  35742368  70% /\nudev                                                        10240          0     10240   0% /dev\ntmpfs                                                     1224028        916   1223112   1% /run\n/dev/disk/by-uuid/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  115378728   79636360  35742368  70% /\ntmpfs                                                        5120          0      5120   0% /run/lock\ntmpfs                                                     2448040        708   2447332   1% /run/shm\n/dev/sdb1                                              1922859912 1910136652  12723260 100% /backup\n/dev/mapper/0                                            41284928   38735524    452252  99% /mnt\n/dev/mapper/2                                            82569904   55356304  23019296  71% /backup/mnt\n[/code]\n\nWhile easy on the human eyes, they are \"hard\" to parse. I quote hard because it depends on the applications: some just require a Perl's <tt>split(/\\s+/)</tt> or <tt>cut</tt> because they are a variation of tab-separated values or CSV (but remember that correctly parsing CSV is hard), while some require a custom-crafted complex regex with additional logic.\n\nIn the age where Perl's popularity has waned and there is less emphasis on regex skills, or the age of webdevs and devops, correctly parsing CLI programs' outputs can be quite challenging to some. Many developers are more familiar with HTTP API's and JSON or the like, where they do not have to parse anything and get the data they want in the form of data structures (arrays, hashes, or a combination of both).\n\nSome Unix commands do offer an option to produce more parse-friendly output, but this is rare.\n\nWith <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Manual\">Perinci::CmdLine</a> we get the best of both world. Your function (the backend for the CLI app) produces pure data structures. Formatting is left to the framework to figure out. When run as CLI app, your users still get a nice table output that is easy on the eyes. But when they need to parse the output or feed it to another program, or access the function via API, there is an option to produce the data structure (<tt>--json</tt> switch in CLI).\n\nA very simple demonstration. Save the script below to <b>list-files</b>:\n\n[code language=\"perl\"]\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n\n$SPEC{list_files} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        'verbose' =&gt; {\n            cmdline_aliases =&gt; {v=&gt;{}},\n            schema =&gt; 'bool',\n        },\n        'all' =&gt; {\n            cmdline_aliases =&gt; {a=&gt;{}},\n            schema =&gt; 'bool',\n        },\n    },\n};\nsub list_files {\n    my %args = @_;\n    my $verbose = $args{verbose};\n    my $all     = $args{all};\n\n    my @files;\n    opendir my($dh), &quot;.&quot;;\n    for (sort readdir($dh)) {\n        next if !$all &amp;&amp; /\\A\\./;\n        if ($verbose) {\n            my $type = (-l $_) ? &quot;l&quot; : (-d $_) ? &quot;d&quot; : (-f _) ? &quot;f&quot; : &quot;?&quot;;\n            push @files, {name=&gt;$_, size=&gt;(-s _), type=&gt;$type};\n        } else {\n            push @files, $_;\n        }\n    }\n\n    [200, &quot;OK&quot;, \\@files];\n}\n\nmy $app = Perinci::CmdLine::Any-&gt;new(url =&gt; '/main/list_files');\ndelete $app-&gt;common_opts-&gt;{verbose};\n$app-&gt;common_opts-&gt;{version}{getopt} = 'version|V';\n$app-&gt;run;\n[/code]\n\n[code language=\"text\"]\n% ./list-files\nhello\nlist-files\nlist-files~\nmycomp\nmycomp2a\nmycomp2b\nmycomp2b+comp\npause\nperl-App-hello\n\n% ./list-files -v\n+----------------+------+------+\n| name           | size | type |\n+----------------+------+------+\n| hello          | 1131 | f    |\n| list-files     | 988  | f    |\n| list-files~    | 989  | f    |\n| mycomp         | 902  | f    |\n| mycomp2a       | 608  | f    |\n| mycomp2b       | 686  | f    |\n| mycomp2b+comp  | 1394 | f    |\n| pause          | 4096 | d    |\n| perl-App-hello | 4096 | d    |\n+----------------+------+------+\n\n% ./list-files --json\n[200,&quot;OK&quot;,[&quot;hello&quot;,&quot;list-files&quot;,&quot;list-files~&quot;,&quot;mycomp&quot;,&quot;mycomp2a&quot;,&quot;mycomp2b&quot;,&quot;mycomp2b+comp&quot;,&quot;pause&quot;,&quot;perl-App-hello&quot;],{}]\n\n% ./list-files -v --format json-pretty --naked-res\n[\n   {\n      &quot;name&quot; : &quot;hello&quot;,\n      &quot;size&quot; : 1131,\n      &quot;type&quot; : &quot;f&quot;\n   },\n   {\n      &quot;name&quot; : &quot;list-files&quot;,\n      &quot;size&quot; : 988,\n      &quot;type&quot; : &quot;f&quot;\n   },\n   {\n      &quot;name&quot; : &quot;list-files~&quot;,\n      &quot;size&quot; : 989,\n      &quot;type&quot; : &quot;f&quot;\n   },\n   {\n      &quot;name&quot; : &quot;mycomp&quot;,\n      &quot;size&quot; : 902,\n      &quot;type&quot; : &quot;f&quot;\n   },\n   {\n      &quot;name&quot; : &quot;mycomp2a&quot;,\n      &quot;size&quot; : 608,\n      &quot;type&quot; : &quot;f&quot;\n   },\n   {\n      &quot;name&quot; : &quot;mycomp2b&quot;,\n      &quot;size&quot; : 686,\n      &quot;type&quot; : &quot;f&quot;\n   },\n   {\n      &quot;name&quot; : &quot;mycomp2b+comp&quot;,\n      &quot;size&quot; : 1394,\n      &quot;type&quot; : &quot;f&quot;\n   },\n   {\n      &quot;name&quot; : &quot;pause&quot;,\n      &quot;size&quot; : 4096,\n      &quot;type&quot; : &quot;d&quot;\n   },\n   {\n      &quot;name&quot; : &quot;perl-App-hello&quot;,\n      &quot;size&quot; : 4096,\n      &quot;type&quot; : &quot;d&quot;\n   }\n]\n[/code]\n \nAnd the function is available from Perl as well, it's just a regular Perl subroutine. You can put it in a module and publish the module on CPAN, and so on. There are tools to publish your function as PSGI/Plack-based HTTP API as well, which we will cover in a future blog post.\n\nOther readings of interest:\n\n<ul>\n<li><a href=\"https://blogs.oracle.com/meem/entry/creating_shell_friendly_parsable_output\">Creating shell-friendly parsable output</a>\n</ul>",
+         "post_date" : "20150313T00:00:27",
+         "post_date_gmt" : "20150312T17:00:27",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "235",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:40:31",
+         "post_modified_gmt" : "20160901T01:40:31",
+         "post_name" : "pericmd-039-creating-api-friendly-cli-applications-with-parseable-outputs",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 039: Creating API-friendly CLI applications with parseable outputs",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3N",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "660",
+               "key" : "email_notification",
+               "value" : "1426093414"
+            },
+            {
+               "id" : "550",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "655",
+               "key" : "jabber_published",
+               "value" : "1426093413"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=226",
+         "link" : "https://perlancar.wordpress.com/2015/03/12/pericmd-038-getoptlongcomplete/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<a href=\"https://metacpan.org/pod/Getopt::Long::Complete\">Getopt::Long::Complete</a> is a module which I created as a drop-in replacement for Getopt::Long. It lets you use the tab completion features like in Perinci::CmdLine, without you having to get into all the other concepts of Perinci::CmdLine (like Rinci metadata and Riap URL, output formatting rules, or even subcommands, and so on). It's perfect if you want to add tab completion feature for your CLI application but you use Getopt::Long.\n\nI personally use this module to write tab completer for other applications (non-Perl, non-Perinci::CmdLine-based). Some examples: <a href=\"https://metacpan.org/pod/App::ShellCompleter::cpanm\">App::ShellCompleter::cpanm</a> (for Miyagawa's <a href=\"https://metacpan.org/pod/cpanm\">cpanm</a>), <a href=\"https://metacpan.org/pod/App::ShellCompleter::emacs\">App::ShellCompleter::emacs</a> (for the Emacs editor), <a href=\"https://metacpan.org/pod/App::ShellCompleter::CpanUpload\">App::ShellCompleter::CpanUpload</a> (for RJBS' <a href=\"https://metacpan.org/pod/cpan-upload\">cpan-upload</a>),\n\nAlso you might remember from a previous blog post (pericmd 024) about <a href=\"https://metacpan.org/pod/Getopt::Long::Subcommand\">Getopt::Long::Subcommand</a>. This module also lets you use all the Complete::* modules without getting into the whole Perinci::CmdLine.\n\nAn example on how you might use Getopt::Long::Complete can be seen <a href=\"https://metacpan.org/source/PERLANCAR/App-ShellCompleter-cpanm-0.10/bin/_cpanm\">here</a> (reproduced below sans the POD). It's a source code of _cpanm, which you install on bash using <tt>complete -C _cpanm cpanm</tt>.\n\n[code language=\"perl\"]\n#!perl\n \nour $DATE = '2015-02-15'; # DATE\nour $VERSION = '0.10'; # VERSION\n \n# NO_PERINCI_CMDLINE_SCRIPT\n# FRAGMENT id=shcompgen-hint completer=1 for=cpanm\n \nuse 5.010001;\nuse strict;\nuse warnings;\nuse Log::Any '$log';\n \nuse Complete::Util qw(complete_array_elem complete_file combine_answers);\nuse Getopt::Long::Complete qw(GetOptionsWithCompletion);\n \ndie &quot;This script is for shell completion only\\n&quot;\n    unless $ENV{COMP_LINE} || $ENV{COMMAND_LINE};\n \nmy $noop = sub {};\n \n# complete with list of installed modules\nmy $comp_installed_mods = sub {\n    require Complete::Module;\n \n    my %args = @_;\n \n    $log-&gt;tracef(&quot;Adding completion: installed modules&quot;);\n    Complete::Module::complete_module(\n        word =&gt; $args{word},\n    );\n};\n \n# complete with installable stuff\nmy $comp_installable = sub {\n    require Complete::Module;\n \n    my %args = @_;\n    my $word   = $args{word} // '';\n    my $mirror = $args{mirror}; # XXX support multiple mirrors\n \n    # if user already types something that looks like a path instead of module\n    # name, like '../' or perhaps 'C:\\' (windows) then don't bother to complete\n    # with module name because it will just delay things without getting any\n    # result.\n    my $looks_like_completing_module =\n        $word eq '' || $word =~ /\\A(\\w+)(::\\w+)*/;\n \n    my @answers;\n \n    {\n        $log-&gt;tracef(&quot;Adding completion: tarballs &amp; dirs&quot;);\n        my $answer = complete_file(\n            filter =&gt; sub { /\\.(zip|tar\\.gz|tar\\.bz2)$/i || (-d $_) },\n            word   =&gt; $word,\n        );\n        $log-&gt;tracef(&quot;  answer: %s&quot;, {words=&gt;$answer, path_sep=&gt;'/'});\n        push @answers, $answer;\n    }\n \n    if ($looks_like_completing_module) {\n        $log-&gt;tracef(&quot;Adding completion: installed modules &quot;.\n                         &quot;(e.g. when upgrading)&quot;);\n        my $answer = Complete::Module::complete_module(\n            word   =&gt; $word,\n        );\n        $log-&gt;tracef(&quot;  answer: %s&quot;, $answer);\n        push @answers, $answer;\n    }\n \n    # currently we only complete from local CPAN (App::lcpan) if it's available.\n    # for remote service, ideally we will need a remote service that quickly\n    # returns list of matching PAUSE ids, package/module names, and dist names\n    # (CPANDB, XPAN::Query, and MetaCPAN::Client are not ideal because the\n    # response time is not conveniently quick enough). i probably will need to\n    # setup such completion-oriented web service myself. stay tuned.\n    {\n        no warnings 'once';\n \n        last unless $looks_like_completing_module;\n        eval { require App::lcpan }; last if $@;\n        $log-&gt;tracef(&quot;Adding completion: modules from local CPAN mirror&quot;);\n \n        require Perinci::CmdLine::Util::Config;\n \n        my %lcpanargs;\n        my $res = Perinci::CmdLine::Util::Config::read_config(\n            program_name =&gt; &quot;lcpan&quot;,\n        );\n        unless ($res-&gt;[0] == 200) {\n            $log-&gt;tracef(&quot;Can't get config for lcpan: %s&quot;, $res);\n            last;\n        }\n        my $config = $res-&gt;[2];\n \n        $res = Perinci::CmdLine::Util::Config::get_args_from_config(\n            config =&gt; $config,\n            args   =&gt; \\%lcpanargs,\n            subcommand_name =&gt; 'update-index',\n            meta   =&gt; $App::lcpan::SPEC{update_local_cpan_index},\n        );\n        unless ($res-&gt;[0] == 200) {\n            $log-&gt;tracef(&quot;Can't get args from config: %s&quot;, $res);\n            last;\n        }\n        App::lcpan::_set_args_default(\\%lcpanargs);\n        my $mods = App::lcpan::list_local_cpan_modules(\n            %lcpanargs,\n            query =&gt; $word . '%',\n        );\n        #$log-&gt;tracef(&quot;all mods: %s&quot;, $mods);\n        my $answer = [grep {\n                if ($word =~ /::\\z/) {\n                    /\\A\\Q$word\\E[^:]+(::)?\\z/i\n                } else {\n                    /\\A\\Q$word\\E[^:]*(::)?\\z/i\n                }\n        } @$mods];\n        $log-&gt;tracef(&quot;  answer: %s&quot;, $answer);\n        push @answers, $answer;\n    }\n \n    # TODO module name can be suffixed with '@&lt;version&gt;'\n \n    combine_answers(@answers);\n};\n \nmy $comp_file = sub {\n    my %args = @_;\n \n    complete_file(\n        word =&gt; $args{word},\n        ci   =&gt; 1,\n    );\n};\n \n# this is taken from App::cpanminus::script and should be updated from time to\n# time.\nGetOptionsWithCompletion(\n    sub {\n        my %args  = @_;\n        my $type      = $args{type};\n        my $word      = $args{word};\n        if ($type eq 'arg') {\n            $log-&gt;tracef(&quot;Completing arg&quot;);\n            my $seen_opts = $args{seen_opts};\n            if ($seen_opts-&gt;{'--uninstall'} || $seen_opts-&gt;{'--reinstall'}) {\n                return $comp_installed_mods-&gt;(word=&gt;$word);\n            } else {\n                return $comp_installable-&gt;(\n                    word=&gt;$word, mirror=&gt;$seen_opts-&gt;{'--mirror'});\n            }\n        } elsif ($type eq 'optval') {\n            my $ospec = $args{ospec};\n            my $opt   = $args{opt};\n            $log-&gt;tracef(&quot;Completing optval (opt=$opt)&quot;);\n            if ($ospec eq 'l|local-lib=s' ||\n                    $ospec eq 'L|local-lib-contained=s') {\n                return complete_file(filter=&gt;'d', word=&gt;$word);\n            } elsif ($ospec eq 'format=s') {\n                return complete_array_elem(\n                    array=&gt;[qw/tree json yaml dists/], word=&gt;$word);\n            } elsif ($ospec eq 'cpanfile=s') {\n                return complete_file(word=&gt;$word);\n            }\n        }\n        return [];\n    },\n    'f|force'   =&gt; $noop,\n    'n|notest!' =&gt; $noop,\n    'test-only' =&gt; $noop,\n    'S|sudo!'   =&gt; $noop,\n    'v|verbose' =&gt; $noop,\n    'verify!'   =&gt; $noop,\n    'q|quiet!'  =&gt; $noop,\n    'h|help'    =&gt; $noop,\n    'V|version' =&gt; $noop,\n    'perl=s'          =&gt; $noop,\n    'l|local-lib=s'   =&gt; $noop,\n    'L|local-lib-contained=s' =&gt; $noop,\n    'self-contained!' =&gt; $noop,\n    'mirror=s@'       =&gt; $noop,\n    'mirror-only!'    =&gt; $noop,\n    'mirror-index=s'  =&gt; $noop,\n    'cpanmetadb=s'    =&gt; $noop,\n    'cascade-search!' =&gt; $noop,\n    'prompt!'         =&gt; $noop,\n    'installdeps'     =&gt; $noop,\n    'skip-installed!' =&gt; $noop,\n    'skip-satisfied!' =&gt; $noop,\n    'reinstall'       =&gt; $noop,\n    'interactive!'    =&gt; $noop,\n    'i|install'       =&gt; $noop,\n    'info'            =&gt; $noop,\n    'look'            =&gt; $noop,\n    'U|uninstall'     =&gt; $noop,\n    'self-upgrade'    =&gt; $noop,\n    'uninst-shadows!' =&gt; $noop,\n    'lwp!'    =&gt; $noop,\n    'wget!'   =&gt; $noop,\n    'curl!'   =&gt; $noop,\n    'auto-cleanup=s' =&gt; $noop,\n    'man-pages!' =&gt; $noop,\n    'scandeps'   =&gt; $noop,\n    'showdeps'   =&gt; $noop,\n    'format=s'   =&gt; $noop,\n    'save-dists=s' =&gt; $noop,\n    'skip-configure!' =&gt; $noop,\n    'dev!'       =&gt; $noop,\n    'metacpan!'  =&gt; $noop,\n    'report-perl-version!' =&gt; $noop,\n    'configure-timeout=i' =&gt; $noop,\n    'build-timeout=i' =&gt; $noop,\n    'test-timeout=i' =&gt; $noop,\n    'with-develop' =&gt; $noop,\n    'without-develop' =&gt; $noop,\n    'with-feature=s' =&gt; $noop,\n    'without-feature=s' =&gt; $noop,\n    'with-all-features' =&gt; $noop,\n    'pp|pureperl!' =&gt; $noop,\n    &quot;cpanfile=s&quot; =&gt; $noop,\n    #$self-&gt;install_type_handlers,\n    #$self-&gt;build_args_handlers,\n);\n \n# ABSTRACT: Shell completer for cpanm\n# PODNAME: _cpanm\n \n__END__\n[/code]\n\nIn the linked source code you'll see the completion routine passed in as the first argument for the <tt>GetOptionsWithCompletion()</tt> function (line 140). This is very much like a completion routine you set in <tt>completion</tt> property of function argument specification in a Rinci metadata. The routine should accept a hash argument, with the usual keys like <tt>word</tt> and is expected to return an array or a hash.\n\nOne key that is present, passed by Getopt::Long::Complete to the completion routine is the <tt>type</tt> key, which can have possible values of \"optval\" (meaning we are completing the value for a command-line option) or \"arg\" (meaning we are completing the value of a command-line argument).\n\nWhen type is \"optval\", these keys are also passed: <tt>ospec</tt> (a Getopt::Long option specification to identify the option, e.g. \"--foo\"), <tt>opt</tt> the name of the option). There is also <tt>seen_opts</tt> which is a hash containing all the options that have been specified in the command-line.\n\nWhen type is \"arg\", these keys are also passed:<tt>pos</tt> (an integer starting from 0 to let us know which argument are we completing the value for).\n\nAlso you'll see a new function being used from Complete::Util: <tt>combine_answers()</tt> (line 125). This function is used to combine two or more completion answers. Each answer can be an array or a hash. If all answers are arrays, the final result will still be an array, but if one of the input answers is a hash, the final result will be a hash.",
+         "post_date" : "20150312T00:00:26",
+         "post_date_gmt" : "20150311T17:00:26",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "226",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:42:10",
+         "post_modified_gmt" : "20160901T01:42:10",
+         "post_name" : "pericmd-038-getoptlongcomplete",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 038: Getopt::Long::Complete",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3E",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "653",
+               "key" : "email_notification",
+               "value" : "1426007004"
+            },
+            {
+               "id" : "546",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "648",
+               "key" : "jabber_published",
+               "value" : "1426006997"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=224",
+         "link" : "https://perlancar.wordpress.com/2015/03/11/pericmd-037-more-on-tab-completion-8-x-schema-entity/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "If you have a lot of functions each with several arguments, you can end up with adding a lot of completion routines for them. And chances are, a lot of them have the same completion routines, for example many of your \"user\" arguments probably are to be completed with a list of Unix usernames, \"file\" arguments are filenames, and so on.\n\nInstead of explicitly adding completion routines, you can now also just add an <tt>x.schema.entity</tt> attribute to your function argument's specification to mark what kind of entity this argument is.\n\nPerinci::CmdLine will then look for corresponding <tt>Perinci::Sub::ArgEntity::*</tt> module and inside the module will search for <tt>complete_arg_val</tt> function. This function will then be used for the completion routine.\n\nThere is also the corresponding <tt>x.schema.element_entity</tt> to be used for the <tt>element_completion</tt> property.\n\nCurrently there is only a handful (or less than a handful) of Perinci::Sub::ArgEntity::* modules on CPAN. I plan to add some more. I also plan to create a Dist::Zilla plugin so that CLI applications having <tt>x.schema.{entity,element_entity}</tt> attributes in their Rinci metadata will have the corresponding Perinci::Sub::ArgEntity:* modules searched on CPAN and added automatically as prerequisites.\n\nAlso of note is that the <tt>x.schema.entity</tt> attribute is useful for other purposes too, but this is the topic for another blog post.\n\n<h3>Afterthought</h3>\n\n<tt>x.schema.entity</tt> is a temporary workaround. Since this is just an issue of types, eventually this information should be put in the <tt>schema</tt> property, where instead of something like <tt>[\"str*\", min_len=&gt;1, max_len=&gt;255]</tt> you specify a schema like <tt>[\"filename*\"]</tt> and then the tab completion subsystem can get hints from the type. Sah is capable of this subtyping, but the implementation modules haven't caught up yet, so I'm keeping the schemas to basic/builtin types and add more refined information in the <tt>x.schema.entity</tt> attributes for now.  \n\n&nbsp;",
+         "post_date" : "20150311T00:00:42",
+         "post_date_gmt" : "20150310T17:00:42",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "224",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:42:32",
+         "post_modified_gmt" : "20160901T01:42:32",
+         "post_name" : "pericmd-037-more-on-tab-completion-8-x-schema-entity",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 037: More on tab completion (8): x.schema.entity",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3C",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "640",
+               "key" : "email_notification",
+               "value" : "1425920579"
+            },
+            {
+               "id" : "542",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "635",
+               "key" : "jabber_published",
+               "value" : "1425920578"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=222",
+         "link" : "https://perlancar.wordpress.com/2015/03/10/pericmd-036-more-on-tab-completion-7-config-profile/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Back to tab completion on today's post. In this post I want to show you how the completion of <tt>--config-profile</tt> works. I think this is a nice feature of Perinci::CmdLine and studying the code highlights the mechanism of the tab completion routine.\n\n<h3>What is --config-profile for?</h3>\n\nAs already discussed in a previous blog post, a configuration file can consist of several profiles (or perhaps \"scenarios\") which can be selected by the user via command-line option. For example:\n\n[code language=\"text\"]\n# in ~/.config/myapp.conf\nfoo=1\n\n[profile=p20]\nfoo=21\nbar=22\n\n# in /etc/myapp.conf\nbar=2\nbaz=3\n\n[profile=p10]\nfoo=11\nbar=12\n[/code]\n\nSo if you run <tt>myapp --config-profile=p10</tt> you'll get <tt>(foo=11, bar=12, baz=3)</tt>. If you run <tt>myapp --config-profile=p20</tt> you'll get <tt>(foo=21, bar=22, baz=3)</tt>. And if you run without using any profile: <tt>myapp</tt> you'll get <tt>(foo=1, bar=2, baz=3)</tt>.\n\nThere is completion available for <tt>--config-profile</tt>:\n\n[code language=\"text\"]\n% myapp --config-profile &lt;tab&gt;&lt;tab&gt;\np10     p20\n[/code]\n\n<h3>How the completion routine works</h3>\n\nIn Perinci/CmdLine/Base.pm, in the definition of common options (<tt>%copts</tt>), we have the following code:\n\n[code language=\"perl\" firstline=\"199\"]\n    config_profile =&gt; {\n        getopt  =&gt; 'config-profile=s',\n        summary =&gt; 'Set configuration profile to use',\n        handler =&gt; sub {\n            my ($go, $val, $r) = @_;\n            $r-&gt;{config_profile} = $val;\n        },\n        completion =&gt; sub {\n            # return list of profiles in read config file\n\n            my %args = @_;\n            my $word    = $args{word} // '';\n            my $cmdline = $args{cmdline};\n            my $r       = $args{r};\n\n            # we are not called from cmdline, bail (actually we might want to\n            # return list of programs anyway, but we want to read the value of\n            # bash_global_dir et al)\n            return undef unless $cmdline;\n\n            # since this is common option, at this point we haven't parsed\n            # argument or even read config file. so we need to do that first.\n            {\n                # this is not activated yet\n                $r-&gt;{read_config} = 1;\n\n                my $res = $cmdline-&gt;parse_argv($r);\n                #return undef unless $res-&gt;[0] == 200;\n            }\n\n            # we are not reading any config file, return empty list\n            return [] unless $r-&gt;{config};\n\n            my @profiles;\n            for (keys %{$r-&gt;{config}}) {\n                if (length $r-&gt;{subcommand_name}) {\n                    push @profiles, $1\n                        if /\\A\\Q$r-&gt;{subcommand_name}\\E \\s+ profile=(.+)/x;\n                } else {\n                    push @profiles, $1 if /\\Aprofile=(.+)/;\n                }\n            }\n\n            require Complete::Util;\n            Complete::Util::complete_array_elem(\n                array=&gt;[sort @profiles], word=&gt;$word, ci=&gt;1);\n        },\n    },\n[/code]\n\nBelow is the description of how the completion routine works. Lines 210-212 takes in the arguments. Aside from the familiar <tt>word</tt>, we also have <tt>cmdline</tt> and <tt>r</tt>. <tt>cmdline</tt> contains the Perinci::CmdLine object and is passed to the completion routine so the routine can access the attributes of the command-line application, as well as know that it is run in the context of CLI (completion routine can also be run under different context, like GUI or HTTP over AJAX for autocompletion of form fields). <tt>r</tt> is a hash structure that contains per-request data, and is explained in the <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Base\">POD documentation of Perinci::CmdLine::Base</a>, for example: <tt>format</tt> (the output format chosen by user), <tt>action</tt> (the action chosen, like \"help\" when program should display help message and exit, \"version\" to display version and exit, or \"call\" to execute Riap function, which is the main action), and so on.\n\n<tt>r</tt> also contains information about the configuration paths and content. Lines 221-227 force the reading of config files via calling the <tt>parse_argv()</tt> method. After this, if we are reading any config files, the configuration data will be in <tt>$r-&gt;{config}</tt> and we just need to grab all the available profiles (lines 232-240).\n\nFinally we call the usual <tt>complete_array_elem</tt> to filter the list of profile names with <tt>word</tt> and return the final answer (line 242-244).\n  ",
+         "post_date" : "20150310T00:00:43",
+         "post_date_gmt" : "20150309T17:00:43",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "222",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:42:50",
+         "post_modified_gmt" : "20160901T01:42:50",
+         "post_name" : "pericmd-036-more-on-tab-completion-7-config-profile",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 036: More on tab completion (7): --config-profile",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3A",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "633",
+               "key" : "email_notification",
+               "value" : "1425834170"
+            },
+            {
+               "id" : "538",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "628",
+               "key" : "jabber_published",
+               "value" : "1425834168"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=220",
+         "link" : "https://perlancar.wordpress.com/2015/03/09/pericmd-035-common-options/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "We'll take a short break from discussing tab completion. Let's turn to one thing that we've taken for granted so far: common options. These are things like <tt>--help</tt>, <tt>--version</tt>, <tt>--format</tt> and so on. Where are they defined and how can we customize them?\n\nWhen we instantiate our CLI application object with <tt>Perinci::CmdLine::Any-&gt;new</tt>, it will return either a Perinci::CmdLine::Lite (the default) or Perinci::CmdLine::Classic object, depending on some conditions/parameters. These classes are all subclasses of Perinci::CmdLine::Base.\n\nPerinci::CmdLine::Base defines the following package variable:\n\n[code language=\"perl\"]\nour %copts = (\n\n    version =&gt; {\n        getopt  =&gt; &quot;version|v&quot;,\n        usage   =&gt; &quot;--version (or -v)&quot;,\n        handler =&gt; sub {\n            my ($go, $val, $r) = @_;\n            $r-&gt;{action} = 'version';\n            $r-&gt;{skip_parse_subcommand_argv} = 1;\n        },\n    },\n\n    help =&gt; {\n        getopt  =&gt; 'help|h|?',\n        summary =&gt; 'Display this help message',\n        usage   =&gt; &quot;--help (or -h, -?)&quot;,\n        handler =&gt; sub {\n            my ($go, $val, $r) = @_;\n            $r-&gt;{action} = 'help';\n            $r-&gt;{skip_parse_subcommand_argv} = 1;\n        },\n        order =&gt; 0, # high\n    },\n\n    format =&gt; {\n        getopt  =&gt; 'format=s',\n        summary =&gt; 'Choose output format, e.g. json, text',\n        handler =&gt; sub {\n            my ($go, $val, $r) = @_;\n            $r-&gt;{format} = $val;\n        },\n    },\n \n    ...\n[/code]\n\nLater, each of Perinci::CmdLine::Lite and Perinci::CmdLine::Classic will copy from this hash into new object's <tt>common_opts</tt> attribute. Some options will not be included, for example all the config-related common options (<tt>--config-profile</tt>, <tt>--config-path</tt>, <tt>--no-config</tt>), will be skipped if we don't want config file support (<tt>read_config</tt> attribute is set to false). You get the final set of options in the <tt>common_opts</tt> attribute.\n\n<h3>Customizing common options</h3>\n\nSuppose you don't want any common option (this makes the CLI app quite incovenient to use, but for the sake of the example...):\n\n[code language=\"perl\"]\n# myapp\nuse Perinci::CmdLine::Any;\nPerinci::CmdLine::Any-&gt;new(common_opts=&gt;{}, url=&gt;'...');\n[/code]\n\nWhen this program is run:\n\n[code language=\"text\"]\n% myapp --help\nUnknown option: help\nERROR 500: GetOptions failed\n\n% myapp -v\nUnknown option: v\nERROR 500: GetOptions failed\n[/code]\n\nWhat you would like to do is sometimes just remove one or two common options or rename them, usually because they happen to conflict with your function argument. For example, suppose your function has an argument called <tt>format</tt> and you want the common option <tt>--format</tt> to be renamed to <tt>--output-format</tt>. You can already see the structure of the <tt>format</tt> common option from the previous listing, so:\n\n[code language=\"perl\"]\n# myapp\nuse Perinci::CmdLine::Any;\nmy $app = Perinci::CmdLine::Any-&gt;new(url=&gt;'...');\n$app-&gt;common_opts-&gt;{format}{getopt} = 'output-format=s';\n$app-&gt;run;\n[/code]\n",
+         "post_date" : "20150309T00:00:19",
+         "post_date_gmt" : "20150308T17:00:19",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "220",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:43:13",
+         "post_modified_gmt" : "20160901T01:43:13",
+         "post_name" : "pericmd-035-common-options",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 035: Common options",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3y",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "626",
+               "key" : "email_notification",
+               "value" : "1425747901"
+            },
+            {
+               "id" : "534",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "621",
+               "key" : "jabber_published",
+               "value" : "1425747899"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=216",
+         "link" : "https://perlancar.wordpress.com/2015/03/08/pericmd-034-more-on-tab-completion-6-completion-modules/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In this post we'll take a tour on what completion modules have been written and how you can write one yourself.\n<h3>Completing Perl modules and distributions</h3>\n<a href=\"https://metacpan.org/pod/Complete::Module\">Complete::Module</a>, previously mentioned, can complete Perl module names. There are some other derivative modules which I wrote which are basically shortcuts for convenience like <a href=\"https://metacpan.org/pod/Complete::Dist::Zilla\">Complete::Dist::Zilla</a> (for listing modules in the namespace of /^Dist::Zilla::(Plugin,PluginBundle,Role)::/) or <a href=\"https://metacpan.org/pod/Complete::Pod::Weaver\">Complete::Pod::Weaver</a> (for modules in /^Pod::Weaver::(Role,Plugin,PluginBundle,Section)::/). There is also <a href=\"https://metacpan.org/pod/Complete::Riap\">Complete::Riap</a> which currently only supports local URL (like \"/App/fatten/fatten\" or \"pl:/WWW/PAUSE/Simple/list_files\") and also complete from Perl modules and functions.\n\n<a href=\"https://metacpan.org/pod/Complete::Dist\">Complete::Dist</a> can complete from list of locally installed Perl distributions. I'm using it <a href=\"https://metacpan.org/pod/App::DistUtils\">App::DistUtils</a> (\"uninstall-dist &lt;tab&gt;\").\n<h3>Unix stuffs</h3>\n<a href=\"https://metacpan.org/pod/Complete::Unix\">Complete::Unix</a> provides several functions for completing Unix-related things like user names, UIDs, group names, GIDs, PIDs, as well as process names. They can be useful for writing Unix or Unix-related utilities. For example, I'm using it for <a href=\"https://metacpan.org/pod/App::ShellCompleter::emacs\">App::ShellCompleter::emacs</a> (\"emacs --user &lt;tab&gt;\").\n\n<a href=\"https://metacpan.org/pod/Complete::Man\">Complete::Man</a> can complete from list of available manpages. So far I haven't had the need to use it yet though.\n<h3>Others</h3>\ncomplete_prog() from Complete::Util can complete from list of programs available on PATH.\n<h3>Creating your own completion routine/module</h3>\nLet's create an example of completing from the list of time zone names. In a Unix machine, there is usually a directory structure in /usr/share/zoneinfo/ which we can readily use (we just need to filter out some files). Since this is just filesystem path, we can utilize <a href=\"https://metacpan.org/pod/Complete::Util\">Complete::Util</a>'s complete_file() for this.\n\nFirst create a module called Complete::TZ by creating file named \"lib/Complete/TZ.pm\" with the following content:\n\n[code language=\"perl\"]\npackage Complete::TZ;\n\nuse strict;\nuse warnings;\nuse Exporter qw(import);\nour @EXPORT_OK = qw(complete_tz);\n\nsub complete_tz {\n    require Complete::Util;\n    my %args = @_;\n    Complete::Util::complete_file(\n        starting_path =&gt; '/usr/share/zoneinfo',\n        handle_tilde =&gt; 0,\n        allow_dot =&gt; 0,\n        filter =&gt; sub {\n            return 0 if $_[0] =~ /\\.tab$/;\n            1;\n        },\n\n        word =&gt; $word,\n    );\n}\n1;\n[/code]\n\nLet's test this module:\n\n[code language=\"text\"]\n% perl -Ilib -MComplete::TZ=complete_tz -MDD -E'dd complete_tz(word=&gt;&quot;asia/j&quot;)'\n[&quot;Asia/Jakarta&quot;, &quot;Asia/Jayapura&quot;, &quot;Asia/Jerusalem&quot;]\n[/code]\n\nIf you later package this module as a proper CPAN module and install it, you'll be able to use it in your CLI app as with other completion routines, e.g.:\n\n[code language=\"perl\"]\nuse Complete::TZ qw(complete_tz);\n\n$SPEC{yourapp} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        tz =&gt; {\n            summary =&gt; 'Select a timezone name',\n            schema =&gt; 'str*',\n            completion =&gt; \\&amp;complete_tz,\n        },\n        ...\n    },\n};\n...\n[/code]\n\nWhen you use your CLI app, you'll then get a convenience of tab completion for timezone names, e.g.:\n\n[code language=\"text\"]\n% yourapp --tz asia/j&lt;tab&gt;&lt;tab&gt;\nAsia/Jakarta   Asia/Jayapura   Asia/Jerusalem\n[/code]\n",
+         "post_date" : "20150308T00:00:31",
+         "post_date_gmt" : "20150307T17:00:31",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "216",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:43:30",
+         "post_modified_gmt" : "20160901T01:43:30",
+         "post_name" : "pericmd-034-more-on-tab-completion-6-completion-modules",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 034: More on tab completion (6): Completion modules",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3u",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "617",
+               "key" : "email_notification",
+               "value" : "1425661253"
+            },
+            {
+               "id" : "530",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "612",
+               "key" : "jabber_published",
+               "value" : "1425661251"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=214",
+         "link" : "https://perlancar.wordpress.com/2015/03/07/pericmd-033-more-on-tab-completion-5-hash-answer/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Simpler <tt>complete_*()</tt> functions will just return the list of words as an array, e.g.:\n\n[code language=\"perl\"]\ncomplete_array_elem(word=&gt;&quot;a&quot;, array=&gt;[qw/an apple a day keeps the doctor away/]);\n# -&gt; [&quot;a&quot;, &quot;an&quot;, &quot;apple&quot;, &quot;away&quot;]\n[/code]\n\nBut actually completion routine can also return a hash structure. This is described in <a href=\"https://metacpan.org/pod/Complete\">Complete</a>. For example:\n\n[code language=\"perl\"]\n{words=&gt;[&quot;a&quot;, &quot;an&quot;, &quot;apple&quot;, &quot;away&quot;]}\n[/code]\n\nAside from <tt>words</tt> which is the meat of the answer, a hash can contain some other keys for metadata/hints for formatting. I'm just going to mention 2 of such keys. The others you can read for yourself in the Complete or Complete::Bash's POD (or will perhaps be discussed in later posts.)\n\n<h3>path_sep</h3>\n\nAs you probably noticed from the previous blog post (pericmd 032), <tt>complete_module()</tt> function from <a href=\"https://metacpan.org/pod/Complete::Module\">Complete::Module</a> routines return a hash with <tt>path_sep</tt> key set to the path separator:\n\n[code language=\"perl\"]\ncomplete_module(word=&gt;&quot;Complete::P&quot;);\n# -&gt; {words=&gt;[&quot;Complete::Path&quot;, &quot;Complete::Pod::Weaver&quot;], path_sep=&gt;&quot;::&quot;}\n\ncomplete_module(word=&gt;&quot;Complete/Po&quot;, dig_leaf=&gt;0);\n# -&gt; {words=&gt;[&quot;Complete/Pod/&quot;], path_sep=&gt;&quot;/&quot;}\n[/code]\n\nThe <tt>path_sep</tt> key is useful to give hints for, e.g. <a href=\"https://metacpan.org/pod/Complete::Bash\">Complete::Bash</a> (the module that formats the completion answer to stdout for bash). In bash, when a completion routine returns a single entry, bash will add a space to let user move to the next word since the completion is already unambiguous. For example, you already type \"Cha\" before pressing Tab, and there is only a single file that begins with \"Cha\" (\"Changes\"). bash will then change the current word \"Cha\" to \"Changes\" and add a space. This is fine when we are completing file/non-folder entity, but suppose the single completion you have for \"li\" is the directory \"lib/\", and bash automatically adds a space after \"lib/\". Normally you'd want to have \"lib/\" right before cursor and without any space, so you can press Tab again to drill down inside that directory. Bash does not provide a way for programs to hint this behavior, so the Complete::Bash employs a trick of returning <tt>[\"lib/\", \"lib/ \"]</tt> instead of just <tt>[\"lib/\"]</tt>. This makes the completion ambiguous (there are two candidates) and bash replaces current word \"li\" with the common substring of the answers \"lib/\" without any space.\n\nSo <tt>path_sep</tt> will make Complete::Bash format the output of complete_module() in the previous example:\n\n[code language=\"perl\"]\ncomplete_module(word=&gt;&quot;Complete/Po&quot;, dig_leaf=&gt;0);\n# -&gt; {words=&gt;[&quot;Complete/Pod/&quot;], path_sep=&gt;&quot;/&quot;}\n[/code]\n\ninto this final output for bash (the second entry has an extra space at the end):\n\n[code language=\"text\"]\nComplete/Pod/\nComplete/Pod/ \n[/code]\n\nBut this answer will not get an additional entry since it's already ambiguous:\n\n[code language=\"perl\"]\ncomplete_module(word=&gt;&quot;Complete::P&quot;);\n# -&gt; {words=&gt;[&quot;Complete::Path&quot;, &quot;Complete::Pod::Weaver&quot;], path_sep=&gt;&quot;::&quot;}\n[/code]\n\n[code language=\"text\"]\nComplete::Path\nComplete::Pod::Weaver\n[/code]\n\nIn short, you can a <tt>path_sep</tt> key if you are returning a path-like thing and you want to let user drill down. If you do have a custom path-like completion, though, consider using <a href=\"https://metacpan.org/pod/Complete::Path\">Complete::Path</a> which provides some other nice features like previously discussed (pericmd 032).\n\n<h3>esc_mode</h3>\n\nThis key gives hints to Complete::Bash on how to escape the output, as there are some possible variant depending on what the user expects. A value of <tt>shellvar</tt> tells Complete::Bash not to escape \"$\" (dollar sign) to \"\\$\". Normally if we are completing filenames, for example, we'd want dollar signs to be escaped to avoid shell variable interpretation. But if we are completing shell variables, we do want the \"$\" to stay as \"$\".\n",
+         "post_date" : "20150307T00:00:27",
+         "post_date_gmt" : "20150306T17:00:27",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "214",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:43:52",
+         "post_modified_gmt" : "20160901T01:43:52",
+         "post_name" : "pericmd-033-more-on-tab-completion-5-hash-answer",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 033: More on tab completion (5): Hash answer",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3s",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "594",
+               "key" : "email_notification",
+               "value" : "1425639890"
+            },
+            {
+               "id" : "590",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "587",
+               "key" : "jabber_published",
+               "value" : "1425639889"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=251",
+         "link" : "https://perlancar.wordpress.com/2015/03/06/towards-better-changes-1/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In order to produce a more helpful Changes file for my modules and applications (primarily for me first, and then for others), aside from the usual advice found on the web like:\n\n<ul>\n<li>Geared towards humans (users)\n<li>NOT a commit log\n<li>Tell user whether or not she should upgrade (and when)\n<li>List potential backward incompatibility (removed features, renamed stuffs)\n<li>List new/improved features\n<li>Reference each entry with associated issue tracker ID, if any (e.g. GH#123 for Github, RT#12345 for rt.cpan.org, and so on)\n<li>Categorize by the nature of the changes (new/enhancements, bug fixes, internal, documentation, and so on)\n</ul>\n\nI'm trying to keep in mind about these two things.\n\n<h3>Reason, reason, reason (a.k.a. why, Why? WHY???)</h3>\n\nWhen something is added (and more importantly, when something is removed or renamed), there is usually a reason. Unfortunately, I forget easily. And more unfortunately, I often change my mind. A reason that might be sound at one time, might not be in a later time (and then might again be in a future time). If I didn't write down the reason I did something, and then forget, I might revert a potentially good decision that I made in the past, only to find out later after some repeated incidents, which will make me revert back the decision. And thus, wasted efforts. This has happened to me more than a couple of times.\n\nInstead of:\n\n[code language=\"text\"]\n- Rename foo to bar.\n- Remove baz.\n[/code]\n\nit's much more helpful (for the future me, for other users) to write:\n\n[code language=\"text\"]\n- Rename foo to bar because foo is not a very clear name.\n- Remove baz because Module::XYZ already has something similar (qux), \n  added a mention in See Also section.\n[/code]\n\nThe \"why, Why, WHY???\" rule is also very much applicable to code comments and commit messages.\n\n<h3>Updating old entries</h3>\n\nIn a long history of a module, or a specification document, a feature that got introduced in an earlier release might get renamed or removed in a later release. When one reads the Changes file, it will be useful in the old entry that introduced a feature gets updated with a reference to the new release which removes/deprecates/renames the feature.\n\nYou might also notice something like this in IETF RFCs listing. For example, when you are viewing <a href=\"https://tools.ietf.org/html/rfc821\">RFC 821</a> (an old description of the SMTP protocol), you'll see a notice that this RFC has been obsoleted by RFC 2821.\n\nSo something like this might be useful:\n\n[code language=\"text\" highlight=\"12,18\"]\n1.03    2015-03-06 (PERLANCAR)\n\n        - Add quz.\n        - Remove foo because it proves to be more trouble than it's worth.\n        - Rename bar to baz because bar might be mistaken as a night-only\n          thingie.\n\n...\n\n0.46    2011-03-02 (SOMEONE2)\n\n        - Introduce foo. UPDATE: Removed in 1.03.\n\n...\n\n0.13    2011-03-02 (SOMEONE2)\n\n        - Add bar. UPDATE: Renamed to baz in 1.03.\n[/code]\n\n<h3>Some other things I do</h3>\n\n<b>Add releaser information.</b> Even if currently all of my dists are released only by me (but I've switched PAUSE accounts before). This is additional information that might be useful. Reader can be informed that a certain release is not released by its original maintainer/author. And, different releaser might use different build tools/environment and this might creep in as bugs. Knowing who did the release can be useful to track down the problem.\n\n<b>Add a blank line for each entry in a release.</b> For example: <a href=\"https://metacpan.org/changes/distribution/Rinci\">this</a> or <a href=\"https://metacpan.org/changes/distribution/Riap\">this</a>. Admittedly, this started purely because of issue with text editor (I can align each entry more easily in Emacs if I separate each entry with a blank line), but with time, this format encourages me to write more sentences in a single entry as a paragraph, instead trying to be as brief as possible by keeping each entry to fit in a single line. And, if each entry becomes a paragraph, a blank line separator helps readability.\n\n<h3>Some things I tend to avoid</h3>\n\n<b>Crediting each entry</b>\n\nExample:\n\n[code language=\"text\"]\n1.2.3    2015-03-06 (PERLANCAR)\n\n         - Add foo GH#19 (Peter)\n\n         - Make it so that bar does not crash the browser (Peter)\n\n         - Fix bug GH#32 (Ron)\n\n         - Rename bar to baz (Peter)\n\n         - Mention some related modules (Ron) \n[/code]\n\nSure, it's okay to mention an occasional contributor and if there are only a few entries. But if there are a lot of entries, the names become more of a noise and distracting. If you need to credit a significant contribution for a certain release, perhaps it's better to add an entry at the above, for example:\n\n[code language=\"text\"]\n1.2.3    2015-03-06 (PERLANCAR)\n\n         - This release is mostly due to Peter's tireless work. So, thanks Peter.\n\n         - Add foo GH#19\n         - Make it so that bar does not crash the browser\n         - Fix bug GH#32\n         - Rename bar to baz\n         - Mention some related modules\n[/code]\n\nI believe it's more convenient for the reader. If a curious reader wants to know who does each change, she can go browse the commit logs.\n\n<b>Categorizing changes by contributor</b>. Ugh, just no. This is not helpful for readers.\n\n<h3>Other recommended readings</h3>\n\n<ul>\n<li><a href=\"http://blogs.perl.org/users/neilb/2013/09/a-convention-for-changes-files.html\">A convention for Changes files</a> by NEILB, which deals mostly with formatting.\n<li><a href=\"http://blog.urth.org/2011/01/27/changes-file-how-and-how-not-to/\">Changes file how- (and how-not-)to</a> (and <a href=\"http://blog.urth.org/2011/01/28/changes-file-how-to-follow-up/\">its follow-up</a>) by DROLSKY.\n</ul>\n\n",
+         "post_date" : "20150306T18:04:49",
+         "post_date_gmt" : "20150306T11:04:49",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "251",
+         "post_mime_type" : "",
+         "post_modified" : "20150322T22:58:54",
+         "post_modified_gmt" : "20150322T15:58:54",
+         "post_name" : "towards-better-changes-1",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Towards better Changes (1)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-43",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "583",
+               "key" : "email_notification",
+               "value" : "1425575143"
+            },
+            {
+               "id" : "519",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "578",
+               "key" : "jabber_published",
+               "value" : "1425575141"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=210",
+         "link" : "https://perlancar.wordpress.com/2015/03/06/pericmd-032-more-on-tab-completion-4-completing-paths/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "There are several kinds of tree-like entities that can be addressed using a path. Filesystem is one, another is a hierarchy of Perl module/package (yet another is Riap URL, which we haven't really covered in depth, but suffice to say that local Riap URL also map to Perl packages in Perl-based application). A module called <a href=\"https://metacpan.org/pod/Complete::Path\">Complete::Path</a> is used as a backend to complete all these kinds of path. Each specific type of path is then completed using a higher-level function which uses Complete::Path, but they support the same settings that Complete::Path supports/respects.\n\n<h3>Completing filesystem path</h3>\n\nFunction <tt>complete_file</tt> in <a href=\"https://metacpan.org/pod/Complete::Util\">Complete::Util</a> can be used to complete filesystem path (that is, files and directories). There is a <tt>filter</tt> option which can be a simple string like <tt>\"d\"</tt> to only use directories and not files or <tt>\"x\"</tt> to only include files (and directories) that have their executable bit set, or as complex as you want since it can also be a coderef.\n\nLet's try using the function directly. Suppose we have a directory containing these files:\n\n[code language=\"text\"]\n% mkdir tmp\n% cd tmp\n% mkdir dir1 dir2 Dir3 dir2/dir4\n% touch file1 file2-a file2_b File3 dir2/file4 dir2/dir4/file5\n[/code]\n\nThen this code:\n\n[code language=\"text\"]\n% perl -MComplete::Util=complete_file -MData::Dump -E'dd complete_file(word=&gt;&quot;d&quot;)'\n[&quot;Dir3/&quot;, &quot;dir1/&quot;, &quot;dir2/&quot;]\n[/code]\n\nNote how directories are automatically appended with path separator character (in this case, <tt>/</tt>). This is for convenience to let you press Tab again directly to dig a filesystem deeper into subdirectories without typing the path separator character manually.\n\n<b>The map_case option.</b> <tt>complete_file()</tt> also accepts <tt>map_case</tt> option (will be passed to Complete::Path) which, if turned on (by default it is), will regard underscore (<tt>_</tt>) and dash (<tt>-</tt>) as the same character. This is for convenience to let you use dash (which does not require pressing the Shift key on US keyboards) for completing words that might use underscores as separators. Example:\n\n[code language=\"text\"]\n% perl -MComplete::Util=complete_file -MData::Dump -E'dd complete_file(word=&gt;&quot;file2-&quot;)'\n[&quot;file2-a&quot;, &quot;file2_b&quot;]\n[/code]\n\n<b>The exp_im_path option.</b> <tt>exp_im_path</tt> is short for \"expand intermediate paths\" and is another convenience option which by default is turned on (can be turned off globally by setting environment COMPLETE_OPT_EXP_IM_PATH to 0). This option lets you type only one or a few characters of intermediate paths. For example:\n\n[code language=\"text\"]\n% perl -MComplete::Util=complete_file -MData::Dump -E'dd complete_file(word=&gt;&quot;d/d/f&quot;)'\n[&quot;dir2/dir4/file5&quot;]\n[/code]\n\nThis is akin to a shell wildcard like <tt>d*/d*/f*</tt>.\n\nNote that by default, expansion is limited only when each intermediate path is only 1 or 2 characters long. As to why this is done, the documentation for Complete module contains the gory details.\n\n<b>The dig_leaf option.</b> This is another convenience option (again, by default is turned on and can be turned off using COMPLETE_OPT_DIG_LEAF=0), which lets Complete::Path dig immediately several levels down if it finds only a single directory in the intermediate paths. For example:\n\n[code language=\"text\"]\n% perl -MComplete::Util=complete_file -MData::Dump -E'dd complete_file(word=&gt;&quot;dir2/&quot;)'\n[&quot;dir2/dir4/file5&quot;, &quot;dir2/file4&quot;]\n[/code]\n\nInside <tt>dir2</tt> there is only a single file (<tt>file4</tt>) and a single subdirectory (<tt>dir4</tt>). Instead of settling with those, since there is only a single directory, Complete::Path will dig inside <tt>dir4</tt> and add the files inside it to the completion answer. If <tt>dir4</tt> in turn only contains a single subdirectory, the process is repeated. The effect is, if you have a deep directory structure, e.g. <tt>lib/TAP/Parser/Iterator/Stream.pm</tt> and you happen to have only a single file like that and no other intermediate paths, you just have to type \"lib\" (or even \"l/\", due to <tt>exp_im_path</tt> setting) and voila, the whole path is completed using a single Tab press instead of you having to Tab-Tab-Tab your way into the deep directory.\n\n<h3>Completing Perl module names</h3>\n\nPerl module names can be completed using the <tt>complete_module</tt> function in <a href=\"https://metacpan.org/pod/Complete::Module\">Complete::Module</a> module. Since Perl modules also form a hierarchical namespace, the function also calls Complete::Path::complete_path as its backend and shares the same support for options like <tt>exp_im_path</tt> and <tt>dig_leaf</tt>. Let's see some examples:\n\n[code language=\"text\"]\n% perl -MComplete::Module=complete_module -MData::Dump -E'dd complete_module(word=&gt;&quot;TA&quot;)'\n{\n  path_sep =&gt; &quot;/&quot;,\n  words =&gt; [&quot;TAP/&quot;, &quot;TableDef&quot;, &quot;Taint/&quot;, &quot;Task/Weaken&quot;, &quot;tainting&quot;],\n}\n% perl -MComplete::Module=complete_module -MData::Dump -E'dd complete_module(word=&gt;&quot;TAP::&quot;)'\n{\n  path_sep =&gt; &quot;::&quot;,\n  words =&gt; [\n    &quot;TAP::Base&quot;,\n    &quot;TAP::Formatter::&quot;,\n    &quot;TAP::Harness&quot;,\n    &quot;TAP::Harness::&quot;,\n    &quot;TAP::Object&quot;,\n    &quot;TAP::Parser&quot;,\n    &quot;TAP::Parser::&quot;,\n  ],\n}\n[/code]\n\nWait, why is the path separator still \"/\", shouldn't it be \"::\" (double colon)? Yes, this is for convenience when doing bash completion. Path separator will only become \"::\" if the word already contains \"::\". Otherwise . See the documentation of Complete::Module (or some of my old blog posts) for more details.\n\nYou can force using \"::\" by specifying <tt>path_sep</tt> argument:\n\n[code language=\"text\"]\n% perl -MComplete::Module=complete_module -MData::Dump -E'dd complete_module(word=&gt;&quot;TA&quot;, path_se=&gt;&quot;::&quot;)'\n{\n  path_sep =&gt; &quot;::&quot;,\n  words =&gt; [&quot;TAP::&quot;, &quot;TableDef&quot;, &quot;Taint::&quot;, &quot;Task::Weaken&quot;, &quot;tainting&quot;],\n}\n[/code]\n\nAlso, why does instead of array of words, the function returns a hash structure instead? This allows for setting metadata (like the <tt>path_sep</tt> key above) useful for hints when formatting the completion. The hash completion answer structure will be discussed in the next blog post.\n\nAnother convenience that the function provides is some common shortcuts like \"dzp\" automatically being expanded to \"Dist/Zilla/Plugin/\", \"pws\" to \"Pod/Weaver/Section/\" and so on. This list of shortcuts can be customized, even from the environment variable.\n\nLet's see the <tt>complete_module()</tt> function in action in an actual CLI program. Install <a href=\"https://metacpan.org/pod/App::PMUtils\">App::PMUtils</a> from CPAN. It contains several CLI apps like <a href=\"https://metacpan.org/pod/pmversion\">pmversion</a> or <a href=\"https://metacpan.org/pod/pmpath\">pmpath</a>:\n\n[code language=\"text\"]\n% pmversion t/ansit&lt;tab&gt;\n% pmversion Text/ANSITable _\n0.39\n\n% pmpath dat&lt;tab&gt;&lt;tab&gt;\nData/            DateTime         DateTimePP       \nDate/            DateTime/        DateTimePPExtra  \n% pmpath date/&lt;tab&gt;\n% pmpath Date/&lt;tab&gt;&lt;tab&gt;\nDate/Format     Date/Language   Date/Language/  Date/Parse      \n% pmpath Date/f&lt;tab&gt;\n% pmpath Date/Format _\n/home/s1/perl5/perlbrew/perls/perl-5.18.4/lib/site_perl/5.18.4/Date/Format.pm\n\n% pmversion dzb&lt;tab&gt;\n% pmversion Dist/Zilla/PluginBundle/&lt;tab&gt;\n% pmversion Dist/Zilla/PluginBundle/a/perla&lt;tab&gt;\n% pmversion Dist/Zilla/PluginBundle/Author/PERLANCAR _\n0.33\n[/code]\n",
+         "post_date" : "20150306T00:00:43",
+         "post_date_gmt" : "20150305T17:00:43",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "210",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:44:13",
+         "post_modified_gmt" : "20160901T01:44:13",
+         "post_name" : "pericmd-032-more-on-tab-completion-4-completing-paths",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 032: More on tab completion (4): Completing paths",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3o",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

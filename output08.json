@@ -1,0 +1,671 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "946",
+               "key" : "email_notification",
+               "value" : "1429176259"
+            },
+            {
+               "id" : "937",
+               "key" : "jabber_published",
+               "value" : "1429176257"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=329",
+         "link" : "https://perlancar.wordpress.com/2015/04/16/having-your-own-queryable-cpan-mirror-using-lcpan/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<h3>minicpan</h3>\nMany of you already know that you can easily download a mini version of CPAN (meaning only the latest versions of modules: the ones currently being indexed by PAUSE in 02packages.details.txt.gz, without the older versions residing in each author's directory) for offline use using <a href=\"https://metacpan.org/pod/minicpan\">minicpan</a> (installable via \"cpanm -n CPAN::Mini\"). It's currently about 4.5GB so you can put it on your laptop. This offline CPAN mirror is useful when you develop during periods without (reliable) internet connection, e.g. in remote vacation places or during flight. To install CPAN modules from this offline mirror, you can simply do:\n\n[code language=\"text\"]\n% cpanm --mirror /path/to/your/cpan --mirror-only -n Foo::Bar\n[/code]\n\nYou can setup a shell alias for that, to make it more convenient. To update all installed modules on your system using this mirror, you can do:\n\n[code language=\"text\"]\n% cpan-outdated --mirror file:/path/to/your/cpan | cpanm --mirror /path/to/your/cpan --mirror-only -n\n[/code]\n\n<h3>lcpan</h3>\nWhat I'm introducing in this blog post is another tool called <a href=\"http://metacpan.org/pod/lcpan\">lcpan</a> (short for \"<b>l</b>ocal cpan\") which uses minicpan to download the mirror, plus extracting META.yml/META.json from each release files and indexing the information from those meta files to a local SQLite database. The result is, in addition to being able to install modules locally, you can also query various things about modules/distributions/releases. To install lcpan, simply do:\n\n[code language=\"text\"]\n% cpanm -n App::lcpan\n[/code]\n\nAfter that, download and index your CPAN mirror using:\n\n[code language=\"text\"]\n% lcpan update\n[/code]\n\nBy default CPAN mirror will be created at <tt>~/cpan</tt>. If you want a different location, you can do so by creating a <tt>~/lcpan.conf</tt> containing:\n\n[code language=\"text\"]\ncpan=/path/to/your/cpan\n[/code]\n\nDo \"lcpan update\" regularly (e.g. once a day) if you want to keep it up to date.\n<h3>Installing modules</h3>\nlcpan comes with a thin cpanm wrapper called <tt>lcpanm</tt> that makes it more convenient for you to install modules from your local CPAN mirror. Instead of:\n\n[code language=\"text\"]\n% cpanm --mirror ~/cpan --mirror-only -n Foo::Bar\n[/code]\n\nnow you can simply type:\n\n[code language=\"text\"]\n% lcpanm -n Foo::Bar\n[/code]\n\nas lcpanm will read the lcpan configuration to find out where the local CPAN mirror is.\n<h3>Querying your local CPAN mirror</h3>\nNow for the fun part. As mentioned above, lcpan also creates a SQLite database (by default it's in <tt>~/cpan/index.db</tt>) that you can query, either using the lcpan tool itself (which already provides quite a few subcommands for querying various things) or, if needed, query directly yourself using DBI. First, the basics. To list authors:\n\n[code language=\"text\"]\n% lcpan authors ;# just the CPAN IDs\n% lcpan authors --detail ;# along with version, dist, etc\n% lcpan authors BING ;# search\n% lcpan authors --detail @yahoo ;# search\n[/code]\n\nTo list modules:\n\n[code language=\"text\"]\n% lcpan modules ;# just the names\n% lcpan modules --detail ;# along with version, dist, etc\n% lcpan modules Foo ;# search\n% lcpan modules --author PERLANCAR --dist App-lcpan ;# add some filters\n[/code]\n\nTo list distributions:\n\n[code language=\"text\"]\n% lcpan dists ;# just the names\n% lcpan dists --detail ;# along with version, dist, etc\n% lcpan dists Foo ;# search\n% lcpan dists --author PERLANCAR --latest ;# add some filters\n% lcpan dists --author PERLANCAR --detail --nolatest ;# list old versions of distribution\n[/code]\n\nTo list releases:\n\n[code language=\"text\"]\n% lcpan releases ;# just the names\n% lcpan releases --detail ;# along with version, dist, etc\n% lcpan releases Foo ;# search\n% lcpan releases --author PERLANCAR --has-buildpl --has-metajson ;# add some filters\n[/code]\n\n<h3>Dependencies information</h3>\nOne of the most important information I want to query (and the reason I created lcpan in the first place, and the aspect of lcpan which is already being used by other distributions) is dependencies. Instead of having to browse <a href=\"https://metacpan.org/\">metacpan.org</a> or call its API, if you have a fairly recent index, you can instead just query your local CPAN mirror index for dependencies information. To list what modules are required by a module (to be exact, what modules are required by the distribution that a module is in):\n\n[code language=\"text\"]\n% lcpan deps Text::ANSITable\n+------------------------------+-----------+----------+\n| module                       | author    | version  |\n+------------------------------+-----------+----------+\n| Border::Style::Role          | PERLANCAR | 0        |\n| Color::RGB::Util             | PERLANCAR | 0        |\n| Color::Theme::Role::ANSI     | PERLANCAR | 0        |\n| Data::Unixish::ANSI          | SHARYANTO | 0.02     |\n| Data::Unixish::Apply         | PERLANCAR | 1.33     |\n| DateTime                     | DROLSKY   | 0        |\n| Function::Fallback::CoreOrPP | PERLANCAR | 0        |\n| JSON                         | MAKAMAKA  | 0        |\n| Log::Any                     | DAGOLDEN  | 0        |\n| Module::List                 | ZEFRAM    | 0        |\n| Moo                          | HAARG     | 0        |\n| Package::MoreUtil            | PERLANCAR | 0        |\n| Parse::VarName               | SHARYANTO | 0        |\n| Term::App::Role::Attrs       | PERLANCAR | 0        |\n| Text::ANSI::Util             | PERLANCAR | 0.08     |\n| experimental                 | LEONT     | 0        |\n| namespace::clean             | RIBASUSHI | 0        |\n| perl                         |           | 5.010001 |\n+------------------------------+-----------+----------+\n[/code]\n\nTo view recursive dependencies, add -R:\n\n[code language=\"text\"]\n% lcpan deps -R Text::ANSITable\n+--------------------------------+-----------+----------+\n| module                         | author    | version  |\n+--------------------------------+-----------+----------+\n| Border::Style::Role            | PERLANCAR | 0        |\n| Color::RGB::Util               | PERLANCAR | 0        |\n| Color::Theme::Role::ANSI       | PERLANCAR | 0        |\n|   Color::ANSI::Util            | PERLANCAR | 0        |\n| Data::Unixish::ANSI            | SHARYANTO | 0.02     |\n|   Data::Unixish::Util          | PERLANCAR | 1.43     |\n| Data::Unixish::Apply           | PERLANCAR | 1.33     |\n|   Number::Format               | WRW       | 0        |\n|   Number::Format::Metric       | PERLANCAR | 0        |\n|   Rinci                        | PERLANCAR | v1.1.67  |\n|     DefHash                    | PERLANCAR | v1.0.6   |\n|   String::Pad                  | PERLANCAR | 0        |\n|   Syntax::Feature::EachOnArray | SHARYANTO | 0        |\n|     Hash::FieldHash            | GFUJI     | 0        |\n|     syntax                     | PHAYLON   | 0        |\n|       Data::OptList            | RJBS      | 0.104    |\n|         Params::Util           | ADAMK     | 0        |\n|         Sub::Install           | RJBS      | 0.921    |\n|   Text::sprintfn               | PERLANCAR | 0        |\n|   Tie::Simple                  | HANENKAMP | 0        |\n|   Unixish                      | SHARYANTO | v1.0.1   |\n| DateTime                       | DROLSKY   | 0        |\n|   DateTime::Locale             | DROLSKY   | 0.41     |\n|   DateTime::TimeZone           | DROLSKY   | 1.74     |\n|     Class::Singleton           | SHAY      | 1.03     |\n|     List::AllUtils             | DROLSKY   | 0        |\n|       List::MoreUtils          | REHSACK   | 0.28     |\n|         Exporter::Tiny         | TOBYINK   | 0.038    |\n|       List::Util               | PEVANS    | 1.31     |\n|   Params::Validate             | DROLSKY   | 0.76     |\n| Function::Fallback::CoreOrPP   | PERLANCAR | 0        |\n|   Clone::PP                    | NEILB     | 0        |\n| JSON                           | MAKAMAKA  | 0        |\n| Log::Any                       | DAGOLDEN  | 0        |\n| Module::List                   | ZEFRAM    | 0        |\n| Moo                            | HAARG     | 0        |\n| Package::MoreUtil              | PERLANCAR | 0        |\n| Parse::VarName                 | SHARYANTO | 0        |\n|   Exporter::Lite               | NEILB     | 0        |\n| Term::App::Role::Attrs         | PERLANCAR | 0        |\n|   Moo::Role                    | HAARG     | 0        |\n|     Class::Method::Modifiers   | ETHER     | 1.1      |\n|     Devel::GlobalDestruction   | HAARG     | 0.11     |\n|     Role::Tiny                 | HAARG     | 2        |\n|   Term::Detect::Software       | PERLANCAR | 0        |\n|     File::Which                | PLICEASE  | 0        |\n| Text::ANSI::Util               | PERLANCAR | 0.08     |\n|   Text::WideChar::Util         | PERLANCAR | 0.10     |\n|     Unicode::GCString          | NEZUMI    | 0        |\n|       MIME::Charset            | NEZUMI    | v1.6.2   |\n| experimental                   | LEONT     | 0        |\n| namespace::clean               | RIBASUSHI | 0        |\n|   B::Hooks::EndOfScope         | ETHER     | 0.12     |\n|     Sub::Exporter::Progressive | FREW      | 0.001006 |\n|   Package::Stash               | DOY       | 0.23     |\n|     Dist::CheckConflicts       | DOY       | 0.02     |\n|     Module::Implementation     | DROLSKY   | 0.06     |\n|       Module::Runtime          | ZEFRAM    | 0.012    |\n|       Try::Tiny                | DOY       | 0        |\n| perl                           |           | 5.010001 |\n+--------------------------------+-----------+----------+\n[/code]\n\nThere are several options provided by the <tt>deps</tt> subcommand, e.g. only listing dependencies for a certain relationship (e.g. recommends) or phase (e.g. configure instead of runtime), filtering by author, and so on. Reverse dependencies information is also available, because that's just the other side of the same coin:\n\n[code language=\"text\"]\n% lcpan rdeps Text::ANSITable\n+-----------+-------------------------------------------+---------+\n| author    | dist                                      | version |\n+-----------+-------------------------------------------+---------+\n| SHARYANTO | Data-Format-Pretty-Console                | 0.33    |\n| PERLANCAR | Perinci-CmdLine-Classic                   | 1.49    |\n| PERLANCAR | Perinci-CmdLine-Classic                   | 1.50    |\n| PERLANCAR | Pod-Weaver-Section-BorderStyles-ANSITable | 0.03    |\n| PERLANCAR | Text-ANSITable-ColorTheme-Extra           | 0.14    |\n+-----------+-------------------------------------------+---------+\n[/code]\n\n(Hm, rather embarassing isn't it. Nobody but me is using it). The <tt>rdeps</tt> subcommand also has several options, which you can see using <tt>lcpan rdeps --help</tt> or by consulting the manpage.\n<h3>Other stuffs</h3>\nLots of other stuffs are also provided, from the documentation:\n\n[code language=\"text\"]\n% lcpan mod2dist Text::ANSITable::ColorTheme::Default ;# -&amp;gt; Text-ANSITable\n\n% lcpan mod2rel  Text::ANSITable::ColorTheme::Default ;# -&amp;gt; Text-ANSITable-0.39.tar.gz\n% lcpan mod2rel  Text::ANSITable --full-path          ;# -&amp;gt; /cpan/authors/id/P/PE/PERLANCAR/Text-ANSITable-0.39.tar.gz\n\n% lcpan dist2rel Text-ANSITable             ;# -&amp;gt; Text-ANSITable-0.39.tar.gz\n% lcpan dist2rel Text-ANSITable --full-path ;# -&amp;gt; /cpan/authors/id/P/PE/PERLANCAR/Text-ANSITable-0.39.tar.gz\n\n% lcpan distmods Text-ANSITable ;# list modules in a distribution\nText::ANSITable\nText::ANSITable::BorderStyle::Default\nText::ANSITable::ColorTheme::Default\nText::ANSITable::StyleSet::AltRow\n\n% lcpan authormods PERLANCAR   ;# list an author's modules\n% lcpan authordists PERLANCAR  ;# list an author's dists\n% lcpan authorrels PERLANCAR   ;# list an author's releases\n\n# who are authors with the most number of releases?\n% lcpan authors-by-rel-count\n\n# who are authors with the most number of distributions?\n% lcpan authors-by-dist-count\n\n# who are authors with the most number of registered modules/packages?\n% lcpan authors-by-mod-count\n\n# show all other authors' distributions using one of your modules\n% lcpan authorrdeps PERLANCAR --user-author-isnt PERLANCAR\n\n# show your old releases (which you should probably delete from CPAN?)\n% lcpan releases --author PERLANCAR --nolatest\n\n# what are modules that are used the most by other distributions?\n% lcpan mods-by-rdep-count\n[/code]\n\n<h3>Other/prior work</h3>\n<a href=\"https://metacpan.org/pod/CPAN::SQLite\">CPAN::SQLite</a> is a module which parses the three CPAN indexes 01mailrc.txt.gz, 02packages.details.txt.gz, and 03modlist.data.gz (which is now empty) into SQLite database. However, it does not index any dependency information, which I need.\n\n<a href=\"https://metacpan.org/pod/CPANDB\">CPANDB</a> (and its companion generator <a href=\"https://metacpan.org/pod/CPANDB::Generator\">CPANDB::Generator</a> also indexes information into a SQLite database, but aside from CPAN it also downloads and indexes additional sources like PAUSE upload data and CPAN ratings. The downloads are quite huge (multigigabyte) and not incremental, making it less convenient to update daily.\n\n<a href=\"https://metacpan.org/pod/Pinto\">Pinto</a> has a different goal of creating and managing <em>CPAN-like </em>repository, but can surely be used to mirror CPAN and show you the dependencies information. However, the Pinto documentation warns about Pinto \"not indexing exactly like PAUSE does\", so there might be minor/subtle differences.\n<h3>Closing remarks</h3>\nI'll be adding more queries and subcommands as I see fit. If you have ideas, please send it my way. Or, if you want to add some stuffs, it's welcome too. The code is on github, and adding a new subcommand should be easy and obvious.",
+         "post_date" : "20150416T16:24:17",
+         "post_date_gmt" : "20150416T09:24:17",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "329",
+         "post_mime_type" : "",
+         "post_modified" : "20150419T20:46:21",
+         "post_modified_gmt" : "20150419T13:46:21",
+         "post_name" : "having-your-own-queryable-cpan-mirror-using-lcpan",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Having your own queryable CPAN mirror using lcpan",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-5j",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "894",
+               "key" : "email_notification",
+               "value" : "1427275953"
+            },
+            {
+               "id" : "925",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "885",
+               "key" : "jabber_published",
+               "value" : "1427275952"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=283",
+         "link" : "https://perlancar.wordpress.com/2015/03/25/interacting-with-pause-using-cli/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Any CPAN author has to interact with <a href=\"https://pause.perl.org\">PAUSE</a>, the website you go to to upload files if you want to publish your work on CPAN. There is no API provided, so you have to use a browser to upload files manually. \n\nWell, not really. There are some modules you can use, like <a href=\"https://metacpan.org/pod/CPAN::Uploader\">CPAN::Uploader</a> to upload files or <a href=\"https://metacpan.org/pod/WWW::PAUSE::CleanUpHomeDir\">WWW::PAUSE::CleanUpHomeDir</a> to delete old releases in your PAUSE home directory. And if you use Dist::Zilla, by default you will use CPAN::Uploader when you release your distribution, so you don't have to go to PAUSE manually. These modules all work by scraping the website since, like it is said above, there is no API.\n\n<a href=\"https://metacpan.org/pod/WWW::PAUSE::Simple\"><b>WWW::PAUSE::Simple</b></a> is another module you can use which: 1) provides more functions (aside from uploading, currently can also list/delete/undelete/reindex files, as well as list distributions and cleanup older releases, more functions will be added in the future); 2) comes with a handy CLI utility called <a href=\"https://metacpan.org/pod/pause\"><b>pause</b></a> (distributed in <a href=\"https://metacpan.org/pod/App::pause\">App::pause</a>) to do everything via the command-line.\n\nTo use this utility, first install the CPAN module:\n\nIf you want the Perl API (module):\n\n<tt>% cpanm -n WWW::PAUSE::Simple</tt>\n\nIf you want the CLI:\n\n<tt>% cpanm -n App::pause</tt>\n\nAfter that, configure it by creating a file <tt>~/pause.conf</tt> (or <tt>~/.config/pause.conf</tt>):\n\n[code language=\"text\"]\nusername=(your PAUSE ID)\npassword=(your password)\n[/code]\n\nand you're ready to go.\n\n<b>Uploading files.</b> To upload some files:\n\n<tt>% pause upload *.tar.gz</tt>\n\nThis is the subcommand I use most often. Even though I use Dist::Zilla daily, there are routinely times when I need to upload manually, for example when I develop on my laptop in places with no or flaky Internet connection. I still do the releases, but skip uploading to CPAN. Later when Internet connection is available again, I upload the tarballs using <tt>pause</tt>.\n\nTo see log/debug messages as each file is uploaded, give it a <tt>--debug</tt> option.\n\nThis utility is very much similar to the <tt>cpan-upload</tt> script provided by CPAN::Uploader, except by default <tt>pause</tt> will continue to the next file when uploading a file fails, instead of bailing out (cpan-upload can already behave like this now, by using the new <tt>--ignore-errors</tt> option).\n\n<b>Listing files.</b> Simple enough:\n\n<tt>% pause ls</tt>\n<tt>% pause ls -l</tt>\n\nYou can also give it some wildcard arguments to match the files. But since matching is done by the script to match files <i>on the server</i>, you have to quote the wildcards to prevent them from being expanded by the shell to match files on your local directory:\n\n<tt>% pause ls -l 'App-*'</tt>\n\nSince some files can also be scheduled for deletion if they have been recently deleted, you can filter whether you want to see these files or not via <tt>--nodel</tt>. To see only files scheduled for deletion, use <tt>--del</tt>.\n\n<b>Deleting files.</b> Also using subcommand familiar to Unix fans: \n\n<tt>% pause rm 'App-*' '*TRIAL*'</tt>\n<tt>% pause rm '*'; # delete everything!</tt>\n\nAgain, you should quote your wildcard arguments to protect them from being accidentally expanded by the shell.\n\nWhen deleting files on PAUSE, the files are not actually deleted immediately but instead put into a schedule of 72 hours. During this period, you can cancel your deletion instruction by using the <tt>undelete</tt> subcommand:\n\n<tt>% pause undelete '*'; # bring back everything</tt>\n\nOnce the period expires, the files will actually be deleted and cannot be recovered anymore on PAUSE. (They are still available on <a href=\"http://backpan.perl.org\">BackPAN</a> though, so you can upload them again to PAUSE if you want to.)\n\n<b>Reindexing files.</b> Sometimes you have to reindex your files so it can appear on the indexes (02packages.details.txt.gz et al). For example, if you happen to lack permission during the first upload (you were not yet given a co-maint status for a module). Or sometimes the PAUSE indexer does choke up. This happens to me once or twice, usually because I upload too many files at once causing the SQLite database to get locked and the indexer to fail. To do this:\n\n<tt>% pause reindex 'App-*'</tt>\n<tt>% pause reindex '*'; # reindex everything!</tt>\n\n<b>Cleaning older releases.</b> I've used WWW::PAUSE::CleanUpHomeDir for a few years, but since I've written <tt>pause</tt> last month, I thought why not add this functionality too into the tool. So:\n\n<tt>% pause cleanup</tt>\n\nwill delete older releases on your PAUSE home directory. Trial/dev releases are skipped. There is an option <tt>-n</tt> to let you specify how many old versions you want to keep for each distribution. The default is 1, meaning to only keep the latest version.\n\nI now do this routine every week or so to keep my home dir clean.\n\n<b>The other stuffs.</b> I also plan to add subcommands for other PAUSE functionality, like changing password, setting forwarding email, and setting permissions. But since I do this very seldomly, I haven't bothered to add them yet.\n\n<b>Dry-run mode.</b> Some subcommands, especially those which can modify your files like <tt>rm</tt> and <tt>reindex</tt>, have a <tt>--dry-run</tt> option to let you try without actually do the action. They only will show the files that will be affected. Useful particularly if you use wildcards or with the <tt>cleanup</tt> subcommand.\n\n<b>Tab completion.</b> <tt>pause</tt> comes with tab completion feature under Unix shells, which you can activate via <tt>complete -C pause pause</tt> (or via shcompgen, see the manpage for more details).\n\nI haven't tested this under Windows, please drop me a message if things don't work as advertised.\n\n<b>But what about the API?</b> Aside from the CLI, WWW::PAUSE::Simple is the module you can use from Perl directly. For example:\n\n[code language=\"perl\"]\nuse WWW::PAUSE::Simple qw(list_dists);\nmy @dists = list_dists(username=&amp;gt;&amp;quot;your PAUSE ID&amp;quot;, password=&amp;gt;&amp;quot;your pass&amp;quot;);\n[/code]\n\nCouldn't be simpler.\n\n<h3>Additional reading</h3>\n\n<ul>\n\n<li>PAUSE <a href=\"https://pause.perl.org/pause/query?ACTION=pause_04about\">about</a>, <a href=\"https://pause.perl.org/pause/query?ACTION=pause_06history\">history</a> and <a href=\"https://pause.perl.org/pause/query?ACTION=pause_05news\">news</a> pages.\n\n<li><a href=\"http://blog.mycpan.com/2002/10/increase-your-schwartz/\">Increase your Schwartz</a> by BDFOY. In fact brian has written <a href=\"http://blogs.perl.org/users/brian_d_foy/cpan-cleaning/\">more than a couple of blog posts</a> on the topic of CPAN cleaning.\n\n</ul>\n",
+         "post_date" : "20150325T16:32:32",
+         "post_date_gmt" : "20150325T09:32:32",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "283",
+         "post_mime_type" : "",
+         "post_modified" : "20150416T15:46:43",
+         "post_modified_gmt" : "20150416T08:46:43",
+         "post_name" : "interacting-with-pause-using-cli",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Interacting with PAUSE using CLI",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-4z",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "7",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "Tak Berkategori",
+               "parent" : "0",
+               "slug" : "tak-berkategori",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "3278647",
+               "term_taxonomy_id" : "1"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "769",
+               "key" : "email_notification",
+               "value" : "1426870968"
+            },
+            {
+               "id" : "715",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "764",
+               "key" : "jabber_published",
+               "value" : "1426870959"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=291",
+         "link" : "https://perlancar.wordpress.com/2015/03/21/pericmd-047-special-arguments-1-dry_run/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In Rinci, function can express in its metadata that it supports various features or options. These feature-/option-related information will later be passed back to the function during function call in the form of special arguments. These arguments are prefixed with \"-\" (dash) with predefined names and values, and will only be passed if the function already expresses the support, and if the function accepts named arguments (as hash or hashref).\n\nThere are several such special arguments, one that I will cover today is <tt>-dry_run</tt>.\n\nA function can express that it supports dry-run (simulation) mode, via the <tt>dry_run</tt> feature inside the <tt>features</tt> property in the Rinci function metadata:\n\n[code language=\"perl\" highlight=\"7\"]\n$SPEC{delete_files} = {\n    v =&amp;gt; 1.1,\n    args =&amp;gt; {\n        ...\n    },\n    features =&amp;gt; {\n        dry_run =&amp;gt; 1,\n    },\n}\n[/code]\n\nThe special argument <tt>-dry_run</tt> need not be declared in the <tt>args</tt> property. It will automatically be passed when program is run in dry-run mode.\n\nIn Perinci::CdmLine, a common command-line option <tt>--dry-run</tt> will automatically be added if function supports dry_run feature. This means, if user passes <tt>--dry-run</tt> (or, alternatively, setting DRY_RUN environment variable to true), Perinci::CmdLine will call the function with <tt>-dry_run =&gt; 1</tt>.\n\nIf function is passed <tt>-dry_run =&gt; 1</tt> in the arguments, it should perform the operation but without actually doing it. Lots of programs have this feature, like <b>rsync</b>, <b>make</b>, or <b>svn merge</b> (note: <b>git merge</b> also supports dry-run operation but with options named <tt>--no-commit --no-ff</tt> instead of <tt>--dry-run</tt>. They are useful for testing/trial, especially when the associated operation is rather dangerous (like deleting stuffs or sending mass email).\n\nWe could, of course, manually define a <tt>dry_run</tt> argument ourselves. But the advantage of specifying the <tt>dry_run</tt> feature instead is, aside from standardization and automatic addition of --dry-run and DRY_RUN parsing, is that in transactions, the dry-run functions can have special treatment. We will cover transaction in the future.\n\nHere's the full example:\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse 5.010;\nuse strict;\nuse warnings;\nuse Log::Any '$log';\n\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n\n$SPEC{delete_files} = {\n    v =&amp;gt; 1.1,\n    args =&amp;gt; {\n        'file' =&amp;gt; {\n            schema =&amp;gt; ['array*', of=&amp;gt;'str*', min_len=&amp;gt;1],\n            req =&amp;gt; 1,\n            pos =&amp;gt; 0,\n            greedy =&amp;gt; 1,\n        },\n    },\n    features =&amp;gt; {dry_run=&amp;gt;1},\n};\nsub delete_files {\n    my %args = @_;\n    my $verbose = $args{verbose};\n\n    my $num_success = 0;\n    my $num_fail = 0;\n    for my $file (@{$args{file}}) {\n        $log-&amp;gt;infof(&amp;quot;Deleting %s ...&amp;quot;, $file);\n        next if $args{-dry_run};\n        if (unlink $file) {\n            $num_success++;\n        } else {\n            $num_fail++;\n            $log-&amp;gt;warnf(&amp;quot;Can't delete %s: %s&amp;quot;, $file, $!);\n        }\n    }\n\n    if ($num_fail == 0) {\n        [200, &amp;quot;OK&amp;quot;];\n    } elsif ($num_success == 0) {\n        [500, &amp;quot;All failed&amp;quot;];\n    } else {\n        [200, &amp;quot;Some failed&amp;quot;];\n    }\n}\n\nPerinci::CmdLine::Any-&amp;gt;new(url=&amp;gt;'/main/delete_files', log=&amp;gt;1)-&amp;gt;run;\n[/code]\n\n[code language=\"text\"]\n% mkdir test\n% cd test\n% touch file1 file2 file3; mkdir dir1 dir2\n% ls\ndir1/  dir2/  file1  file2  file3\n\n% ../delete-files --dry-run f*\n[pericmd] Dry-run mode is activated\ndelete-files: Deleting file1 ...\ndelete-files: Deleting file2 ...\ndelete-files: Deleting file3 ...\n% ls\ndir1/  dir2/  file1  file2  file3\n\n% ../delete-files --verbose f*\ndelete-files: Deleting dir1 ...\ndelete-files: Can't delete dir1: Is a directory\ndelete-files: Deleting dir2 ...\ndelete-files: Can't delete dir2: Is a directory\ndelete-files: Deleting file1 ...\ndelete-files: Deleting file2 ...\ndelete-files: Deleting file3 ...\n% ls\ndir1/  dir2/\n[/code]\n",
+         "post_date" : "20150321T00:00:57",
+         "post_date_gmt" : "20150320T17:00:57",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "291",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:36:59",
+         "post_modified_gmt" : "20160901T01:36:59",
+         "post_name" : "pericmd-047-special-arguments-1-dry_run",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 047: Special arguments (1): dry_run",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-4H",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "748",
+               "key" : "email_notification",
+               "value" : "1426840601"
+            },
+            {
+               "id" : "744",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "741",
+               "key" : "jabber_published",
+               "value" : "1426840599"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=295",
+         "link" : "https://perlancar.wordpress.com/2015/03/20/loading-module-conditionally-and-other-options/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "If you want to load a module conditionally, you can't do this (it's a syntax error):\n\n[code language=\"perl\" gutter=\"false\"]\nuse MyModule if $cond;\n[/code]\n\nYou can use <tt>require</tt>, but: 1) it's run-time, not compile-time; 2) it doesn't allow specifying minimum version or imports. So you have to do something like this:\n\n[code language=\"perl\" gutter=\"false\"]\nBEGIN { if ($cond) { require MyModule; MyModule-&gt;VERSION(1.23); MyModule-&gt;import(@import_args) } }\n[/code]\n\nAlternatively, you can use the <tt>if</tt> pragma (available in core since 5.6.2, a.k.a. forever):\n\n[code language=\"perl\" gutter=\"false\"]\nuse if $cond, &quot;MyModule&quot;;\nuse if $cond, MyOtherMod =&gt; @import_args;\n[/code]\n\nBut: 1) you have to quote the module name (unless you use fat comma, like the second example); 2) you can't specify minimum version; 3) you can't do the equivalent of <tt>use MyModule ()</tt> (avoiding calling import). And, the syntax is... well, suboptimal.\n\nFor completeness, you can also use <tt>eval \"\"</tt>. The downsides: 1) you need to add <tt>or die</tt> to rethrow captured exception; 2) you need to express everything as a string, so if you import some data structure, you need to dump it as Perl first; 3) it's slower (but most of the time it shouldn't matter); 4) more importantly, you have to be more careful since it's eval after all. So the usage of <tt>eval</tt> is not particularly attractive in this case.\n\n[code language=\"perl\" gutter=\"false\"]\nuse Data::Dump qw(dump);\nif ($cond) { eval &quot;use MyModule&quot; . (@import_args ? &quot;, &quot;.dump(@import_args) : &quot;&quot;); die if $@ }\n[/code]\n\nLet's face it, <tt>use</tt> is special and its specialness causes an annoyance if you want to emulate or \"extend\" it.\n\nI'm thought-experimenting with a swiss-army-knife pragma for loading modules called <b>module</b> (not yet written). You still have to use <tt>use</tt> to get the compile-time access, it's more verbose, and you still need to quote the module name, but the syntax is more regular and it's open to future extension.\n\n[code language=\"perl\" gutter=\"false\"]\n# load a single module, default imports, equivalent to: use MyModule;\nuse module &quot;MyModule&quot;;\n\n# load several modules, equivalent to multiple 'use' statements\nuse module &quot;MyModule&quot;, &quot;MyOtherMod&quot;;\n\n# specify imports, equivalent to: use MyModule 'one', 'two';\nuse module &quot;MyModule&quot;, -import =&gt; ['one', 'two'];\nuse module &quot;MyModule&quot;, -import =&gt; ('one', 'two'); # allow this too? to trap possibly common mistake\n\n# don't import(), equivalent to: use MyModule ();\nuse module &quot;MyModule&quot;, -noimport =&gt; 1; # ugh, too verbose?\n\n# specify version (call VERSION())\nuse module &quot;MyModule&quot;, -version =&gt; 1.23;\n\n# conditional loading\nuse module &quot;MyModule&quot;, &quot;MyOtherMod&quot;, -if =&gt; $cond;\n[/code]\n\nI find the last example slightly more readable compared to using the <tt>if</tt> pragma, because you get to specify the module names first (although you can also write: <tt>use module -if =&gt; $cond, \"MyModule\"</tt>).\n\nOther things I'm thinking of adding:\n\n<ul>\n<li>An option to delay loading the module until runtime (we already have Module::Load or Class::Load though);\n<li>An option to accept filenames instead of module names (like Module::Load);\n<li>Add awareness to Exporter (@EXPORT) and allow specifying regex/wildcard to pick imports.\n<li>More complex version specification (minimum/maximum, blacklist some versions, etc)\n</ul>\n",
+         "post_date" : "20150320T15:36:39",
+         "post_date_gmt" : "20150320T08:36:39",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "295",
+         "post_mime_type" : "",
+         "post_modified" : "20150322T22:56:49",
+         "post_modified_gmt" : "20150322T15:56:49",
+         "post_name" : "loading-module-conditionally-and-other-options",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Loading module conditionally (and other options)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-4L",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "738",
+               "key" : "email_notification",
+               "value" : "1426785050"
+            },
+            {
+               "id" : "701",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "733",
+               "key" : "jabber_published",
+               "value" : "1426785049"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=279",
+         "link" : "https://perlancar.wordpress.com/2015/03/20/pericmd-046-customizing-table-output-2/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Continuing from previous post, if we use Perinci::CmdLine::Classic as a backend, there are a few other options to customize table output. Let's use the same <b>list-files</b> script, but use the classic backend:\n\n[code language=\"text\"]\n% PERINCI_CMDLINE_ANY=classic ./list-files -v\n[/code]\n\n<a href=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-1.jpg\"><img src=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-1.jpg\" alt=\"pericmd046-1\" width=\"226\" height=\"194\" class=\"alignnone size-full wp-image-280\" /></a>\n\nYou'll notice that compared to the default Perinci::CmdLine::Lite's output (which uses <a href=\"https://metacpan.org/pod/Text::Table::Tiny\">Text::Table::Tiny</a> to produce the table), the Perinci::CmdLine::Classic's output (which uses <a href=\"https://metacpan.org/pod/Text::ANSITable\">Text::ANSITable</a>) is a bit fancier, e.g. colors and boxchars (and/or Unicode characters).\n\nBy default, Text::ANSITable colors columns differently according to data type. The second column, since it contains only numbers and thus is a numeric column, is colored cyan by default. While string columns are colored light grey by default.\n\nOf course, like the lite backend, the classic backend supports reordering columns:\n\n[code language=\"text\"]\n% PERINCI_CMDLINE_ANY=classic ./list-files2 -v\n[/code]\n\n<a href=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-2.jpg\"><img src=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-2.jpg\" alt=\"pericmd046-2\" width=\"282\" height=\"195\" class=\"alignnone size-full wp-image-282\" /></a> \n\n[code language=\"text\"]\n% PERINCI_CMDLINE_ANY=classic FORMAT_PRETTY_TABLE_COLUMN_ORDERS='[[&quot;type&quot;,&quot;size&quot;,&quot;links&quot;]]' ./list-files2 -v\n[/code]\n\n<a href=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-3.jpg\"><img src=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-3.jpg\" alt=\"pericmd046-3\" width=\"281\" height=\"191\" class=\"alignnone size-full wp-image-286\" /></a>\n\nAside from <tt>FORMAT_PRETTY_TABLE_COLUMN_ORDERS</tt>, there's also <tt>FORMAT_PRETTY_TABLE_COLUMN_TYPES</tt>:\n\n[code language=\"text\"]\n% PERINCI_CMDLINE_ANY=classic FORMAT_PRETTY_TABLE_COLUMN_TYPES='[{&quot;modified&quot;:&quot;date&quot;}]' ./list-files3 -v\n[/code]\n\n<a href=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-4.jpg\"><img src=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-4.jpg?w=300\" alt=\"pericmd046-4\" width=\"300\" height=\"140\" class=\"alignnone size-medium wp-image-287\" /></a>\n\nThe mentioned <b>list-files3</b> is exactly the same as <b>list-files2</b> except that it adds a column <tt>modified</tt> containing mtime Unix timestamp of file. By default will be shown as a number (cyan), but with the above <tt>FORMAT_PRETTY_TABLE_COLUMN_TYPES</tt> hint the column is shown as a date (yellow).\n\nNote that there is some heuristics employed, so if you name the column \"mtime\" or \"something_date\", you don't have to give any hint to show the column as date.\n\nThere is also <tt>FORMAT_PRETTY_TABLE_COLUMN_FORMATS</tt> to apply some formatting to columns, for example:\n\n[code language=\"text\"]\n% PERINCI_CMDLINE_ANY=classic FORMAT_PRETTY_TABLE_COLUMN_FORMATS='[{&quot;size&quot;:[[&quot;num&quot;,{&quot;style&quot;:&quot;kilo&quot;}]]}]' ./list-files2 -v\n[/code]\n\n<a href=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-5.jpg\"><img src=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-5.jpg\" alt=\"pericmd046-5\" width=\"289\" height=\"210\" class=\"alignnone size-full wp-image-288\" /></a>\n\nThe POD for <a href=\"https://metacpan.org/pod/Data::Format::Pretty::Console\">Data::Format::Pretty::Console</a> describes these options in more details.\n\nAside from these, the Text::ANSITable module itself provides lots of options to configure its output. For example, to choose border style and color theme:\n\n[code language=\"text\"]\n% PERINCI_CMDLINE_ANY=classic ANSITABLE_BORDER_STYLE=&quot;Default::csingle&quot; ANSITABLE_COLOR_THEME=&quot;Tint::tint_red&quot; ./list-files2 -v\n[/code]\n\n<a href=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-6.jpg\"><img src=\"https://perlancar.files.wordpress.com/2015/03/pericmd046-6.jpg\" alt=\"pericmd046-6\" width=\"284\" height=\"207\" class=\"alignnone size-full wp-image-289\" /></a>\n\nWith Text::ANSITable you can also customize cell padding/spacing, column widths, or alignments. You can hide some columns/rows, repeat some columns/rows, or even do conditional styles involving Perl code. For more available options, refer to the <a href=\"https://metacpan.org/pod/Data::Format::Pretty::Console\">POD</a>.",
+         "post_date" : "20150320T00:00:59",
+         "post_date_gmt" : "20150319T17:00:59",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "279",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:37:27",
+         "post_modified_gmt" : "20160901T01:37:27",
+         "post_name" : "pericmd-046-customizing-table-output-2",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 046: Customizing table output (2)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-4v",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "731",
+               "key" : "email_notification",
+               "value" : "1426698121"
+            },
+            {
+               "id" : "609",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "726",
+               "key" : "jabber_published",
+               "value" : "1426698103"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=262",
+         "link" : "https://perlancar.wordpress.com/2015/03/19/pericmd-045-customizing-table-output-1/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Data structures like array of arrays of strings (aoaos), hash, or array of hashes of strings (aohos) will render as tables under Perinci::CmdLine. There are some ways to customize this table output, either from outside the script or from inside the script.\n\nLet's revisit the <b>list-files</b> script that made an appearance some posts ago (pericmd 039):\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse 5.010;\nuse strict;\nuse warnings;\n\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n\n$SPEC{list_files} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        'verbose' =&gt; {\n            cmdline_aliases =&gt; {v=&gt;{}},\n            schema =&gt; 'bool',\n        },\n        'all' =&gt; {\n            cmdline_aliases =&gt; {a=&gt;{}},\n            schema =&gt; 'bool',\n        },\n    },\n};\nsub list_files {\n    my %args = @_;\n    my $verbose = $args{verbose};\n    my $all     = $args{all};\n\n    my @files;\n    opendir my($dh), &quot;.&quot;;\n    for (sort readdir($dh)) {\n        next if !$all &amp;&amp; /\\A\\./;\n        if ($verbose) {\n            my $type = (-l $_) ? &quot;l&quot; : (-d $_) ? &quot;d&quot; : (-f _) ? &quot;f&quot; : &quot;?&quot;;\n            push @files, {name=&gt;$_, size=&gt;(-s _), type=&gt;$type};\n        } else {\n            push @files, $_;\n        }\n    }\n\n    [200, &quot;OK&quot;, \\@files];\n}\n\nmy $app = Perinci::CmdLine::Any-&gt;new(url =&gt; '/main/list_files');\ndelete $app-&gt;common_opts-&gt;{verbose};\n$app-&gt;common_opts-&gt;{version}{getopt} = 'version|V';\n$app-&gt;run;\n[/code]\n\nWhen we run this script:\n\n[code language=\"text\"]\n% ./list-files -v --format json-pretty\n[\n   200,\n   &quot;OK&quot;,\n   [\n      {\n         &quot;name&quot; : &quot;hello&quot;,\n         &quot;size&quot; : 1131,\n         &quot;type&quot; : &quot;f&quot;\n      },\n      {\n         &quot;name&quot; : &quot;list-files&quot;,\n         &quot;size&quot; : 988,\n         &quot;type&quot; : &quot;f&quot;\n      },\n      {\n         &quot;name&quot; : &quot;list-files~&quot;,\n         &quot;size&quot; : 989,\n         &quot;type&quot; : &quot;f&quot;\n      },\n      {\n         &quot;name&quot; : &quot;mycomp&quot;,\n         &quot;size&quot; : 902,\n         &quot;type&quot; : &quot;f&quot;\n      },\n      {\n         &quot;name&quot; : &quot;mycomp2a&quot;,\n         &quot;size&quot; : 608,\n         &quot;type&quot; : &quot;f&quot;\n      },\n      {\n         &quot;name&quot; : &quot;mycomp2b&quot;,\n         &quot;size&quot; : 686,\n         &quot;type&quot; : &quot;f&quot;\n      },\n      {\n         &quot;name&quot; : &quot;mycomp2b+comp&quot;,\n         &quot;size&quot; : 1394,\n         &quot;type&quot; : &quot;f&quot;\n      },\n      {\n         &quot;name&quot; : &quot;pause&quot;,\n         &quot;size&quot; : 4096,\n         &quot;type&quot; : &quot;d&quot;\n      },\n      {\n         &quot;name&quot; : &quot;perl-App-hello&quot;,\n         &quot;size&quot; : 4096,\n         &quot;type&quot; : &quot;d&quot;\n      }\n   ],\n   {}\n]\n\n%  ./list-files -v\n+----------------+------+------+\n| name           | size | type |\n+----------------+------+------+\n| hello          | 1131 | f    |\n| list-files     | 988  | f    |\n| list-files~    | 989  | f    |\n| mycomp         | 902  | f    |\n| mycomp2a       | 608  | f    |\n| mycomp2b       | 686  | f    |\n| mycomp2b+comp  | 1394 | f    |\n| pause          | 4096 | d    |\n| perl-App-hello | 4096 | d    |\n+----------------+------+------+\n[/code]\n\n<h3>Column order</h3>\n\nWe didn't specify the ordering of columns, because our data is an array of hashes (instead of array of arrays). But in this case, the order happens to be the way we want (filename, then size and type). By default, the order is asciibetical. But if we modify the script and add another field <tt>links</tt> (for number of hardlinks):\n\n[code language=\"perl\" highlight=\"34-37\"]\n#!/usr/bin/env perl\n\nuse 5.010;\nuse strict;\nuse warnings;\n\nuse Perinci::CmdLine::Any;\n\nour %SPEC;\n\n$SPEC{list_files} = {\n    v =&gt; 1.1,\n    args =&gt; {\n        'verbose' =&gt; {\n            cmdline_aliases =&gt; {v=&gt;{}},\n            schema =&gt; 'bool',\n        },\n        'all' =&gt; {\n            cmdline_aliases =&gt; {a=&gt;{}},\n            schema =&gt; 'bool',\n        },\n    },\n};\nsub list_files {\n    my %args = @_;\n    my $verbose = $args{verbose};\n    my $all     = $args{all};\n\n    my @files;\n    opendir my($dh), &quot;.&quot;;\n    for (sort readdir($dh)) {\n        next if !$all &amp;&amp; /\\A\\./;\n        if ($verbose) {\n            my $is_sym = (-l $_); # will do an lstat\n            my @st = stat($_);\n            my $type = $is_sym ? &quot;l&quot; : (-d _) ? &quot;d&quot; : (-f _) ? &quot;f&quot; : &quot;?&quot;;\n            push @files, {name=&gt;$_, size=&gt;(-s _), type=&gt;$type, links=&gt;$st[3]};\n        } else {\n            push @files, $_;\n        }\n    }\n\n    [200, &quot;OK&quot;, \\@files];\n}\n\nmy $app = Perinci::CmdLine::Any-&gt;new(url =&gt; '/main/list_files');\ndelete $app-&gt;common_opts-&gt;{verbose};\n$app-&gt;common_opts-&gt;{version}{getopt} = 'version|V';\n$app-&gt;run;\n[/code]\n\nthen the result will be:\n\n[code language=\"text\"]\n% ./list-files -v\n+-------+----------------+------+------+\n| links | name           | size | type |\n+-------+----------------+------+------+\n| 1     | hello          | 1131 | f    |\n| 1     | list-files     | 988  | f    |\n| 1     | list-files2    | 1086 | f    |\n| 1     | list-files2~   | 988  | f    |\n| 1     | list-files~    | 989  | f    |\n| 1     | mycomp         | 902  | f    |\n| 1     | mycomp2a       | 608  | f    |\n| 1     | mycomp2b       | 686  | f    |\n| 1     | mycomp2b+comp  | 1394 | f    |\n| 6     | pause          | 4096 | d    |\n| 5     | perl-App-hello | 4096 | d    |\n+-------+----------------+------+------+\n[/code]\n\nWhat if we want the <tt>name</tt> column to stay as the leftmost? Here's also where the result metadata comes in handy. From inside the script (function), we can embed this formatting hints when returning the enveloped result as follow:\n\n[code language=\"perl\" higlight=\"2\"]\n[200, &quot;OK&quot;, \\@files, {\n    format_options =&gt; {any =&gt; {table_column_orders=&gt;[[qw/name type links size/]]}},\n}];\n[/code]\n\nOK, that's a mouthful. What the code above does is add a key to the result metadata (the fourth element of the enveloped result array, a hash) called <tt>format_options</tt>. The value of this key is a hash of format names and format specifications. We'll use <tt>any</tt> for the format name to apply to any format (but you actually can specify different formatting for <tt>text</tt> vs for <tt>json</tt> and so on). \n\nThe format specification is another hash containing a key called <tt>table_column_orders</tt>. This key has a value of <i>array of arrays</i> (to be able to specify multiple tables). One element of that array contains the list of columns for our table: <tt>[qw/name type links size/]</tt>. Since the output table's columns match this entry, the order is followed.\n\nAside from inside the script itself, you can actually specify the ordering from an environment variable (outside the script). For example:\n\n[code language=\"text\"]\n% FORMAT_PRETTY_TABLE_COLUMN_ORDERS='[[&quot;size&quot;,&quot;links&quot;,&quot;type&quot;,&quot;name&quot;]]' ./list-files2 -v\n+------+-------+------+----------------+\n| size | links | type | name           |\n+------+-------+------+----------------+\n| 1131 | 1     | f    | hello          |\n| 988  | 1     | f    | list-files     |\n| 1187 | 1     | f    | list-files2    |\n| 1086 | 1     | f    | list-files2~   |\n| 989  | 1     | f    | list-files~    |\n| 902  | 1     | f    | mycomp         |\n| 608  | 1     | f    | mycomp2a       |\n| 686  | 1     | f    | mycomp2b       |\n| 1394 | 1     | f    | mycomp2b+comp  |\n| 4096 | 6     | d    | pause          |\n| 4096 | 5     | d    | perl-App-hello |\n+------+-------+------+----------------+\n[/code]\n\nThe value of the environment variable is a JSON-encoded array of arrays, just like in <tt>table_column_orders</tt> format specification above.\n\nIf we use the Perinci::CmdLine::Classic backend (which renders tables using <a href=\"https://metacpan.org/pod/Text::ANSITable\">Text::ANSITable</a>), there are a few other options available to customize the table. We'll discuss this in another blog post.\n\n",
+         "post_date" : "20150319T00:00:38",
+         "post_date_gmt" : "20150318T17:00:38",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "262",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:37:44",
+         "post_modified_gmt" : "20160901T01:37:44",
+         "post_name" : "pericmd-045-customizing-table-output-1",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 045: Customizing table output (1)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-4e",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "724",
+               "key" : "email_notification",
+               "value" : "1426662705"
+            },
+            {
+               "id" : "645",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "719",
+               "key" : "jabber_published",
+               "value" : "1426662703"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=273",
+         "link" : "https://perlancar.wordpress.com/2015/03/18/pericmd-044-customizing-output/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "The functions we use as backend of our CLI application return pure data structure, and Perinci::CmdLine's formatter figures out how to best display this information. There are, however, some ways to customize how the output looks in our CLI application by setting some attributes in the result metadata.\n\nAs you might remember, result metadata is the fourth element in the enveloped result structure:\n\n[code language=\"perl\"]\n[$status, $message, $actual_result, $meta]\n[/code]\n\nThe result metadata is a hash (a <a href=\"https://metacpan.org/pod/DefHash\">DefHash</a> actually, but for most purposes you don't care about the difference). There are some attributes (keys) you can set in this metadata to give hints to Perinci::CmdLine on how to render the result in CLI application.\n\n<h3>cmdline.result</h3>\n\nThe first one is <tt>cmdline.result</tt>. This sets alternative result to use when in CLI context. For example:\n\n[code language=\"perl\"]\nsub func {\n    [200, &quot;OK&quot;, &quot;foo&quot;, {'cmdline.result'=&gt;'bar'}];\n}\n[/code]\n\nThis way, if you are calling the function, you'll get \"foo\" (in the third element), but if this function is run on the command-line, user will see \"bar\".\n\nWhy would this be useful? An example would be functions that return bool values, like for example <tt>user_exists()</tt>. In Perl, we probably will only care about getting 1/0. But in CLI, you might want to display a more user-friendly message. So instead of:\n\n[code language=\"text\"]\n% user-exists ujang\n0\n% user-exists kadek\n1\n[/code]\n\nIf your function does this:\n\n[code language=\"perl\"]\nsub user_exists {\n    my %args = @_;\n    my $exists = actual_check_for_existence($args{user});\n    [200, &quot;OK&quot;, $exists, {'cmdline.result' =&gt; &quot;User $args{user}&quot; . ($exists ? &quot; exists&quot;:&quot;does not exist&quot;)}];\n}\n[/code]\n\nthen you can have:\n\n[code language=\"text\"]\n% user-exists ujang\nUser ujang does not exist\n% user-exists kadek\nUser kadek exists\n[/code]\n\nAnother example where this is applied is in <a href=\"https://metacpan.org/pod/Git::Bunch\">\nGit::Bunch</a>. In function <tt>check_bunch</tt>, the result is a hash of every repo in the bunch and their check statuses, e.g.:\n\n[code language=\"perl\"]\n[200, &quot;OK&quot;, {repo1=&gt;[200,&quot;clean&quot;], repo2=&gt;[500,&quot;Needs commit&quot;], ...}]\n[/code]\n\nThe function also happens to use progress bar to report unclean repositories as the checking is being done. Unclean repos get reported/logged to the screen. Thus, it is not very useful to display this hash on the CLI (but useful when we are using the function from Perl). So <tt>check_bunch()</tt> sets the CLI output to empty string:\n\n[code language=\"perl\"]\n[200, &quot;OK&quot;, ..., {'cmdline.result'=&gt;''}]\n[/code]\n\n<h3>cmdline.default_format</h3>\n\nThis attribute picks the default format. For example:\n\n[code language=\"perl\"]\n[200, &quot;OK&quot;, ..., {'cmdline.default_format'=&gt;'json'}]\n[/code]\n\nThis way, when CLI is run, the output defaults to JSON instead of text, unless user explicitly specify the output format that she wants, e.g. <tt>--format text</tt>.\n\nOne common use-case for this is to force the simple or pretty version of text format. By default, for DWIM-ness, the text format becomes simpler when the program is run through pipes (e.g. formatted ASCII table becomes lines of tab-separated values). For example (I'm using the <b>list-files</b> script mentioned in pericmd 039):\n\n[code language=\"text\"]\n% list-files -v\n+----------------+------+------+\n| name           | size | type |\n+----------------+------+------+\n| hello          | 1131 | f    |\n| list-files     | 988  | f    |\n| list-files2    | 1187 | f    |\n| mycomp         | 902  | f    |\n| mycomp2a       | 608  | f    |\n| mycomp2b       | 686  | f    |\n| mycomp2b+comp  | 1394 | f    |\n| pause          | 4096 | d    |\n| perl-App-hello | 4096 | d    |\n+----------------+------+------+\n\n% list-files -v | cat\nhello   1131    f\nlist-files      988     f\nlist-files2     1187    f\nmycomp  902     f\nmycomp2a        608     f\nmycomp2b        686     f\nmycomp2b+comp   1394    f\npause   4096    d\nperl-App-hello  4096    d\n[/code]\n\nSometimes you always want to default to the pretty version (even though your CLI program is run through pipes), and sometimes the other way around. To do this you can instruct in the result metadata <tt>'cmdline.default_format' =&gt; 'text-pretty'</tt> (or <tt>text-simple</tt>).\n\nNote that the <tt>cmdline.default_format</tt> attribute can also be specified in the Rinci function metadata, but specifying this in the result metadata is more flexible as we can customize on a per-invocation basis.\n\n<h3>cmdline.exit_code</h3>\n\nThis is not actually related to output format, but somewhat related. This attribute explicitly chooses an exit code for the CLI program. By default, as you might also remember, status code is determined as follow: \"if status is 2xx or 304, then 0, else status-300\".\n\n<h3>cmdline.skip_format</h3>\n\nIf you set this attribute to true, the result will be printed as-is without any formatting. You might want to use this if you are outputting a preformatted text. Which defeats the whole point of convenience given by Perinci::CmdLine, but sometimes it's useful.\n\n<h3>cmdline.page_result and cmdline.pager</h3>\n\nThis is also not directly related to formatting, but somewhat related. If you set <tt>cmdline.page_result</tt> to true, you can instruct Perinci::CmdLine to run a pager (like <b>less</b>). This might be useful for programs that output long text. The <tt>cmdline.pager</tt> can be used to specifically choose another program instead of the default <tt>$ENV{PAGER}</tt> (or <b>less</b>).\n\nIn the next blog post I'll discuss more ways to customize table output.\n",
+         "post_date" : "20150318T00:00:48",
+         "post_date_gmt" : "20150317T17:00:48",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "273",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:38:18",
+         "post_modified_gmt" : "20160901T01:38:18",
+         "post_name" : "pericmd-044-customizing-output",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 044: Customizing output",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-4p",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "696",
+               "key" : "email_notification",
+               "value" : "1426525291"
+            },
+            {
+               "id" : "605",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "691",
+               "key" : "jabber_published",
+               "value" : "1426525261"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=258",
+         "link" : "https://perlancar.wordpress.com/2015/03/17/pericmd-043-generating-cli-applications-appgenpericmdscript/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Most Perinci::CmdLine-based CLI scripts are basically a variation of:\n\n[code language=\"perl\"]\n#!perl\n\nuse Perinci::CmdLine::Any;\nPerinci::CmdLine-&gt;new(\n    url =&gt; '/some/riap/url/to/function',\n    ...\n)-&gt;run;\n[/code]\n\nDue to my laziness and strict adherence to the DRY principle, I create a script <a href=\"https://metacpan.org/pod/gen-pericmd-script\">gen-pericmd-script</a> (distributed with <a href=\"https://metacpan.org/pod/App::GenPericmdScript\">App::GenPericmdScript</a>) to generate this boilerplate. To see it in action, first install <a href=\"https://metacpan.org/pod/Perinci::Examples\">Perinci::Examples</a> (if you haven't done so) and then run:\n\n[code language=\"text\"]\n% gen-pericmd-script /Perinci/Examples/gen_array\n[/code]\n\nThe result is spewed to standard output:\n\n[code language=\"perl\"]\n#!/mnt/home/s1/perl5/perlbrew/perls/perl-5.18.4/bin/perl\n\n# Note: This script is a CLI interface to Riap function /Perinci/Examples/gen_array\n# and generated automatically using App::GenPericmdScript version 0.04\n\n# DATE\n# VERSION\n\nuse 5.010001;\nuse strict;\nuse warnings;\n\nuse Perinci::CmdLine::Any;\n\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; &quot;/Perinci/Examples/gen_array&quot;,\n)-&gt;run;\n\n# ABSTRACT: Generate an array of specified length\n# PODNAME: script\n[/code]\n\nIf you analyze the output, the abstract is also written for you. This is taken from the Rinci metadata which is retrieved by <b>gen-pericmd-script</b> via a Riap meta request.\n\nIf you specify <tt>-o</tt> option, e.g. <tt>-o /home/s1/bin/gen-array</tt>, the generated script is written to the specified path and also set <tt>chmod 0755</tt> as well as tab completion is activated (if you have <a href=\"https://metacpan.org/pod/shcompgen\">shcompgen</a> installed). There are of course several options to customize the script, like the Perinci::CmdLine backend module to use, whether to activate logging, specify subcommands, whether to add some code before instantiating Perinci::CmdLine object, and so on.\n\nApp::GenPericmdScript is actually best used with <a href=\"https://metacpan.org/pod/Dist::Zilla\">Dist::Zilla</a>. There's a plugin called <a href=\"https://metacpan.org/pod/Dist::Zilla::Plugin::Rinci::ScriptFromFunc\">DZP:Rinci::ScriptFromFunc</a> which uses to App::GenPericmdScript to generate scripts for you during build. If some have a <tt>dist.ini</tt> like this:\n\n[code language=\"text\" highlight=\"4-5\"]\nname=App-GenArray\nversion=0.01\n\n[Rinci::ScriptFromFunc]\nscript= url=/Perinci/Examples/gen_array\n\n[@Classic]\n\n[PodWeaver]\nconfig_plugin=-Rinci\n[/code]\n\nAfter you run <tt>dzil build</tt>, you'll get something like this in <tt>App-GenArray-0.01/bin/gen-array</tt>:\n\n[code language=\"perl\"]\n#!perl\n\n# Note: This script is a CLI interface to Riap function /Perinci/Examples/gen_array\n# and generated automatically using App::GenPericmdScript version 0.04\n\n# DATE\n# VERSION\n\nuse 5.010001;\nuse strict;\nuse warnings;\n\nuse Perinci::CmdLine::Any;\n\n$ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0;\n\nPerinci::CmdLine::Any-&gt;new(\n    url =&gt; &quot;/Perinci/Examples/gen_array&quot;,\n)-&gt;run;\n\n# ABSTRACT: Generate an array of specified length\n# PODNAME: gen-array\n\n__END__\n\n=pod\n\n=head1 SYNOPSIS\n\nUsage:\n\n % gen-array [options] &lt;len&gt;\n\n=head1 DESCRIPTION\n\nAlso tests result schema.\n\n=head1 OPTIONS\n\nC&lt;*&gt; marks required options.\n\n=over\n\n=item B&lt;--config-path&gt;=I&lt;s&gt;\n\nSet path to configuration file.\n\nCan be specified multiple times.\n\n=item B&lt;--config-profile&gt;=I&lt;s&gt;\n\nSet configuration profile to use.\n\n=item B&lt;--format&gt;=I&lt;s&gt;\n\nChoose output format, e.g. json, text.\n\n=item B&lt;--help&gt;, B&lt;-h&gt;, B&lt;-?&gt;\n\nDisplay this help message.\n\n=item B&lt;--json&gt;\n\nSet output format to json.\n\n=item B&lt;--len&gt;=I&lt;i&gt;*\n\nArray length.\n\nDefault value:\n\n 10\n\n=item B&lt;--naked-res&gt;\n\nWhen outputing as JSON, strip result envelope.\n\nBy default, when outputing as JSON, the full enveloped result is returned, e.g.:\n\n    [200,&quot;OK&quot;,[1,2,3],{&quot;func.extra&quot;=&gt;4}]\n\nThe reason is so you can get the status (1st element), status message (2nd\nelement) as well as result metadata/extra result (4th element) instead of just\nthe result (3rd element). However, sometimes you want just the result, e.g. when\nyou want to pipe the result for more post-processing. In this case you can use\n`--naked-res` so you just get:\n\n    [1,2,3]\n\n\n=item B&lt;--no-config&gt;\n\nDo not use any configuration file.\n\n=item B&lt;--version&gt;, B&lt;-v&gt;\n\n=back\n\n=head1 ENVIRONMENT\n\nGEN_ARRAY_OPT\n\n=head1 FILES\n\n~/gen-array.conf\n\n/etc/gen-array.conf\n\n=cut\n[/code]\n\nWhen you run <tt>perldoc</tt> on this script, you'll get something like:\n\n[code language=\"text\"]\nGEN-ARRAY(1)               User Contributed Perl Documentation               GEN-ARRAY(1)\n\n\n\nSYNOPSIS\n       Usage:\n\n        % gen-array [options] &lt;len&gt;\n\nDESCRIPTION\n       Also tests result schema.\n\nOPTIONS\n       &quot;*&quot; marks required options.\n\n       --config-path=s\n           Set path to configuration file.\n\n           Can be specified multiple times.\n\n       --config-profile=s\n           Set configuration profile to use.\n\n       --format=s\n           Choose output format, e.g. json, text.\n\n       --help, -h, -?\n           Display this help message.\n\n       --json\n           Set output format to json.\n\n       --len=i*\n           Array length.\n\n           Default value:\n\n            10\n\n       --naked-res\n           When outputing as JSON, strip result envelope.\n\n           By default, when outputing as JSON, the full enveloped result is returned,\n           e.g.:\n\n               [200,&quot;OK&quot;,[1,2,3],{&quot;func.extra&quot;=&gt;4}]\n\n           The reason is so you can get the status (1st element), status message (2nd\n           element) as well as result metadata/extra result (4th element) instead of just\n           the result (3rd element). However, sometimes you want just the result, e.g.\n           when you want to pipe the result for more post-processing. In this case you\n           can use `--naked-res` so you just get:\n\n               [1,2,3]\n\n       --no-config\n           Do not use any configuration file.\n\n       --version, -v\n\nENVIRONMENT\n       GEN_ARRAY_OPT\n\nFILES\n       ~/gen-array.conf\n\n       /etc/gen-array.conf\n\n[/code]\n",
+         "post_date" : "20150317T00:00:31",
+         "post_date_gmt" : "20150316T17:00:31",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "258",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:39:17",
+         "post_modified_gmt" : "20160901T01:39:17",
+         "post_name" : "pericmd-043-generating-cli-applications-appgenpericmdscript",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 043: Generating CLI applications (App::GenPericmdScript)",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-4a",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "689",
+               "key" : "email_notification",
+               "value" : "1426439564"
+            },
+            {
+               "id" : "575",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "684",
+               "key" : "jabber_published",
+               "value" : "1426439563"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=246",
+         "link" : "https://perlancar.wordpress.com/2015/03/16/pericmd-042-using-functions-from-other-languages/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Since Perinci::CmdLine uses Riap behind the scenes (from getting the Rinci metadata to calling the function), it is possible to use a remote server as the Riap server, even when the server side is not Perl. Below are two examples. The first one uses piping (stdin/stdout) to access a Ruby program on the same server, and the second one uses TCP server written in Node.js. Note that the two programs are just quick-hacks and very ad-hoc, I haven't actually developed any Riap libraries on those languages. Their main goal is to demonstrate the simplicity of the Riap::Simple protocol.\n\n<h3>Ruby over pipe</h3>\n\nSave this code to <b>/some/path/to/riap_server.rb</b>:\n\n[code language=\"ruby\"]\n#!/usr/bin/env ruby\n\nrequire 'json'\n\ndef _res(res)\n  res[3] ||= {}\n  res[3]['riap.v'] ||= 1.1\n  puts &quot;j&quot; + res.to_json\n  $stdout.flush\nend\n\nwhile line = $stdin.gets do\n  if line =~ /^j(.+)/\n    begin\n      req = JSON.parse($1)\n    rescue Exception =&gt; e\n      _res [400, &quot;Invalid JSON in Riap request: &quot; + e.message]\n      next\n    end\n\n    if !req['action']\n      _res [400, &quot;Please specify 'action'&quot;]\n      next\n    end\n\n    if !req['uri']\n      _res [400, &quot;Please specify 'uri'&quot;]\n      next\n    end\n\n    if req['action'] == 'call'\n      if req['uri'] == '/cat_array'\n        args = req['args'] || {}\n        if (!args['a1'])\n          _res [400, &quot;Please specify a1&quot;]\n          next\n        elsif (!args['a2'])\n          _res [400, &quot;Please specify a1&quot;]\n          next\n        end\n        _res [200,&quot;OK&quot;,args['a1'] + args['a2']]\n        next\n      else\n        _res [404, &quot;Unknown uri&quot;]\n        next\n      end\n\n    elsif req['action'] == 'meta'\n      if req['uri'] == '/cat_array'\n        _res [200,&quot;OK&quot;,{\n                &quot;v&quot; =&gt; 1.1,\n                &quot;summary&quot; =&gt; &quot;Concatenate two arrays together&quot;,\n                &quot;args&quot; =&gt; {\n                  &quot;a1&quot; =&gt; {\n                    &quot;summary&quot; =&gt; &quot;First array&quot;,\n                    &quot;schema&quot; =&gt; [&quot;array&quot;],\n                    &quot;req&quot; =&gt; true,\n                  },\n                  &quot;a2&quot; =&gt; {\n                    &quot;summary&quot; =&gt; &quot;Second array&quot;,\n                    &quot;schema&quot; =&gt; [&quot;array&quot;],\n                    &quot;req&quot; =&gt; true,\n                  },\n                }}]\n        next\n      else\n        _res [404, &quot;Unknown uri&quot;]\n        next\n      end\n\n    elsif req['action'] == 'info'\n      if req['uri'] == '/cat_array'\n        _res [200,&quot;OK&quot;,{&quot;type&quot; =&gt; &quot;function&quot;, &quot;uri&quot; =&gt; &quot;/foo&quot;}]\n        next\n      else\n        _res [404, &quot;Unknown uri&quot;]\n        next\n      end\n\n    else\n      _res [400, &quot;Invalid action&quot;]\n      next\n    end\n\n  else\n    _res [400, &quot;Invalid Riap request&quot;]\n    break\n  end\nend\n[/code]\n\nNow create our CLI program, let's call it <b>cat-array-ruby</b>:\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse Perinci::CmdLine::Classic;\nPerinci::CmdLine::Classic-&gt;new(\n    url =&gt; &quot;riap+pipe:/some/path/to/riap_server.rb////cat_array&quot;,\n)-&gt;run;\n[/code]\n\nLet's test the CLI program:\n\n[code language=\"text\"]\n% cat-array-ruby --help\ncat-array-ruby - Concatenate two arrays together                                                     \nUsage                                                                                    \n  -e --help (or -h, -?)                                                                  \n  -e --version (or -v)                                                                   \n  -e [options]                                                                           \nOptions                                                                                  \n  --a1-json=s                                --a1-yaml=s                                 \n  --a1=s*                                    --a2-json=s                                 \n  --a2-yaml=s                                --a2=s*                                     \n  --config-path=s                            --config-profile=s                          \n  --debug                                    --format-options=s                          \n  --format=s                                 --help, -h, -?                              \n  --json                                     --log-level=s                               \n  --no-config                                --quiet                                     \n  --trace                                    --verbose                                   \n  --version, -v                                                                          \nFor more complete help, use '--help --verbose'.                   \n\n% cat-array-ruby --a1-json '[1,2,3]' --a2-json '[4,5,6]'\n┌─────────────────────────────┐\n│  1    2    3    4    5    6 │\n└─────────────────────────────┘\n[/code]\n\nAll the other features you would normally get from a Perinci::CmdLine-based CLI application, like tab completion, output formatting, and so on works.\n\n<h3>Node.js over TCP server</h3>\n\nSave this code to <b>riap_server.js</b>:\n\n[code language=\"javascript\"]\nfunction _res(s, res) {\n    if (!res[3]) res[3] = {};\n    res[3]['riap.v'] = 1.1;\n    s.write(&quot;j&quot; + JSON.stringify(res) + &quot;&#092;&#048;15&#092;&#048;12&quot;);\n    return;\n}\n\nvar humanize = require('humanize');\nvar net = require('net');\nvar rl = require('readline');\nvar server = net.createServer(function(socket) { //'connection' listener\n    console.log('client connected');\n    socket.on('end', function() {\n        console.log('client disconnected');\n    });\n    var i = rl.createInterface(socket, socket);\n    i.on('line', function (line) {\n        match = line.match(/^j(.+)/)\n        if (match) {\n            // XXX error handling?\n            var req = JSON.parse(match[1]);\n            if (!req['action']) {\n                _res(socket, [400, &quot;Please specify action&quot;]);\n            } else if (!req['uri']) {\n                _res(socket, [400, &quot;Please specify uri&quot;]);\n\n            } else if (req['action'] == 'call') {\n                var args = req['args'] || {}\n                if (req['uri'] == '/humanize/filesize') {\n                    if (!args['size']) {\n                        _res(socket, [400, &quot;Please specify size&quot;]);\n                    } else {\n                        _res(socket, [200, &quot;OK&quot;, humanize.filesize(args['size'])]);\n                    }\n                } else {\n                    _res(socket, [404, &quot;Unknown uri&quot;]);\n                }\n\n            } else if (req['action'] == 'meta') {\n                if (req['uri'] == '/humanize/filesize') {\n                    _res(socket, [200, &quot;OK&quot;, {\n                        &quot;v&quot;: 1.1,\n                        &quot;summary&quot;: &quot;Humanize file size&quot;,\n                        &quot;args&quot;: {\n                            &quot;size&quot;: {\n                                &quot;schema&quot;: [&quot;int&quot;],\n                                &quot;req&quot;: true,\n                                &quot;pos&quot;: 0\n                            }\n                        }\n                    }]);\n                } else {\n                    _res(socket, [404, &quot;Unknown uri&quot;]);\n                }\n\n            } else if (req['action'] == 'info') {\n                if (req['uri'] == '/humanize/filesize') {\n                    _res(socket, [200, &quot;OK&quot;, {&quot;uri&quot;:&quot;/humanize/filesize&quot;, &quot;type&quot;:&quot;function&quot;}])\n                } else {\n                    _res(socket, [404, &quot;Unknown uri&quot;]);\n                }\n\n            } else {\n                _res(socket, [400, &quot;Unknown action&quot;]);\n            }\n        } else {\n            _res(socket, [400, &quot;Invalid Riap request&quot;]);\n            socket.destroy();\n        }\n    });\n});\nserver.listen(5000, function() { //'listening' listener\n    console.log('server bound');\n});\n[/code]\n\nInstall the <tt>humanize</tt> NPM module (if you doesn't have the module) and run the server:\n\n[code language=\"text\"]\n% npm install humanize\n% node riap_server.js\nserver bound\n[/code]\n\nPrepare our client, let's call it <b>humanize-filesize</b>:\n\n[code language=\"perl\"]\n#!/usr/bin/env perl\n\nuse Perinci::CmdLine::Classic;\nPerinci::CmdLine::Classic-&gt;new(\n    url =&gt; &quot;riap+tcp://localhost:5000/humanize/filesize&quot;,\n)-&gt;run;\n[/code]\n\nRun our CLI:\n\n[code language=\"text\"]\n% humanize-filesize --help\nhumanize-filesize - Humanize file size                                      \nUsage                                                                                    \n  -e --help (or -h, -?)                                                                  \n  -e --version (or -v)                                                                   \n  -e [options] &lt;size&gt;                                                                    \nOptions                                                                                  \n  --config-path=s                            --config-profile=s                          \n  --debug                                    --format-options=s                          \n  --format=s                                 --help, -h, -?                              \n  --json                                     --log-level=s                               \n  --no-config                                --quiet                                     \n  --size=i* (=arg[0])                        --trace                                     \n  --verbose                                  --version, -v                               \nFor more complete help, use '--help --verbose'.                        \n\n% humanize-filesize\nERROR 400: Missing required argument(s): size\n\n% humanize-filesize 100200300\n95.56 MB\n\n% humanize-filesize 100200300 --json\n[\n   200,\n   &quot;OK&quot;,\n   &quot;95.56 MB&quot;,\n   {\n      &quot;riap.v&quot;: 1.1\n   }\n]\n[/code]\n\nNote that in this blog post we are using Perinci::CmdLine::Classic instead of Perinci::CmdLine::Any because the default backend Perinci::CmdLine::Lite does not yet support the URL schemes riap+pipe:/ or riap+tcp://. This will be rectified sometime in the future.\n",
+         "post_date" : "20150316T00:00:40",
+         "post_date_gmt" : "20150315T17:00:40",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "246",
+         "post_mime_type" : "",
+         "post_modified" : "20160901T08:39:47",
+         "post_modified_gmt" : "20160901T01:39:47",
+         "post_name" : "pericmd-042-using-functions-from-other-languages",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 042: Using functions from other languages",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3Y",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "680",
+               "key" : "email_notification",
+               "value" : "1426352437"
+            },
+            {
+               "id" : "570",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "675",
+               "key" : "jabber_published",
+               "value" : "1426352435"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=244",
+         "link" : "https://perlancar.wordpress.com/2015/03/15/pericmd-041-riapsimple/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "The last post (pericmd 040) describes the <a href=\"https://metacpan.org/pod/Riap\">Riap</a> protocol. Riap is an abstract protocol that does not specify how data should be transported on the wire. For that, two more protocols are defined: <a href=\"https://metacpan.org/pod/Riap::HTTP\">Riap::HTTP</a> and <a href=\"https://metacpan.org/pod/Riap::Simple\">Riap::Simple</a>. The first one specifies how Riap is used with HTTP/HTTPS transport, and the second one is about how Riap can be transported over any stream socket (or pipe).\n\nSince the latter is significantly simpler (even though it is lacking some nice features that Riap::HTTP provides), I'll cover it first:\n\n<h3>Request</h3>\n\nClient sends Riap request in a single line: the letter \"j\" (lowercase), followed by the Riap request hash encoded as JSON (must all be in a single line), followed by CRLF.\n\n<h3>Response</h3>\n\nServer sends response in a single line also: the letter \"j\" (lowercase), followed by enveloped response array encoded as JSON (must all be in a single line), followed by CRLF.\n\nIf client or server sends invalid data, the connection can be closed.\n\nThat's it.",
+         "post_date" : "20150315T00:00:19",
+         "post_date_gmt" : "20150314T17:00:19",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "244",
+         "post_mime_type" : "",
+         "post_modified" : "20150322T22:59:29",
+         "post_modified_gmt" : "20150322T15:59:29",
+         "post_name" : "pericmd-041-riapsimple",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "pericmd 041: Riap::Simple",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-3W",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "48",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "pericmd-tut",
+               "parent" : "0",
+               "slug" : "pericmd-tut",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "339197583",
+               "term_taxonomy_id" : "8"
+            },
+            {
+               "count" : "105",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "7"
+            },
+            {
+               "count" : "1",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perlcmd-tut",
+               "parent" : "0",
+               "slug" : "perlcmd-tut",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "339195703",
+               "term_taxonomy_id" : "4"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]

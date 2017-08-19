@@ -1,0 +1,581 @@
+[
+   200,
+   "OK",
+   [
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1123",
+               "key" : "email_notification",
+               "value" : "1455169509"
+            },
+            {
+               "id" : "1118",
+               "key" : "jabber_published",
+               "value" : "1455169506"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=531",
+         "link" : "https://perlancar.wordpress.com/2016/02/11/using-lcpan-to-index-your-darkpan/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<a href=\"https://metacpan.org/pod/lcpan\">lcpan</a> is an application to manage your local CPAN (or CPAN-like) repository. It creates a SQLite database from information in your CPAN-like repository so you can query various stuffs about your repository.\n\n<b>DarkPAN</b> is a term to describe a directory hierarchy containing collection of Perl modules that is structured like a CPAN mirror. So, there is an <code>authors/id/</code> directory structures, <code>modules/02packages.details.txt.gz</code> index file, and so on. It can be created with some tools like<a href=\"https://metacpan.org/pod/orepan.pl\">OrePAN</a> or <a href=\"https://metacpan.org/pod/CPAN::Mini::Inject\">CPAN::Mini::Inject</a>. You can use various CPAN tools on it, like <b>cpanm</b>, <a href=\"https://metacpan.org/pod/cpan-outdated\">cpan-outdated</a>, and so on. The difference with a normal CPAN mirror is that a DarkPAN contains your own modules and can be private. It leverages existing CPAN tools for your private modules.\n\nIf you are maintaining your own DarkPAN, the recent versions of lcpan can now also index your DarkPAN too, so you can query various stuffs about your DarkPAN like you would a normal mini CPAN mirror. Previously there was a problem because some DarkPANs like those produced by OrePAN do not contain <code>authors/01mailrc.txt.gz</code> but <code>authors/00whois.xml</code> instead. Recent versions of lcpan resolve this by also looking for <code>00whois.xml</code>.\n\nTo start using lcpan for your DarkPAN, I suggest you put a few lines in your <code>~/lcpan.conf</code>. Suppose your DarkPAN is in <code>/home/budi/darkpan-budi</code>. In <code>lcpan.conf</code>:\n\n<pre>[profile=darkpan-budi]\ncpan=/home/budi/darkpan-budi\n[profile=darkpan-budi subcommand=update]\nupdate_files=0\n</pre>\n\nNow, index your DarkPAN:\n\n<pre>% lcpan --config-profile darkpan-budi update</pre>\n\n(You will need to do this after you add/remove files from your DarkPAN.)\n\nNext, you can query your DarkPAN:\n\n<pre>% lcpan --config-profile darkpan-budi mods -l\n% lcpan --config-profile darkpan-budi author-rdeps BUDI --user-author-isnt BUDI\n...</pre>\n\nTo make it more convenient, you can create a script, e.g. <code>lcpan-budi</code>:\n\n<pre>#!/bin/bash\n# FRAGMENT id=shcompgen-hint command=lcpan command_args=\"--config-profile darkpan-budi\"\nlcpan --config-profile darkpan-budi \"$@\"</pre>\n\nThe <code># FRAGMENT</code> bit is a hint for <a href=\"https://metacpan.org/pod/shcompgen\">shcompgen</a>, if you use that application. After you create the above script and put it somewhere in your PATH, you run <code>shcompgen generate</code> so that the <code>lcpan-budi</code> has working tab completion.\n\n",
+         "post_date" : "20160211T12:45:05",
+         "post_date_gmt" : "20160211T05:45:05",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "531",
+         "post_mime_type" : "",
+         "post_modified" : "20160212T18:18:37",
+         "post_modified_gmt" : "20160212T11:18:37",
+         "post_name" : "using-lcpan-to-index-your-darkpan",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Using lcpan to index your DarkPAN",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-8z",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1114",
+               "key" : "email_notification",
+               "value" : "1455168639"
+            },
+            {
+               "id" : "1106",
+               "key" : "jabber_published",
+               "value" : "1455168637"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=510",
+         "link" : "https://perlancar.wordpress.com/2016/02/11/lcpan-0-67-scripts-mentions-contents/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<a href=\"https://metacpan.org/pod/lcpan\">lcpan</a> is an application to manage your local CPAN mirror. It downloads mini CPAN to your computer, and creates a SQLite database from information in the mirror so you can query various stuffs about your mirror.\n\nUp until version 0.66, lcpan only indexes <code>modules/02packages.details.txt.gz</code> (for list of modules/packages), <code>authors/01mailrc.txt.gz</code> (list of authors), and META files from each release tarballs (dist names, dist abstract, dependency information).\n\nNow in 0.67, a lot more stuffs are being indexed. Size and mtime of release tarballs, content (list of files) inside each tarball, scripts. lcpan also extracts abstract for each module and script. It also parses POD to get <i>mentions</i>, which is references to modules/scripts.\n\nSo now in addition to dependencies relationship, we also get mentions relationship. Want to know what modules/scripts/authors mentions your modules in their POD? Or what modules and authors are most popular in terms of being most mentioned? Now you can.",
+         "post_date" : "20160211T12:30:35",
+         "post_date_gmt" : "20160211T05:30:35",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "510",
+         "post_mime_type" : "",
+         "post_modified" : "20160211T12:30:35",
+         "post_modified_gmt" : "20160211T05:30:35",
+         "post_name" : "lcpan-0-67-scripts-mentions-contents",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "lcpan 0.67: scripts, mentions, contents",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-8e",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            },
+            {
+               "count" : "7",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "Tak Berkategori",
+               "parent" : "0",
+               "slug" : "tak-berkategori",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "3278647",
+               "term_taxonomy_id" : "1"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1089",
+               "key" : "email_notification",
+               "value" : "1452420584"
+            },
+            {
+               "id" : "1082",
+               "key" : "jabber_published",
+               "value" : "1452420580"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=437",
+         "link" : "https://perlancar.wordpress.com/2016/01/10/a-note-about-stringflogger-and-logging-in-dzil/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<a href=\"https://metacpan.org/pod/Dist::Zilla\">Dist::Zilla</a> uses <a href=\"https://metacpan.org/pod/Log::Dispatchouli\">Log::Dispatchouli</a> for logging, which in turn uses <a href=\"https://metacpan.org/pod/String::Flogger\">String::Flogger</a> to format arguments into the final string that gets logged.\n\nString::Flogger is a convenient formatter. Depending on what arguments it gets, it does different things. First, if passed a simple string then it is returned as-is, so you can just do this:\n\n<pre>$self-&gt;log(\"A simple message\");</pre>\n\nIf you pass several strings (arguments), each string (argument) will be flogged individually and joined with space, e.g.:\n\n<pre>$self-&gt;log(\"A message\", \"another message\"); # final string is: \"A message another message\"</pre>\n\nSecond, if you pass an array reference, it will be formatted using (currently) sprintf(), e.g.:\n\n<pre>$self-&gt;log([\"A %s message\", \"sprintf-formatted\"]); # \"A sprintf-formatted message\"</pre>\n\nNote that in some other logging frameworks, like <a href=\"https://metacpan.org/pod/Log::Any\">Log::Any</a>, there is a separate set of methods to explicitly request sprintf-style formatting, so no extra pair of brackets is needed, e.g.:\n\n<pre>$log-&gt;debugf(\"A %s message\", \"sprintf-formatted\");</pre>\n\nThird, if passed a coderef, String::Flogger <i>calls</i> the code. This can be useful if you want to do more complex formatting and/or defer relatively expensive calculation, e.g.:\n\n<pre>$self-&gt;log(sub { \"Current system load: \".sysload() });</pre>\n\nSo far so good.\n\nBut wait, there's an extra level of convenience and design choice. In the array reference (sprintf-style) variant, if the sprintf arguments are references, they will be formatted using some rules:\n\n1) scalar references or reference references will be formatted using \"ref(VALUE)\", so <code>\\1</code> will become:\n\n<pre>ref(1)</pre>\n\n2) the rest will be passed to JSON encoder (currently <a href=\"https://metacpan.org/pod/JSON::MaybeXS\">JSON::MaybeXS</a>) and then enclosed using \"{{\" and \"}}\", e.g.:\n\n<pre>$self-&gt;log([\"Let there be some data: %s\", [undef, \"a\"]]); # 'Let there be some data: {{[null,\"a\"]}}'</pre>\n\nThe choice of JSON indicates (also <a href=\"https://github.com/rjbs/String-Flogger/issues/4\">confirmed here</a>) that RJBS envisions the log to also be processed with external tools outside the Perl ecosystem. A valid use case, but with some drawbacks that some Perl data structures cannot be viewed more accurately, which you also sometimes want when you are debugging some complex Perl data in your application.\n\nObjects (blessed references) will be dumped as just \"obj(ADDRESS)\".\n\nAlso, the extra convenience is that in the arrayref/sprintf-style variant, if the arguments are coderefs, they will also be called, e.g.:\n\n<pre>$self-&gt;log([\"Current system load: %s\", sub { sysload() }];</pre>\n\nThis is a potential gotcha if you, like me, are used to the other logging frameworks. If you want a behaviour more like Log::Any:\n\n<pre>$log-&gt;debugf(\"Data that might be anything including coderef: %s\", $data);</pre>\n\nIn Log::Dispatchouli you should dump the data first using something else, e.g.:\n\n<pre>$self-&gt;log([\"Data that might be anything including coderef: %s\", Data::Dmp::dmp($data)]);</pre>\n\nor perhaps:\n\n<pre>$self-&gt;log([\"Data that might be anything including coderef: %s\", sub { require Data::Dmp; Data::Dmp::dmp($data) }]);</pre>",
+         "post_date" : "20160110T17:09:39",
+         "post_date_gmt" : "20160110T10:09:39",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "437",
+         "post_mime_type" : "",
+         "post_modified" : "20160110T17:16:48",
+         "post_modified_gmt" : "20160110T10:16:48",
+         "post_name" : "a-note-about-stringflogger-and-logging-in-dzil",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "A note about String::Flogger and logging in dzil",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-73",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            },
+            {
+               "count" : "7",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "Tak Berkategori",
+               "parent" : "0",
+               "slug" : "tak-berkategori",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "3278647",
+               "term_taxonomy_id" : "1"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1069",
+               "key" : "email_notification",
+               "value" : "1452171592"
+            },
+            {
+               "id" : "1065",
+               "key" : "jabber_published",
+               "value" : "1452171589"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=385",
+         "link" : "https://perlancar.wordpress.com/2016/01/07/the-replace_map-option-in-completeutil-0-43/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "This is yet another option for increasing convenience in tab completion, by allowing for spelling corrections. Suppose you have a <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Lite\">Perinci::CmdLine</a> CLI script that accepts an argument with values of \"mount\" or \"unmount\":\n\n<pre>use Perinci::CmdLine::Lite;\n\nour %SPEC;\n$SPEC{my_program} = {\n    v =&gt; 1.1,\n    summary =&gt; \"Mount or unmount media\",\n    args =&gt; {\n        action =&gt; {\n            schema =&gt; ['str*', in=&gt;['mount','unmount']],\n            req =&gt; 1,\n            pos =&gt; 0,\n        },\n        media =&gt; {\n            summary =&gt; 'Media name',\n            schema =&gt; 'str*',\n            req =&gt; 1,\n            pos =&gt; 1,\n        },\n    },\n};\nsub my_program {\n    ...\n}\n\nPerinci::CmdLine::Lite-&gt;new(url =&gt; '/main/my_program')-&gt;run;</pre>\n\nThis program can be used on the command-line like below:\n\n<pre>% my_program mount foo\n% my_prograrm unmount foo</pre>\n\nAnd the completion works like below:\n\n<pre>% my_program [tab]\nmount  unmount\n\n% my_program m[tab]\n% my_program mount _\n\n% my_program u[tab]\n% my_program unmount _</pre>\n\nBut what if you type \"my_program um\" or \"my_program umount\" (it's most probably in your muscle memory if you spend a lot of your time on Unix CLI environment. The completion library cannot conveniently produce a unique correct completion for you:\n\n<pre>% my_program um[tab]\nmount  unmount</pre>\n\nWhy? By keeping in mind about <a href=\"/2016/01/07/character-mode-matching-in-tab-completion/\">how the completion library tries to find a match</a>: first, the completion library tries string prefix matching against ('mount', 'unmount') and fails. Then, it tries word-mode matching (actually it skips it because the word to be completed \"um\" is just a single \"word\" and does not contain any dashes or other word separators). Next, it tries char-mode matching and returns ('mount', 'unmount'). The result: no direct completion, no convenience.\n\nWe can solve this by using the <code>replace_map</code> option of the <code>complete_array_elem()</code> function. The option was introduced in <a href=\"https://metacpan.org/pod/Complete::Util\">Complete::Util</a> 0.43. The option allows us to specify spelling variations for array elements.\n\nLet's modify our program to become:\n\n<pre>use Complete::Util qw(complete_array_elem);\nuse Perinci::CmdLine::Lite;\n\nmy $actions = ['mount','unmount'];\n\nour %SPEC;\n$SPEC{my_program} = {\n    v =&gt; 1.1,\n    summary =&gt; \"Mount or unmount media\",\n    args =&gt; {\n        action =&gt; {\n            schema =&gt; ['str*', in=&gt;$actions],\n            req =&gt; 1,\n            pos =&gt; 0,\n            completion =&gt; sub {\n                my %args = @_;\n                my $word = $args{word};\n                complete_array_elem(\n                    word =&gt; $word, array =&gt; $actions,\n                    replace_map =&gt; { unmount =&gt; ['umount'] },\n                );\n            },\n        },\n        media =&gt; {\n            summary =&gt; 'Media name',\n            schema =&gt; 'str*',\n            req =&gt; 1,\n            pos =&gt; 1,\n        },\n    },\n};\nsub my_program {\n    ...\n}\n\nPerinci::CmdLine::Lite-&gt;new(url =&gt; '/main/my_program')-&gt;run;</pre>\n\nWe've added a custom completion routine for the argument <code>action</code>. With the <code>replace_map</code> option, \"umount\" (as well as other spelling variations, if they are also specified) is included as a completion candidate. And in the final result, they will be replaced with \"unmount\". So now:\n\n<pre>% my_program um[tab]\n% my_program unmount _\n\n% my_program umount[tab]\n% my_program unmount _</pre>\n",
+         "post_date" : "20160107T19:59:48",
+         "post_date_gmt" : "20160107T12:59:48",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "385",
+         "post_mime_type" : "",
+         "post_modified" : "20160107T23:02:35",
+         "post_modified_gmt" : "20160107T16:02:35",
+         "post_name" : "the-replace_map-option-in-completeutil-0-43",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "The replace_map option in Complete::Util 0.43",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-6d",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1054",
+               "key" : "email_notification",
+               "value" : "1452170315"
+            },
+            {
+               "id" : "1049",
+               "key" : "jabber_published",
+               "value" : "1452170313"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=356",
+         "link" : "https://perlancar.wordpress.com/2016/01/07/character-mode-matching-in-tab-completion/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "In my continuing quest to maximize convenience and laziness for tab completion, I've now added what I call char-mode matching in <a href=\"https://metacpan.org/pod/Complete::Util\">Complete::Util</a> (0.44 to be exact). Let's see this in action by using <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a>.\n\n<pre>% lcpan mods -qty[tab]\n% lcpan mods --query-type _\n\n% lcpan mods --query-type [tab][tab]\nabstract    any         exact-name  name\n\n% lcpan mods --query-type x[tab]\n% lcpan mods --query-type exact-name _</pre>\n\nWhat it means by char-mode matching is that, you can type any number of characters and the word will match any string that contains those characters in the right order, even if they are interspersed with other characters. For example, if you type qux then all strings matching the regex <code>/q.*u.*x/</code> (or <code>/q.*u.*x/i</code>, since by default matching is case-insensitive) will be matched.\n \nChar-mode matching is inspired by the way the <a href=\"http://docs.aws.amazon.com/cli/latest/userguide/cli-command-completion.html\">AWS CLI's completer</a> works.\n\nNote that by default, in Complete::Util, normal prefix comparison matching is performed first. If that fails to produce any matches, then <a href=\"/2015/11/28/word-mode-matching-in-tab-completion/\">word-mode matching</a> is tried. If that also fails to produce any matches, then char-mode matching is performed. Finally, if char-mode matching also fails to return any matches, <a href=\"/2015/09/18/fuzzy-matching-in-tab-completion/\">fuzzy matching</a> is tried.",
+         "post_date" : "20160107T19:38:31",
+         "post_date_gmt" : "20160107T12:38:31",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "356",
+         "post_mime_type" : "",
+         "post_modified" : "20160107T23:02:46",
+         "post_modified_gmt" : "20160107T16:02:46",
+         "post_name" : "character-mode-matching-in-tab-completion",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Character-mode matching in tab completion",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-5K",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1039",
+               "key" : "email_notification",
+               "value" : "1448717453"
+            },
+            {
+               "id" : "1038",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "1033",
+               "key" : "jabber_published",
+               "value" : "1448717449"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=351",
+         "link" : "https://perlancar.wordpress.com/2015/11/28/word-mode-matching-in-tab-completion/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "I've just implemented what I call (out of ignorance for the correct term) \"word-mode\" matching in <a href=\"https://metacpan.org/pod/Complete::Util\">Complete::Util</a> 0.39. You can see the result in all <a href=\"https://metacpan.org/pod/Perinci::CmdLine\">Perinci::CmdLine</a>-based CLI scripts, for example <a href=\"https://metacpan.org/pod/lcpan\">lcpan</a>.\n\nIf you are an Emacs user, you'll know what I mean. When completing for function names (<em>M-x</em>) or file names (<em>C-x C-f</em>) you can complete by using a word that does not need to be right after the cursor position: it can be one or several words after that. For example, if you want to complete \"color-theme-dark-laptop\", it's pretty annoying to complete using normal method because you need to type at least \"color-theme-dark-l\" to get a unique completion, or \"colo[tab]da[tab]l\". Alternatively, you can just type \"c-lap\" and immediately get a unique completion. This is because Emacs will try to find any string which has the word that begins with \"c\" followed by a word that begins with \"lap\". The words do not need to be adjacent to each other. (Actually, Emacs can also immediately complete if you use \"-lap\".)\n\nSo the convenience being offered is, you can complete a string that has several/many words using just the beginning of the words that you remember or words that will more likely result in a unique completion. As long as you know that the words are in there and in the correct order, they don't have to be right next to one another.\n\nLet's see this in action. <b>lcpan</b> has a lot of subcommands. To complete the \"mods-from-same-dist\" subcommand, you can now just type \"m-sa\".\n<pre>% lcpan m-sa[tab]\n% lcpan mods-from-same-dist _</pre>",
+         "post_date" : "20151128T20:30:47",
+         "post_date_gmt" : "20151128T13:30:47",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "351",
+         "post_mime_type" : "",
+         "post_modified" : "20151128T20:38:45",
+         "post_modified_gmt" : "20151128T13:38:45",
+         "post_name" : "word-mode-matching-in-tab-completion",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Word-mode matching in tab completion",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-5F",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1027",
+               "key" : "email_notification",
+               "value" : "1446790435"
+            },
+            {
+               "id" : "1017",
+               "key" : "jabber_published",
+               "value" : "1446790434"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=349",
+         "link" : "https://perlancar.wordpress.com/2015/11/06/transferring-media-files-from-smartphone-via-mtp/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Compared to my old Samsung Galaxy Player (Android 2.3, Gingerbread), transferring files between my laptop/PC and my newer Android devices is always more cumbersome. Ever since Android 3, the protocol used for file transfer is no longer USB Mass Storage, but MTP.\n\nArguably MTP has its advantages, but the effect to me as a Linux user is still pain. I've tried various things to no avail, from jmtpfs (always input/output error) to gvfs-backends (Nautilus et al always sees the device as empty). Usually I ended up using Bluetooth, even Google Drive/Dropbox or Whatsapp/BBM.\n\nlibmtp/mtp-tools usually works, but the CLI commands are not very user-friendly. First, the manpages are nonexistent/incomplete. Even when given -h or some wrong option, the commands like <tt>mtp-getfile</tt> or <tt>mtp-sendfile</tt> will invariably hang for many seconds trying to detect the connected device each time they are run, before reporting the error in argument/option.\n\nI wrote <a href=\"https://metacpan.org/release/App-MTPUtils\">App-MTPUtils</a> which contains several wrapper scripts to lessen my pain when using libmtp. Suppose you want to get several files from your phone. First, you run:\n\n<pre>% mtp-files &gt; mtp-files.out</pre>\n\n(This might be done automatically in the future.)\n\nAfter that, you can list the files using:\n\n<pre>% mtputils-list-files -l\n% mtputils-list-files '*.mp4' -l</pre>\n\nFor me this is more readable as the output is a table and more ls-like.\n\nTo get your files, you can specify their ID's or filenames as arguments to <tt>mtputils-get-files</tt>. Compared to <tt>mtp-getfile</tt> you can get multiple files in one command, and there is a tab completion feature:\n\n<pre>% mtputils-get-files VID&lt;tab&gt;</pre>\n\nTo delete files, there is <tt>mtputils-del-files</tt>.\n",
+         "post_date" : "20151106T13:13:54",
+         "post_date_gmt" : "20151106T06:13:54",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "349",
+         "post_mime_type" : "",
+         "post_modified" : "20151106T13:14:10",
+         "post_modified_gmt" : "20151106T06:14:10",
+         "post_name" : "transferring-media-files-from-smartphone-via-mtp",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Transferring media files from smartphone via MTP",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-5D",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "1",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "mtp",
+               "parent" : "0",
+               "slug" : "mtp",
+               "taxonomy" : "post_tag",
+               "term_group" : "0",
+               "term_id" : "1120429",
+               "term_taxonomy_id" : "9"
+            },
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "1003",
+               "key" : "email_notification",
+               "value" : "1442566163"
+            },
+            {
+               "id" : "1008",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "993",
+               "key" : "jabber_published",
+               "value" : "1442566162"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=344",
+         "link" : "https://perlancar.wordpress.com/2015/09/18/using-pmless-and-pmdoc-pmman-to-quickly-view-modules-source-code-documentation-on-the-cli/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Over the course of about a year, I've trained my muscle memory to use <a href=\"https://metacpan.org/pod/pmless\">pmless</a> instead of <b>less</b> to view source code and <a href=\"https://metacpan.org/pod/pmman\">pmman</a> instead of <b>man</b> to view documentation, when it comes to Perl modules. They come with the CPAN distribution <a href=\"https://metacpan.org/release/App-PMUtils\">App-PMUtils</a> (along with a few other CLI utilities) and they offer some shortcuts and tab completion tricks to help you type less.\n\n<h2>Installing</h2>\n\nThe requirement is that you use <b>bash</b>. In theory other shells like <b>zsh</b> and <b>fish</b> (and even <b>tcsh</b>) should work too, but I haven't had the time to test those other shells.\n\nFirst, install <a href=\"https://metacpan.org/pod/shcompgen\">shcompgen</a>. This utility will make it easier when you install all the other tab completion-aware utilities from CPAN in the future by instantly enabling tab completion right after installation.\n\n<pre>% cpanm -n App::shcompgen</pre>\n\nAfter installation, the distribution will install a file in <code>~/.config/shcompgen.bashrc</code>. <b>You have to run this script in your bash startup file</b> (this is the only manual thing you need to do). For example, in your <code>~/.bashrc</code>, put:\n\n<pre>. ~/.config/shcompgen.bashrc</pre>\n\nNow logout and login again. Or, just execute the above line in your shell prompt. Now you're all set.\n\nInstall App::PMUtils:\n\n<pre>% cpanm -n App::PMUtils</pre>\n\nNow you have <b>pmless</b>, <b>pmman</b> (et al) with tab completion already (readily) activated.\n\n<h2>Usage</h2>\n\nFrom now on I'm only going to use <b>pmman</b> in the examples. You just substitute the command with another depending on what you want to do.\n\n<b>pmman</b> accepts the name of Perl modules in the form of Foo::Bar or Foo/Bar, but Foo/Bar is recommended unless you customize your bash completion setting to exclude the <code>:</code> (colon) character from the word-breaking set.\n\nTo view documentation on a module:\n\n<pre>% pmman HTTP/Request/Common</pre>\n\nOf course, that's not very lazy or convenient. First of all, tab completion is case-insensitive by default so you can type:\n\n<pre>% pmman http[Tab]\n% pmman HTTP/_</pre>\n\nAlso, tab completion completes intermediate paths for you by default, so you can also do:\n\n<pre>% pmman h/r/com[Tab]\n% pmman HTTP/Request/Common _</pre>\n\nAs long as the few first characters are unique, the tab completion will immediately complete the module name for you.\n\nThe tab completion is also fuzzy matching by default, so if you miss one or mistype one or two characters, don't worry:\n\n<pre>% pmman htp/r[Tab]\n% pmman HTTP/Re_</pre>\n\nYou can increase the fuzziness setting if you want looser/more liberal correction, for example:\n\n<pre>% EXPORT COMPLETE_OPT_FUZZY=5\n% pmman proc/proctab[Tab]\n% pmman Proc/ProcessTable_</pre>\n\nLastly, there are some shortcut prefixes to complete popular namespace prefixes for long/deep module names. By default this is (see <a href=\"https://metacpan.org/pod/Complete::Module\">Complete::Module</a>):\n\n<pre>\n        {\n          dzb =&gt; \"Dist/Zilla/PluginBundle/\",\n          dzp =&gt; \"Dist/Zilla/Plugin/\",\n          dzr =&gt; \"Dist/Zilla/Role/\",\n          pwb =&gt; \"Pod/Weaver/PluginBundle/\",\n          pwp =&gt; \"Pod/Weaver/Plugin/\",\n          pwr =&gt; \"Pod/Weaver/Role/\",\n          pws =&gt; \"Pod/Weaver/Section/\",\n        }\n</pre>\n\nBut they are configurable from the command-line.\n\nSo instead of:\n\n<pre>% pmman d/z/p/test[Tab]\n% pmman Dist/Zilla/Plugin/Test_</pre>\n\nyou can also type:\n\n<pre>% pmman dzp/test[Tab]\n% pmman Dist/Zilla/Plugin/Test_</pre>\n",
+         "post_date" : "20150918T15:49:22",
+         "post_date_gmt" : "20150918T08:49:22",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "344",
+         "post_mime_type" : "",
+         "post_modified" : "20150918T15:50:45",
+         "post_modified_gmt" : "20150918T08:50:45",
+         "post_name" : "using-pmless-and-pmdoc-pmman-to-quickly-view-modules-source-code-documentation-on-the-cli",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Using pmless and pmdoc (pmman) to quickly view module's source code &amp; documentation on the CLI",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-5y",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "985",
+               "key" : "email_notification",
+               "value" : "1442564160"
+            },
+            {
+               "id" : "979",
+               "key" : "geo_public",
+               "value" : "0"
+            },
+            {
+               "id" : "976",
+               "key" : "jabber_published",
+               "value" : "1442564159"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=338",
+         "link" : "https://perlancar.wordpress.com/2015/09/18/fuzzy-matching-in-tab-completion/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "Last weekend while on the road home, I worked on adding fuzzy matching to <a href=\"https://metacpan.org/pod/Complete::Util\">Complete::Util</a>'s <code>complete_array_elem()</code>. This enables fuzzy matching (typo correction) in many tab completion routines and utilities that uses the <code>Complete::*</code> modules family. For example, in <b>cpanm</b> (install and activate <a href=\"https://metacpan.org/pod/App::ShellCompleter::cpanm\">App::ShellCompleter::cpanm</a> first):\n\n<pre>% cpanm --miror[Tab]\n% cpanm --mirror_\n\n% cpanm Compess[Tab]\n% cpanm Compress_</pre>\n\nOr <b>mpv</b> (install and activate <a href=\"https://metacpan.org/pod/App::ShellCompleter::mpv\">App::ShellCompleter::mpv</a> first):\n\n<pre>% mpv --video-zom[Tab]\n% mpv --video-zoom _\n\n% mpv json[Tab]\n% mpv Jason\\ Chen\\ _\n% mpv Jason\\ Chen\\ -\\ ihate[Tab]\n% mpv Jason\\ Chen\\ -\\ I\\ Hate\\ Sorry\\ Lyrics\\ on\\ Screen-D95JzZ7ID4U.mp4 _</pre>\n\nAs well as all CLI scripts using the <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Lite\">Perinci::CmdLine::Lite</a> or <a href=\"https://metacpan.org/pod/Perinci::CmdLine::Classic\">Perinci::CmdLine::Classic</a> framework, for example <b>lcpan</b> and <b>pause</b>:\n\n<pre>% lcpan modole[Tab]\n% lcpan modules _\n\n% pause listmods[Tab]\n% pause list-mods _\n\n% pause sl[Tab]  ; # hoping to be autocorrected to 'ls'\n% pause cleanup _</pre>\n\nWhoops, okay, so the fuzzy matching still needs some tuning up to do. But generally it works pretty well in my experience so far.\n\nIf you don't have <a href=\"https://metacpan.org/pod/Text::Levenshtein::XS\">Text::Levenshtein::XS</a> (it's a recommends/optional prereq), fuzzy matching is rather slow. This starts to becomes noticeable when you have thousands of entries to match. For example when using <b>progless</b> from <a href=\"https://metacpan.org/release/App-ProgUtils\">App-ProgUtils</a>:\n\n<pre>% progless pogles[Tab]\n% progless progless _</pre>\n\nThat took almost 1s for <code>complete_array_elem()</code> to fuzzy match out of almost 5000 items (all programs in my PATH). However, note that fuzzy matching is only used when exact matching fails to produce a match. So if you do:\n\n<pre>% progless prog[Tab][Tab]\nprogcat   progedit  progless  progman   progpath  \n% progless progle[Tab]\n% progless progless _</pre>\n\nThose completion all complete quickly because no fuzzy matching is done. And course, you can just install Text::Levenshtein::XS to speed things up.",
+         "post_date" : "20150918T15:15:59",
+         "post_date_gmt" : "20150918T08:15:59",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "338",
+         "post_mime_type" : "",
+         "post_modified" : "20150918T19:09:35",
+         "post_modified_gmt" : "20150918T12:09:35",
+         "post_name" : "fuzzy-matching-in-tab-completion",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Fuzzy matching in tab completion",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-5s",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      },
+      {
+         "comment_status" : "open",
+         "custom_fields" : [
+            {
+               "id" : "971",
+               "key" : "email_notification",
+               "value" : "1432131398"
+            },
+            {
+               "id" : "960",
+               "key" : "jabber_published",
+               "value" : "1432131228"
+            }
+         ],
+         "guid" : "https://perlancar.wordpress.com/?p=336",
+         "link" : "https://perlancar.wordpress.com/2015/05/20/introducing-libfilter/",
+         "menu_order" : "0",
+         "ping_status" : "open",
+         "post_author" : "70489857",
+         "post_content" : "<a href=\"https://metacpan.org/pod/lib::filter\">lib::filter</a> is a pragma that can help you while debugging your applications by simulating the absence of some modules. You can:\n\n<ul>\n\n<li>Test your application using only core modules (this is basically the same as using <a href=\"https://metacpan.org/pod/lib::core::only\">lib::core::only</a>):\n\n<pre>% perl -Mlib::filter=allow_noncore,0 yourapp.pl</pre>\n\n<li>Assume only core modules plus some other modules exist (separate the modules to allow using semicolon):\n\n<pre>% perl -Mlib::filter=allow_noncore,0,allow,'Foo;Bar::Baz;Qux' yourapp.pl</pre>\n\n<li>Assume some modules do not exist:\n\n<pre>% perl -Mlib::filter=disallow,'YAML::XS;YAML::Syck' yourapp.pl</pre>\n\n</ul>\n\nNote that, as an alternative to using <tt>-M...</tt> perl option directly, you can also use <tt>PERL5OPT</tt>. This has the advantage of not having to call perl explicitly e.g.:\n\n<pre>% PERL5OPT=\"-Mlib::filter=allow_noncore,0\" yourperlapp.pl</pre>\n\nAlso, in addition to specifying list of modules to allow/disallow directly, you can also specify them in a file and refer the file. To do that, replace the 'allow' or 'disallow' parameter with 'allow_list' or 'disallow_list', respectively. For example:\n\n<pre>% perl -Mlib::filter=disallow_list,/tmp/disallow.txt yourapp.pl</pre>\n",
+         "post_date" : "20150520T21:13:48",
+         "post_date_gmt" : "20150520T14:13:48",
+         "post_excerpt" : "",
+         "post_format" : "standard",
+         "post_id" : "336",
+         "post_mime_type" : "",
+         "post_modified" : "20150520T21:13:51",
+         "post_modified_gmt" : "20150520T14:13:51",
+         "post_name" : "introducing-libfilter",
+         "post_parent" : "0",
+         "post_password" : "",
+         "post_status" : "publish",
+         "post_thumbnail" : [],
+         "post_title" : "Introducing lib::filter",
+         "post_type" : "post",
+         "short_url" : "http://wp.me/p5E9hG-5q",
+         "sticky" : "0",
+         "terms" : [
+            {
+               "count" : "57",
+               "description" : "",
+               "filter" : "raw",
+               "name" : "perl",
+               "parent" : "0",
+               "slug" : "perl",
+               "taxonomy" : "category",
+               "term_group" : "0",
+               "term_id" : "5226",
+               "term_taxonomy_id" : "6"
+            }
+         ]
+      }
+   ],
+   {
+      "cmdline.default_format" : "json-pretty",
+      "stream" : 0
+   }
+]
