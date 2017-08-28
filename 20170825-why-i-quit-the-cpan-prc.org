@@ -1,0 +1,50 @@
+#+BLOG: perlancar
+#+CATEGORY: perl,cpan
+#+TAGS: perl,cpan
+#+DESCRIPTION:
+#+TITLE: Why I quit the CPAN Pull Request Challenge
+
+TL;DR: I quit CPAN PRC because I feel the concept does not suit me. I also offer
+a few suggestions.
+
+First things first: what is [[http://cpan-prc.org/][CPAN PRC]]? It is a year-long coding game organized by
+[[https://metacpan.org/author/NEILB][NEILB]] that challenges each participant to send a pull request against a CPAN
+distribution each month from January to December. It started in 2015 and also
+ran during 2016 and 2017. CPAN PRC is by no means the first game or challenge
+centered around GitHub pull requests. It is directly [[http://blogs.perl.org/users/olaf_alders/2014/11/can-you-send-24-pull-requests-this-december.html][inspired]] by
+[[http://24pullrequests.com/][24pullrequests.com]] where you are challenged to create a PR everyday from
+December 1st to the 24th. 24pullrequests has run since 2012. [[https://digitalocean.com][DigitalOcean]] also
+organizes [[https://blog.digitalocean.com/hacktoberfest/][Hacktoberfest]]. In 2014, participants were asked to create at least 50
+commits on GitHub in October (so it was not about PR), but in 2015 and 2016 the
+challenge is to create at least 4 PRs during October. There's a free T-shirt
+gift for those who completed the challenge.
+
+I didn't participate in CPAN PRC in 2015 and 2016, although in 2015 I did get a
+few PRs from participants for my CPAN distributions. I joined for 2017 and
+completed the challenge each month since January but decided to give up in
+August.
+
+CPAN PRC differs from the other mentioned PR challenges in one crucial way: the
+participant does not get to pick which projects to work on: you are assigned a
+"random" CPAN distribution each month. For 2015, the assignment is indeed more
+or less random. Any CPAN distribution that is already on GitHub is available for
+picking, except when a CPAN author explicitly requests that his/her distribution
+be excluded from the game (I don't know how many authors actually did this).
+Some [[http://neilb.org/2014/11/29/pr-challenge-2015.html][rules]] are made to even things out like making sure a participant gets a
+different author each month, etc. But soon there were suggestions to have some
+CPAN distributions weigh more compared to others, or to exclude some CPAN
+distributions. For example, more weight should be given to distributions that
+have been explicitly marked as orphans (those currently assigned to the special
+PAUSE account [[https://metacpan.org/author/ADOPTME][ADOPTME]], although there are only several such distributions), or
+to distributions that are depended by a lot of other distributions (either
+directly or indirectly).
+
+This twist is in itself an interesting aspect of the game that also has some
+upsides like: 1) it can make you discover new, interesting project to work
+on; 2) it helps the picked CPAN distributions get a few (at the very least a
+couple of) eyeballs and some contributions. But in the end I decided it's not
+for me.
+
+Getting assigned a random CPAN distribution might be fun once or twice, but
+after several times it becomes tiring. Normally, open source contribution is
+driven by the contributors' interest and passion for the projects.
