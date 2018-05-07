@@ -1,0 +1,199 @@
+#+POSTID: 1731
+#+BLOG: perlancar
+#+CATEGORY: perl,cpan,thoughts
+#+TAGS: perl,cpan,thoughts
+#+DESCRIPTION:
+#+TITLE: Clumping
+
+This post is a "thinking out loud" post, about an unimplemented feature I'm
+planning.
+
+** The problem
+The most often complaint I get when I release a [[https://metacpan.org/pod/Perinci::CmdLine][Perinci::CmdLine]] -based Perl
+application is the huge dependencies of Perinci::CmdLine (currently
+[[https://metacpan.org/pod/Perinci::CmdLine::Lite][Perinci::CmdLine::Lite]] only has 24 direct non-core dependencies, but recursively
+it has 98 non-core dependencies in 92 unique distributions). By the way, you can
+produce these numbers "very easily" using [[https://metacpan.org/pod/lcpan][lcpan]] and [[https://metacpan.org/pod/td][td]]:
+
+: % lcpan mods -lx Perinci::CmdLine::Lite
+: +------------------------+---------+-------------------------------------------------------+----------------------+-----------+----------------------+---------+
+: | module                 | version | abstract                                              | dist                 | author    | rel_mtime            | is_core |
+: +------------------------+---------+-------------------------------------------------------+----------------------+-----------+----------------------+---------+
+: | Perinci::CmdLine::Lite | 1.812   | A Rinci/Riap-based command-line application framework | Perinci-CmdLine-Lite | PERLANCAR | 2018-05-01T08:42:19Z | 0       |
+: +------------------------+---------+-------------------------------------------------------+----------------------+-----------+----------------------+---------+
+
+: % lcpan deps Perinci::CmdLine::Lite --noinclude-core | wc -l
+: 24
+: % lcpan deps Perinci::CmdLine::Lite --noinclude-core -R | wc -l
+: 98
+: % lcpan deps Perinci::CmdLine::Lite --noinclude-core -R --flatten | \
+:     td select module | lcpan mod2dist | td select value | sort | uniq | wc -l
+: 92
+
+Sort of ironic because years ago I used to mock [[https://metacpan.org/pod/Moose][Moose]] 's high number of
+dependencies and avoid it like the plague, and then ending up creating the same
+situation with my own distribution. Correction: a much /worse/ situation than
+the current Moose:
+
+: % lcpan mods -lx Moose
+: +--------+---------+---------------------------------------+-------+--------+----------------------+---------+
+: | module | version | abstract                              | dist  | author | rel_mtime            | is_core |
+: +--------+---------+---------------------------------------+-------+--------+----------------------+---------+
+: | Moose  | 2.2010  | A postmodern object system for Perl 5 | Moose | ETHER  | 2018-02-16T22:01:37Z | 0       |
+: +--------+---------+---------------------------------------+-------+--------+----------------------+---------+
+
+: % lcpan deps Moose --noinclude-core | wc -l
+: 19
+: % lcpan deps Moose --noinclude-core -R | wc -l
+: 22
+: % lcpan deps Moose --noinclude-core -R --flatten | \
+:     td select module | lcpan mod2dist | td select value | sort | uniq | wc -l
+: 22
+
+I arrange the modules into many distributions because I am trying to keep things
+modular. So when I only need a specific subset of functionality, I don't have to
+pull the whole thing (and along with it its large list of dependencies). Maybe I
+went overboard? Maybe. Nevertheless.
+
+The high number of dependencies presents an inconvenience and annoyance when
+users want to install my application, especially since CPAN clients like *cpan*
+and *cpanm* default to testing distributions before installing them.
+
+** One solution: Perinci::CmdLine::Inline
+One solution I created for this problem is [[https://metacpan.org/pod/Perinci::CmdLine::Inline][Perinci::CmdLine::Inline]] (PC:Inline)
+which basically "pre-assembles" the application with sort of a "mini",
+"embedded" Perinci::CmdLine during distribution build time, so that when a user
+installs the application she doesn't need to get Perinci::CmdLine anymore. This
+also has another benefit of faster application startup time due to the
+"pre-assembling" thingy. But this pre-assembling has some downsides too.
+Whenever I create a new version of PC:Inline, I will have to rebuild all the
+applications again. PC:Inline also does not (read: will not, because of the lack
+of [[https://metacpan.org/pod/Riap][Riap]] layer) have all the features of a proper Perinci::CmdLine. I use
+PC:Inline only for simpler applications that need to be very light (has no
+non-core dependencies, or starts fast) like [[https://metacpan.org/pod/hr][hr]], [[https://metacpan.org/pod/wordlist][wordlist]], [[https://metacpan.org/pod/zodiac-of][zodiac-of]].
+
+** Another solution: fatpacking, datapacking
+Another solution is fatpacking or [[https://metacpan.org/pod/Module::DataPack][datapacking]]. I've tried this in the past with
+the [[https://metacpan.org/pod/pause][pause]] script, and it works rather well. Except that when it comes to
+packaging the CPAN distribution as a Debian package, the Debian policy forbids
+"convenience copies" of code.
+
+** Past solution: lumping
+Yet another solution which I've tried in the past is what I call "lumping": in a
+lump distribution I include modules from other distributions (the dependencies)
+but leave them unindexed. For example, I created a distribution called
+Perinci-CmdLine-Any-Lumped that contains modules from Perinci-CmdLine-Any
+(Perinci::CmdLine::Any) as well as all its recursive pure-perl non-core
+dependencies, like Data::Sah, Data::Sah::Coerce, and so on. After installing
+just one lump distribution, a user will have perhaps 100+ extra (but "hidden")
+modules from various distributions on her system. The perl interpreter will see
+those extra modules fine. The modules are "hidden" only in the sense that the
+original distributions of those modules are not listed as installed (because
+they aren't).
+
+I abandoned this solution because it feels really dirty. The extra modules
+lumped into the lump distribution are actually "orphan" modules because the lump
+distribution does not publicly confess that it includes the modules. And I'm
+pretty sure lump distributions are not good candidates for Debian perl packages,
+but it's okay.
+** Another proposed solution: clumping
+This post will describe another solution which I'm thinking of (with an equally
+stupid name so if the idea ended up being really stupid, the name would have
+already fitted): clumping.
+
+A clump distribution is named "Clump-SOMETHING" and will contain modules from
+several other distributions (called "source distributions"). The purpose of a
+clump distribution is to package several other distributions as a single
+distribution for the purpose of reducing the number of dependencies for the
+end-user.
+
+For example, a clump distribution called "Clump-Data-Sah" will contain modules
+from Data-Sah as well as Data-Sah-Coerce, Data-Sah-Format, and so on.
+
+*** Dist::Zilla::Plugin::Clump
+To help build this distribution, a [[https://metacpan.org/pod/Dist::Zilla][Dist::Zilla]] plugin will be created and used:
+DZP:Clump. To use this plugin, we list the source distributions that we want to
+include:
+
+: [Clump]
+: include=Data-Sah
+: include=Data-Sah-Coerce
+: include=Data-Sah-Format
+: ...
+
+The plugin will gather module files from the source distributions as well as
+merge the dependencies from the source distributions into the dependencies for
+the clump distribution.
+
+Dependencies that end up being in the clump distribution can be "netted out".
+For example, Data-Sah depends on Data::Sah::Coerce which is in the
+Data-Sah-Coerce distribution which is also another source distribution in the
+clump, so this dependency now does not need to be specified in Clump-Data-Sah.
+
+*** Clumping and module versions
+The version number of a module inside the clump distribution will be the
+original version joined by ".0". So for example, if the original version number
+of module M1 is "0.001" then M1's version number in the clump distribution is
+"0.001.0". If M2's original version is "0.1.2" then M2's version in the clump is
+"0.1.2.0" and so on. As far as perl concerns the two version numbers in each
+case are the same:
+
+: version->parse("0.001") == version->parse("0.001.0")
+: version->parse("0.1.2") == version->parse("0.1.2.0")
+
+The module version will have to be checked to satisfy the above relationship and
+if it does not, a new release will need to be made in the source distribution
+first to remedy this. For example, M3's original version is 0.02. If we append
+".0" to it to become "0.02.0" then the new version will be /less/ than the
+original version:
+
+: version->parse("0.02") > version->parse("0.02.0")
+: # because 0.02   is 0.020
+: # and     0.02.0 is 0.002.0
+
+To include M3 in the clump, we will need to make a new release of M3 in the
+original source distribution first, say of version 0.030. Then M3 version 0.030
+can now be included in the clump, as version 0.030.0.
+
+Yes, this means the clump distribution will contain different version numbers.
+Which is usually not recommended for a "normal" Perl distribution but is
+appropriate here.
+
+*** Clumping and the PAUSE indexer
+When the clump distribution is released, PAUSE will index the clump distribution
+and now modules included in the clump will be indexed as belonging to the clump
+distribution instead of their original distribution.
+
+When user installs one of these modules, she will be getting it (and
+automatically a lot of other modules too) from the clump distribution, thus
+reducing the number of distributions she needs to install to satisfy all the
+dependencies of an application.
+
+*** Developing modules that are included in clumps
+Ideally, modules are still developed in its original source distribution, e.g.
+Data::Sah::Coerce in Data-Sah-Coerce. When I want to release a new version of
+Data::Sah::Coerce, I can just release a new version of Data-Sah-Coerce. Now the
+module will be indexed by PAUSE as belonging to the new Data-Sah-Coerce.
+
+As more and more modules are being "unclumped" as new releases of the source
+distributions come along, the level of inconvenience to end-users will once
+again increase. To remedy this, from time to time I can release a new clump
+distribution again that contains newer "snapshots" of modules.
+
+This is the reason why version of modules in the clump is being kept the same
+(albeit with extra ".0"): so version bump in the original source distribution
+will be able to "eclipse" the clumped version on CPAN later. Even when the
+original distribution bumps using an extra subversion, e.g. 0.001 to 0.001.1 it
+will still eclipse the clumped version. The next clumped version will be
+0.001.1.0.
+
+*** Clumping vs lumping
+This clump solution is cleaner than the lumping solution because in the former
+case, no modules are "hidden". Basically clumping is lumping, but the included
+modules are "acknowledged" and properly indexed. The $orig_version . ".0" thing
+is really the only novel element here. Because the modules are now not hidden,
+their dependencies must now also be handled.
+
+As to Debian packaging, the source distributions and not the clump distribution
+are the ones that will be packaged so there should not be an issue with
+"convenience copies" or "bundling".
