@@ -1,0 +1,62 @@
+#+POSTID: 1754
+#+BLOG: perlancar
+#+CATEGORY: perl,cli
+#+TAGS: perl,cli
+#+DESCRIPTION:
+#+TITLE: Quickly generate CSV or TSV from SQL query
+
+Sometimes to produce CSV or TSV from information in a MySQL database, all you
+have to do is:
+
+: echo 'some SELECT query ...' | mysql mydb >data.tsv
+
+but for more complex things, you'll often need to use scripting like with Perl
+to do some munging first. When you're ready to output the data with:
+
+: $sth->fetchrow_arrayref
+: $sth->fetchrow_hashref
+
+the data is in a Perl data structure. How to quickly output CSV? I've looked at
+[[https://metacpan.org/pod/DBI::Format][DBI::Format]] and [[https://metacpan.org/pod/DBIx::CSVDumper][DBIx::CSVDumper]] and they are cumbersome especially if you want
+something brief for one-liners: you need to instantiate a separate object with
+some parameters, then call an additional one or more methods. You might as well
+just do this with the standard [[https://metacpan.org/pod/Text::CSV][Text::CSV]] (or [[https://metacpan.org/pod/Text::CSV_XS][Text::CSV_XS]]):
+
+: use Text::CSV;
+: my $csv = Text::CSV->new;
+:
+: ...
+: $csv->print(\*STDOUT, $sth->{NAME});
+: while (my $row = $sth->fetchrow_arrayref) {
+:      $csv->print(\*STDOUT, $row);
+: }
+
+For TSV it's even shorter (note: fail spectacularly when data contains Tab
+character, but that is relatively rare):
+
+: say join("\t", @{$sth->{NAME}});
+: while (my $row = $sth->fetchrow_arrayref) {
+:      say join("\t", @$row);
+: }
+
+My modules [[https://metacpan.org/pod/DBIx::CSV][DBIx::CSV]] and [[https://metacpan.org/pod/DBIx::TSV][DBIx::TSV]] attempt to offer something even briefer (for
+CSV, at least). Instead of ~fetchrow_arrayref~ or ~fetchall_arrayref~ (or
+~selectrow_arrayref~, ~selectall_arrayref~), you use ~fetchrow_csv~ and friends:
+
+: print $sth->fetchall_csv;
+
+This automatically prints the header too, and if you don't want header:
+
+: print $sth->fetchall_csv_noheader;
+
+For even more text table formats, like ASCII table, Org table, Markdown table,
+and so on, I've also written [[https://metacpan.org/pod/DBIx::TextTableAny][DBIx::TextTableAny]].
+
+I've also just written [[https://metacpan.org/pod/DBIx::Conn::MySQL][DBIx::Conn::MySQL]] after being tired from writing the
+gazillionth one-liner to connect to MySQL database. Now, instead of:
+
+: % perl -MDBI -E'my $dbh = DBI->connect("dbi:mysql:database=mydb", "username", "password"); $sth = $dbh->prepare(...)'
+
+you can now write this:
+
+: % perl -MDBI::Conn::MySQL=mydb -E'$sth = $dbh->prepare(...)'
