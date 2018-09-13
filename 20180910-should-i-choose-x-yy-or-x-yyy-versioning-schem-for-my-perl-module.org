@@ -1,0 +1,52 @@
+#+POSTID: 1775
+#+BLOG: perlancar
+#+CATEGORY: perl,cpan
+#+TAGS: perl,cpan
+#+DESCRIPTION:
+#+TITLE: Should I choose x.yy or x.yyy versioning scheme for my Perl module?
+
+* Short answer
+
+*x.yyy*.
+
+* Longer answer
+
+Both schemes are simple and short. x.yy is shorter by a single digit, but it is
+*prone to a trap*. One day, when you want to update your 0.13 module with a
+minor change you might say to yourself, "Gee, it's such a minor change that I
+think I'll release it as 0.13.1 instead of 0.14. [[https://semver.org][Semantic versioning]] and all
+that." So you did, and boom. [[https://pause.perl.org][PAUSE]] would accept it but would refuse to index it.
+Why?? You would scratch your head for a while. Turns out that according to
+[[https://metacpan.org/pod/version][version.pm]], 0.13 > 0.13.1. /Why???/ Because 0.13 numifies into 0.130 and 0.13.1
+numifies into 0.013001.
+
+I've fell for it once (twice actually, before deciding to convert to x.yyy).
+It's amazing how many veteran CPAN authors fell for it. For example, here's [[https://perlhacks.com/2016/12/version-numbers/][Dave
+Cross]] in 2016. Others I've seen while browsing the MetaCPAN [[https://metacpan.org/recent][Recent]] page. My bad
+memory prevents me from remembering who and when, and I'm too lazy to check, but
+trust me it's embarassingly often.
+
+You might argue it's a bug with version.pm or PAUSE or Perl for behaving unlike
+the rest of the world, but that's how versioning works in Perl so just avoid
+this trap and be done with this. You might also say, "I'll always increase the
+minor version and will never use x.yyy.zzz." But there's always the possibility
+thay you'll forget and do just that.
+
+It's unfortunate that x.yy remains (by my guess) the most popular versioning
+scheme for Perl modules, but consider yourself warned.
+
+* More about versioning in Perl
+
+Books can be written on and years can be spent debating about versioning and its
+best practices, including in Perl. If you want to read more, here are a few
+links to get you started:
+
+- [[https://www.perlmonks.org/?node_id=1182627][What basic things should I know about versioning modules?]]
+- [[https://www.perlmonks.org/?node_id=98513][Handling version numbers]]
+- [[https://www.perlmonks.org/?node_id=1058778][Module version numbers best practice]]
+- [[https://www.perlmonks.org/?node_id=643022][Best Practice for automatic version numbers?]]
+- [[http://blogs.perl.org/users/grinnz/2018/04/a-guide-to-versions-in-perl.html][A guide to versions in Perl]]
+
+Some related posts by yours truly:
+
+- [[https://perlancar.wordpress.com/2016/05/19/using-monotoning-versioning-in-perl/][Using monotonic versioning in Perl]]
