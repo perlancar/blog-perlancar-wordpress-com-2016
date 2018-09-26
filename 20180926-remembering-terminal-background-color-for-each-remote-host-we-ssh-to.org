@@ -1,0 +1,83 @@
+#+POSTID: 1785
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,ssh,linux
+#+TAGS: perl,cli,ssh,linux
+#+DESCRIPTION:
+#+TITLE: Remembering terminal background color for each remote host we SSH to
+
+Entering (the right) command to a wrong SSH session is no fun. To help me be
+aware that I am typing commands to a (the correct) remote host, I usually set
+the background color of my Konsole tab (manually, by right-clicking and then
+switching the profile). Inspired by [[http://bryangilbert.com/post/etc/term/dynamic-ssh-terminal-background-colors/][this post]], I decided to make my own SSH
+wrapper in Perl: [[https://metacpan.org/pod/sshwrap-hostcolor][sshwrap-hostcolor]].
+
+*** The wrapper
+
+The ~sshwrap-hostcolor~ script is a wrapper that will execute ~ssh~ with the
+arguments you passed to it, but do some stuff before and after that. To try out
+this wrapper, first install it from CPAN:
+
+: % cpanm -n App::sshwrap::hostcolor
+
+then alias it to ~ssh~:
+
+: % alias ssh=sshwrap-hostcolor
+
+(You might want to put the above line to your shell's startup file, if you
+decide to use this script permanently after all.)
+
+Now ssh somewhere:
+
+: % ssh user@one.example.com
+
+then change the terminal background color. After you exit, the wrapper will
+restore the original background color. But if you ssh to the same user+host
+again later, the background color that you set (and saved by the script to
+*~/.sshwrap-hostcolor.history*) will be restored. [[https://www.youtube.com/watch?v=Upz1ZtiJk1Y][See video demonstration]].
+
+If you want the wrapper to automatically assign a random color to a new
+user+host, you can set the environment variable ~SSHWRAP_HOSTCOLOR_AUTO~ to
+~random-dark~ (or ~random-light~, if you use a light background color), e.g.:
+
+: % export SSHWRAP_HOSTCOLOR_AUTO=random-dark
+
+[[https://www.youtube.com/watch?v=IyJKea6Sv8U][See video demonstration]].
+
+*** The completion script
+
+The wrapper comes with its own tab completion script, which you can
+install using:
+
+: % complete -C _sshwrap-hostcolor ssh
+
+This completion script can complete user+host argument for you, and when there's
+a single completion with known background color, the completion script will
+immediately change the terminal background color during completion. [[https://www.youtube.com/watch?v=zmf4azX2Xjc][See video
+demonstration]]. This might or might not be to your liking, but you have the
+option to install the completion if you want this behavior.
+
+*** Additional stuff
+
+Note that this wrapper will only work with an XTerm-compatible terminal
+emulation software. See the list [[https://metacpan.org/pod/XTerm::Util][here]].
+
+While writing the wrapper script, I also wrote a few other CLI utilities.
+
+[[https://metacpan.org/pod/get-term-bgcolor][get-term-bgcolor]] to programmatically get the terminal's current background
+color.
+
+[[https://metacpan.org/pod/set-term-bgcolor][set-term-bgcolor]] to programmatically set the terminal's current background
+color. This script recognizes RGB color code (e.g. ~00002b~) or color names
+(e.g. ~black~, ~darkblue~).
+
+[[https://metacpan.org/pod/show-color-swatch][show-color-swatch]] to show the list of color names and their codes. Use it as
+such:
+
+: % show-color-swatch X | less -R
+
+Oh, and the ~set-term-bgcolor~ script also features tab completion (activated
+via ~complete -C set-term-bgcolor set-term-bgcolor~) so you can complete color
+names, e.g.:
+
+: % set-term-bgcolor dark<Tab><Tab>
