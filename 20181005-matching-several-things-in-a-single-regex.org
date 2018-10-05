@@ -1,0 +1,74 @@
+#+POSTID: 1796
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,regex
+#+TAGS: perl,regex
+#+DESCRIPTION:
+#+TITLE: Matching several things (in no particular order) using a single regex
+
+Matching several things using a regex is pretty straightforward:
+
+: /(foo).*(bar).*(baz)/
+
+This also implies the order of the things. If you want to require that ~foo~,
+~bar~, ~baz~ all exist but /in no particular order/, you can use lookahead and
+lookbehind (explained in great detail in this [[https://www.rexegg.com/regex-lookarounds.html][wonderful regex tutorial article]]):
+
+: /(?=.*foo)(?=.*bar)(?=.*baz)/
+
+If you also want to capture the things:
+
+: /(?=.*(foo))(?=.*(bar))(?=.*(baz))/
+: /(?=.*(?<one>foo))(?=.*(?<two>bar))(?=.*(?<three>baz))/
+
+Let's see how that works:
+
+: for ("foo bar baz", "foo baz bar", "baz bar foo", "foo bar") {
+:     if (/(?=.*(foo))(?=.*(bar))(?=.*(baz))/) {
+:         say "'$_' matches the regex, \$1=<$1>, \$2=<$2>, \$3=<$3>";
+:     } else {
+:         say "'$_' does not match the regex";
+:     }
+: }
+
+We'll get:
+
+: 'foo bar baz' matches the regex, $1=<foo>, $2=<bar>, $3=<baz>
+: 'foo baz bar' matches the regex, $1=<foo>, $2=<bar>, $3=<baz>
+: 'baz bar foo' matches the regex, $1=<foo>, $2=<bar>, $3=<baz>
+: 'foo bar' does not match the regex
+
+Note that, obviously, the order of the captures follows the order it is defined
+in our pattern and not the order in the string that is being matched.
+
+As a bonus, in this case the unordered version is faster than the ordered
+version because of reduced backtracking:
+
+: % perl -Ilib -MBencher::Mark=:all -E'$str = "foo bar baz";
+:   cmpthese(0, {
+:     ordered   => sub { $str =~ qr/(foo).*(bar).*(baz)/ },
+:     unordered => sub { $str => qr/(?=.*(foo))(?=.*(bar))(?=.*(baz))/ },
+:   });'
+: +-------------+-----------+-----------+------------+---------+---------+
+: | participant | rate (/s) | time (ns) | vs_slowest |  errors | samples |
+: +-------------+-----------+-----------+------------+---------+---------+
+: | ordered     |    860000 |      1200 |        1   | 1.7e-09 |      20 |
+: | unordered   |   2700000 |       370 |        3.2 |   1e-09 |      21 |
+: +-------------+-----------+-----------+------------+---------+---------+
+
+And it becomes even relatively faster the longer the string:
+
+: % perl -Ilib -MBencher::Mark=:all -E'$str = "foo".(" "x10000)."bar".(" "x10000)."baz";
+:   cmpthese(0, {
+:     ordered   => sub { $str =~ qr/(foo).*(bar).*(baz)/ },
+:     unordered => sub { $str => qr/(?=.*(foo))(?=.*(bar))(?=.*(baz))/ },
+:   });'
+: +-------------+-----------+-----------+------------+---------+---------+
+: | participant | rate (/s) | time (ns) | vs_slowest |  errors | samples |
+: +-------------+-----------+-----------+------------+---------+---------+
+: | ordered     |     20000 |    51     |          1 | 1.1e-07 |      20 |
+: | unordered   |   2540000 |     0.394 |        130 | 2.3e-10 |      20 |
+: +-------------+-----------+-----------+------------+---------+---------+
+
+But of course remember that separating the check into multiple simpler patterns
+can be even faster.
