@@ -1,0 +1,75 @@
+#+POSTID: 1805
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli
+#+TAGS: perl,cli
+#+DESCRIPTION:
+#+TITLE: The simplistic simulation mode in rename
+
+*** About the rename script
+
+[[https://metacpan.org/pod/rename][rename]] is a Perl script that lets you use Perl expression or code to rename
+files. It's convenient for mass-renaming. For example, to convert all filenames
+in the current directory to lowercase:
+
+: % rename -e '$_=lc' *
+
+~rename~ was written by Larry himself. It was released in 1989 as part of perl
+3.0 as an example script put under ~eg/rename~. Later, together with a bunch of
+other old Perl scripts that were not compiling cleanly under strict/-w, it was
+removed from the perl source tree prior to the release of Perl 5.8 in 2000. It
+was then republished on CPAN under [[https://metacpan.org/pod/File::Rename][File::Rename]] since 2005 by Robin Baker
+([[https://metacpan.org/author/RBAKER][RBAKER]]).
+
+*** About the simulation (dry-run) mode
+
+One of the useful things that ~rename~ provides is simulation (~-n~) mode. In
+this mode, the files are not actually renamed: ~rename~ only prints how it would
+rename them. For example:
+
+: % mkdir test-area
+: % cd test-area
+: % touch FOO Bar baz
+: % rename -n -e '$_ = lc' *
+: rename(Bar, bar)
+: rename(FOO, foo)
+
+~rename~ was (and is) a very simple script, measuring at only about 130 lines of
+code. This simplicity shows in the simplistic simulation mode. As it shows the
+files as they are being renamed, ~rename~ does not keep track of the new
+filenames that would spring into existence (or old filenames that would
+disappear). For example:
+
+: % rm *
+: % touch 1 2 3
+: % rename -n -e '$_ = 3' *
+: 1 not renamed: 3 already exists
+: 2 not renamed: 3 already exists
+
+~rename~ correctly refuse overwriting ~3~ because it already exists (unless when
+instructed via ~-f~). However:
+
+: % rename -n -e '$_ = 4' *
+: rename(1, 4)
+: rename(2, 4)
+: rename(3, 4)
+
+If you remove the ~-n~ option, ~rename~ would still behave correctly:
+
+: % rename -e '$_ = 4' *
+: 2 not renamed: 4 already exists
+: 3 not renamed: 4 already exists
+
+But the simulation mode does not show you that.
+
+*** An alternative simulation mode
+
+Another script on CPAN, [[https://metacpan.org/pod/perlmv][perlmv]], is an alternative that offers a better
+simulation mode:
+
+: % perlmv -d -e'$_ = 4' *
+: DRYRUN: move `1` -> `4`
+: DRYRUN: move `2` -> `4.1`
+: DRYRUN: move `3` -> `4.2`
+
+Note that perlmv does automatic suffixing to avoid overwriting existing files.
