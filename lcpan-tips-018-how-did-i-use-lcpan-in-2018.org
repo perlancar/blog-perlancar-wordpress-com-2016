@@ -1,0 +1,290 @@
+#+POSTID: 1819
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,lcpan-tips,cli
+#+TAGS: perl,lcpan-tips,cli
+#+DESCRIPTION:
+#+TITLE: lcpan tips 018: How did I use lcpan in 2018?
+
+*About this series:* A collection of short blog posts about [[https://metacpan.org/pod/lcpan][lcpan]] tips/recipes.
+Some posts will also end up in the upcoming [[https://metacpan.org/pod/App::lcpan::Manual::Cookbook][App::lcpan::Manual::Cookbook]] POD to
+be included in the [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution. [[https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/][First article is here]]. [[https://perlancar.wordpress.com/tag/lcpan-tips/][See the whole
+series]].
+
+*About lcpan:* an application to download and index a mini CPAN mirror on your
+local filesystem, so in effect you will have something like your own CPAN with a
+command-line tool (or perl API) to query and extract information from your
+mirror. I find it perfect for my own personal use when working offline.
+
+lcpan remains as one of my most-used tools when doing Perl/CPAN development. I
+use it to search for modules to do some task (usually when I am offline or too
+lazy to open a browser tab to [[https://metacpan.org][MetaCPAN]], but also to do some grep-ing against the
+search results). I also use it sometimes to find [[https://perlancar.wordpress.com/2016/02/21/lcpan-tips-008-finding-related-modules/][modules related to a specific
+module]], as keyword searches or seeing the SEE ALSO section of PODs are sometimes
+insufficient.
+
+The following is a simplistic shell history analysis on how I use lcpan (on my
+main laptop, at least). The history I have on my laptop is from Nov 2017 to Jan
+2019, so that more or less reflects how I used lcpan during 2018.
+
+*** lcpan and lcpanm
+
+: % history | perl -lne's/.+?\]//; s/^pg //; next unless /^lcpanm?\s/; s/(^\S+).*/$1/; print' | freqtable
+: 459	  lcpan
+: 332     lcpanm
+
+I install modules from local mirror using [[https://metacpan.org/pod/lcpanm][lcpanm]] quite often.
+
+*** PAGE_RESULT=1
+
+"pg " is a shell alias which I define as:
+
+: alias pg='PAGE_RESULT=1'
+
+because that lets me navigate the output of lcpan with a PAGER (which I have
+defined as 'less -FRSX').
+
+*** Most often used subcommands
+
+: % history | perl -lne's/.+?\]//; s/^pg //; next unless /^lcpan\s/; s/(^\S+ \S+).*/$1/; print' | freqtable
+: 175	lcpan mods
+: 107	lcpan doc
+:  35	lcpan scripts
+:  32	lcpan deps
+:  17	lcpan rdeps
+:  16	lcpan related-mods
+:  14	lcpan src
+:  11	lcpan stats-last-index-time
+:  10	lcpan upd
+: ...
+
+I use lcpan most often to:
+
+- search for modules (~lcpan mods~);
+- read documentation of modules which I don't have installed yet (~lcpan doc~);
+- search for scripts (~lcpan scripts~);
+- see dependencies (~lcpan deps~);
+- see reverse dependencies (~lcpan rdeps~);
+- search for related modules (~lcpan related-mods~);
+- see source code of modules I don't have installed yet (~lcpan src~);
+- checking the last update date of the index (~lcpan stats-last-index-time~);
+- updating the mirror/index (~lcpan upd~ which is shortcut for ~lcpan update~).
+
+*** Finding modules
+
+: % history | perl -lne's/.+?\]//; s/^pg //; next unless /^lcpan mods\s/; print' | sort -u
+: lcpan mods
+: lcpan mods average
+: lcpan mods average -l
+: lcpan mods average|wc -l
+: lcpan mods binary search -l
+: lcpan mods bitfin
+: lcpan mods bitflip
+: lcpan mods bitgrail
+: lcpan mods bloomberg
+: lcpan mods bluetooth
+: lcpan mods bluetooth -l
+: lcpan mods b perlstring
+: lcpan mods ccxt
+: lcpan mods cpan release
+: lcpan mods cpan release -l
+: lcpan mods DateTime::Format
+: lcpan mods DateTime::Format duration
+: lcpan mods DateTime::Format::Japanese
+: lcpan mods datetime iso8601
+: lcpan mods datetime iso8601 -l
+: lcpan mods dbi string
+: lcpan mods dbi string -l
+: lcpan mods dbi table
+: lcpan mods dbi table -l
+: lcpan mods Dist::Zilla::Plugin add -l
+: lcpan mods Dist::Zilla::Plugin:: --author PERLANCAR -l
+: lcpan mods Dist::Zilla::Plugin Module
+: lcpan mods Dist::Zilla::Plugin Module -l
+: lcpan mods eval
+: lcpan mods eval -l
+: lcpan mods fifo -l
+: lcpan mods File::Slurper
+: lcpan mods File::Slurper -l
+: lcpan mods finance crypto
+: lcpan mods float util
+: lcpan mods histo
+: lcpan mods histog -l
+: lcpan mods histogr -l
+: lcpan mods histo -l
+: lcpan mods inside eval -l
+: lcpan mods interpo
+: lcpan mods inventory
+: lcpan mods inventory -l
+: lcpan mods inventory|wc -l
+: lcpan mods -l array rank
+: lcpan mods -l bin groups
+: lcpan mods -l c encode
+: lcpan mods -l cli hub
+: lcpan mods -l compare
+: lcpan mods -l data cmp
+: lcpan mods -l dbi csv
+: lcpan mods -l dbix conn
+: lcpan mods -l dbix shortcut
+: lcpan mods -l freq table
+: lcpan mods -l groups
+: lcpan mods -l http tiny
+: lcpan mods -l list rank
+: lcpan mods -l module abstract
+: lcpan mods -l module info
+: lcpan mods -l module pod
+: lcpan mods -ln role
+: lcpan mods -l ord
+: lcpan mods -l ordina
+: lcpan mods -l ordinaq
+: lcpan mods -l permute
+: lcpan mods -l pod abstract
+: lcpan mods -l Regexp::Common::
+: lcpan mods -l Regexp::Pattern
+: lcpan mods -l return level
+: lcpan mods -l stock exchange
+: lcpan mods -l test2 tool
+: lcpan mods -l Test::Approximate
+: lcpan mods -l test compare
+: lcpan mods -l Test::Deep::
+: lcpan mods -l throttle
+: lcpan mods -l Tickit
+: lcpan mods -l Tickit Grid
+: lcpan mods -l tie array
+: lcpan mods -l Versioning dot
+: lcpan mods -l who
+: lcpan mods --namespace Acme::CPANLists
+: lcpan mods --namespace Acme::CPANLists -l
+: lcpan mods --namespace Acme::CPANModules -l
+: lcpan mods --namespace Acme::CPANModuless -l
+: lcpan mods --namespace Bencher -l
+: lcpan mods --namespace Bencher::Scenario
+: lcpan mods --namespace Bencher::Scenario -l
+: lcpan mods --namespace Data::Sah::Coerce::perl
+: lcpan mods --namespace Data::Sah::Coerce::perl::str
+: lcpan mods --namespace DateTime::Format
+: lcpan mods --namespace DateTime::Format -l
+: lcpan mods --namespace Graphics::ColorNames
+: lcpan mods --namespace Graphics::ColorNames|xargs lcpanm -n
+: lcpan mods --namespace Log::ger
+: lcpan mods --namespace Log::Ger
+: lcpan mods --namespace Log::ger|grep -i dump
+: lcpan mods --namespace String -l
+: lcpan mods --namespace WordList::Char
+: lcpan mods -n Archive::Tar
+: lcpan mods -n digit
+: lcpan mods -n digit -l
+: lcpan mods -n digit|wc -l
+: lcpan mods nearest -l
+: lcpan mods near -l
+: lcpan mods -n fifo
+: lcpan mods -n generic
+: lcpan mods -n generic -l
+: lcpan mods -nl Archive::Tar
+: lcpan mods -nl gen pw
+: lcpan mods -nl genpw
+: lcpan mods -nl pass gen
+: lcpan mods -nl pwd gen
+: lcpan mods -n pass gen
+: lcpan mods -n permute digit
+: lcpan mods Number::Format
+: lcpan mods Number Format -l
+: lcpan mods Number::Format -l
+: lcpan mods pass templat
+: lcpan mods pass templat -l
+: lcpan mods percent
+: lcpan mods percent Sah
+: lcpan mods percent|wc -l
+: lcpan mods perinci usage
+: lcpan mods perl release -l
+: lcpan mods permute lis
+: lcpan mods purchase
+: lcpan mods purchase -l
+: lcpan mods purchase price
+: lcpan mods python -l
+: lcpan mods qr decode
+: lcpan mods qr decoded
+: lcpan mods random norm -l
+: lcpan mods redact
+: lcpan mods regexp common
+: lcpan mods regexp common cc
+: lcpan mods regexp common credit
+: lcpan mods regexp common -l
+: lcpan mods ssh client -l
+: lcpan mods stack trace -l
+: lcpan mods stock
+: lcpan mods stock -l
+: lcpan mods stock|wc -l
+: lcpan mods Test::Deep:: -l
+: lcpan mods test path
+: lcpan mods Text::Histogram
+: lcpan mods time -l
+: lcpan mods time of day -l
+: lcpan mods timeofday -l
+: lcpan mods version dot
+: lcpan mods version scheme
+: lcpan mods version scheme|grep -v Google
+: lcpan mods who -l
+: lcpan mods WordList::CryptoCurrency::Catalog::Name
+
+I do keyword searches a lot, and when the keyword is not specific enough I
+usually add "pg" and "-l" to let me navigate and search further with ~less~.
+Sometimes I also do namespace searching (~--namespace~). I search for my own
+modules a lot, usually because I forget the exact name.
+
+*** Finding related modules
+
+Modules I tried to find related modules of:
+
+: % history | perl -lne's/.+?\]//; next unless /^lcpan related-mods\s/; print' | sort -u
+; lcpan related-mods alias::module
+: lcpan related-mods Data::Diff
+: lcpan related-mods Data::Throttler
+: lcpan related-mods Data::Valve
+: lcpan related-mods IO::Tee
+: lcpan related-mods Number::Tolerant
+: lcpan related-mods Package::Alias
+: lcpan related-mods String::JS
+: lcpan related-mods Test::Deep
+: lcpan related-mods utf8
+
+*** Finding scripts
+
+: % history | perl -lne's/.+?\]//; s/^pg //; next unless /^lcpan scripts\s/; print' | sort -u
+: lcpan scripts bin -l
+: lcpan scripts count
+: lcpan scripts count -l
+: lcpan scripts dateconv
+: lcpan scripts dateconv -l
+: lcpan scripts envres
+: lcpan scripts group -l
+: lcpan scripts histogram -l
+: lcpan scripts http-tiny
+: lcpan scripts interval
+: lcpan scripts interval -l
+: lcpan scripts lineno
+: lcpan scripts linenum
+: lcpan scripts line number
+: lcpan scripts lino
+: lcpan scripts linum
+: lcpan scripts -l org2html
+: lcpan scripts -l org-to-html
+: lcpan scripts parse-nik
+: lcpan scripts parse-nik -l
+: lcpan scripts parse num
+: lcpan scripts _pause
+: lcpan scripts perl
+: lcpan scripts perllint
+: lcpan scripts pick
+: lcpan scripts pick -l
+: lcpan scripts pick-l
+: lcpan scripts rand
+: lcpan scripts rand -l
+: lcpan scripts resolution
+: lcpan scripts resolution -l
+: lcpan scripts throttle
+: lcpan scripts zodiac -l
+
+I search for my own scripts a lot too, since I have almost a thousand (~880) of
+them on CPAN. It's a bit challenging trying to keep the naming organized. When
+tab completion doesn't help, lcpan comes to the rescue.

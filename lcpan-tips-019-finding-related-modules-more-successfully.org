@@ -1,0 +1,84 @@
+#+POSTID: 1821
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,lcpan-tips
+#+TAGS: perl,lcpan-tips
+#+DESCRIPTION:
+#+TITLE: lcpan tips 019: Helping people find related modules more easily
+
+*About this series:* A collection of short blog posts about [[https://metacpan.org/pod/lcpan][lcpan]] tips/recipes.
+Some posts will also end up in the upcoming [[https://metacpan.org/pod/App::lcpan::Manual::Cookbook][App::lcpan::Manual::Cookbook]] POD to
+be included in the [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution. [[https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/][First article is here]]. [[https://perlancar.wordpress.com/tag/lcpan-tips/][See the whole
+series]].
+
+*About lcpan:* an application to download and index a mini CPAN mirror on your
+local filesystem, so in effect you will have something like your own CPAN with a
+command-line tool (or perl API) to query and extract information from your
+mirror. I find it perfect for my own personal use when working offline.
+
+In a [[https://perlancar.wordpress.com/2016/02/21/lcpan-tips-008-finding-related-modules/][previous tip]], about 3 years ago, the output of ~lcpan related-mods
+Carp::Always~ was:
+
+: +---------------------------------+-------------------------------------------------------------------+--------------+-----------------------+-----------------------+--------+-----------+
+: | module                          | abstract                                                          | num_mentions | num_mentions_together | pct_mentions_together | score  | author    |
+: +---------------------------------+-------------------------------------------------------------------+--------------+-----------------------+-----------------------+--------+-----------+
+: | Carp::Always::Color             | Carp::Always, but with color                                      | 9            | 4                     | 44.44                 | 711.04 | DOY       |
+: | Regexp::Debugger                | Visually debug regexes in-place                                   | 7            | 3                     | 42.86                 | 385.74 | DCONWAY   |
+: | V                               | Print version of the specified module(s).                         | 9            | 3                     | 33.33                 | 299.97 | ABELTJE   |
+: | App::cpanoutdated               | detect outdated CPAN modules in your environment.                 | 24           | 4                     | 16.67                 | 266.72 | TOKUHIROM |
+: | Carp::Source::Always            | Warns and dies with stack backtraces and source code context      | 3            | 2                     | 66.67                 | 266.68 | MARCEL    |
+: | Devel::bt                       | Automatic gdb backtraces on errors                                | 3            | 2                     | 66.67                 | 266.68 | FLORA     |
+: | Module::Install::AuthorRequires | declare author-only dependencies                                  | 3            | 2                     | 66.67                 | 266.68 | FLORA     |
+: | MooseX::Types::LoadableClass    | ClassName type constraint with coercion to load the class.        | 12           | 3                     | 25                    | 225    | ETHER     |
+: | List::AllUtils                  | Combines List::Util and List::MoreUtils in one bite-sized package | 30           | 4                     | 13.33                 | 213.28 | DROLSKY   |
+: | App::Software::License          | Command-line interface to Software::License                       | 4            | 2                     | 50                    | 200    | ETHER     |
+: +---------------------------------+-------------------------------------------------------------------+--------------+-----------------------+-----------------------+--------+-----------+
+
+and here's the output of ~lcpan related-mods Carp::Always --with-scores~, today:
+
+: +-----------------------------------+----------------------------------------------------------------------------------+--------------+-----------------------+-----------------------+---------+--------------------------------+----------+
+: | module                            | abstract                                                                         | num_mentions | num_mentions_together | pct_mentions_together | score   | dist                           | author   |
+: +-----------------------------------+----------------------------------------------------------------------------------+--------------+-----------------------+-----------------------+---------+--------------------------------+----------+
+: | Carp::Always::Color               | Carp::Always, but with color                                                     | 14           | 10                    | 71.43                 | 7143    | Carp-Always-Color              | DOY      |
+: | Devel::Confess                    | Include stack traces on all warnings and errors                                  | 12           | 5                     | 41.67                 | 1041.75 | Devel-Confess                  | HAARG    |
+: | App::cpanoutdated                 | detect outdated CPAN modules in your environment.                                | 24           | 5                     | 20.83                 | 520.75  | cpan-outdated                  | DOLMEN   |
+: | Devel::bt                         | Automatic gdb backtraces on errors                                               | 2            | 2                     | 100                   | 400     | Devel-bt                       | FLORA    |
+: | Regexp::Debugger                  | Visually debug regexes in-place                                                  | 9            | 3                     | 33.33                 | 299.97  | Regexp-Debugger                | DCONWAY  |
+: | V                                 | Print version of the specified module(s).                                        | 9            | 3                     | 33.33                 | 299.97  | V                              | ABELTJE  |
+: | App::YTDL                         | Download YouTube and other videos.                                               | 3            | 2                     | 66.67                 | 266.68  | App-YTDL                       | KUERBIS  |
+: | Carp::Source::Always              | Warns and dies with stack backtraces and source code context                     | 3            | 2                     | 66.67                 | 266.68  | Carp-Source                    | MARCEL   |
+: | Module::Install::AuthorRequires   | declare author-only dependencies                                                 | 3            | 2                     | 66.67                 | 266.68  | Module-Install-AuthorRequires  | FLORA    |
+: | List::AllUtils                    | Combines List::Util, List::SomeUtils and List::UtilsBy in one bite-sized package | 47           | 5                     | 10.64                 | 266     | List-AllUtils                  | DROLSKY  |
+: | CPAN::Mini                        | create a minimal mirror of CPAN                                                  | 84           | 6                     | 7.14                  | 257.04  | CPAN-Mini                      | RJBS     |
+: | MooseX::Types::LoadableClass      | ClassName type constraint with coercion to load the class.                       | 12           | 3                     | 25                    | 225     | MooseX-Types-LoadableClass     | ETHER    |
+: | App::Nopaste                      | Easy access to any pastebin                                                      | 31           | 4                     | 12.9                  | 206.4   | App-Nopaste                    | ETHER    |
+: | Clone::Any                        | Select an available recursive-copy function                                      | 4            | 2                     | 50                    | 200     | Clone-Any                      | EVO      |
+: | Test::Taint                       | Tools to test taintedness                                                        | 4            | 2                     | 50                    | 200     | Test-Taint                     | PETDANCE |
+: | WWW::YouTube::Download            | Very simple YouTube video download interface                                     | 4            | 2                     | 50                    | 200     | WWW-YouTube-Download           | OALDERS  |
+: | App::Software::License            | Command-line interface to Software::License                                      | 5            | 2                     | 40                    | 160     | App-Software-License           | ETHER    |
+: | CPAN::Mini::Devel                 | Create CPAN::Mini mirror with developer releases                                 | 5            | 2                     | 40                    | 160     | CPAN-Mini-Devel                | DAGOLDEN |
+: | Finance::Currency::Convert::Yahoo | convert currencies using Yahoo                                                   | 5            | 2                     | 40                    | 160     | Finance-Currency-Convert-Yahoo | LGODDARD |
+: | L                                 | Back end packages (hardware drivers) for Lab::Measurement                        | 5            | 2                     | 40                    | 160     | L                              | SONGMU   |
+: +-----------------------------------+----------------------------------------------------------------------------------+--------------+-----------------------+-----------------------+---------+--------------------------------+----------+
+
+you can see that, although there are now more false positives, [[https://metacpan.org/pod/Devel::Confess][Devel::Confess]] is
+now included in the top position. The reason is that [[https://metacpan.org/pod/Carp::Always][Carp::Always]] and
+Devel::Confess are mentioned together in more places.
+
+: % setop --intersect <(lcpan mentions-for-mod Carp::Always   --json | td select content_path) \
+:                     <(lcpan mentions-for-mod Devel::Confess --json | td select content_path)
+: Carp-Always-SyntaxHighlightSource-0.03/lib/Carp/Always/SyntaxHighlightSource.pm
+: Task-BeLike-RSRCHBOY-0.007/lib/Task/BeLike/RSRCHBOY.pm
+: Acme-CPANModules-Import-CPANRatings-User-perlancar-0.001/lib/Acme/CPANModules/Import/CPANRatings/User/perlancar.pm
+: Acme-CPANModules-Import-CPANRatings-User-stevenharyanto-0.001/lib/Acme/CPANModules/Import/CPANRatings/User/stevenharyanto.pm
+: Acme-CPANModulesBundle-PERLANCAR-0.004/lib/Acme/CPANModules/PERLANCAR/Retired.pm
+
+This helps users that are using or looking at Carp::Always to also find
+Devel::Confess. (Actually this is not an ideal example, because Carp::Always
+itself has started to mention Devel::Confess directly, so users can just see the
+documentation of Carp::Always and find Devel::Confess.)
+
+Many of the above places that mention both modules together are
+[[https://metacpan.org/pod/Acme::CPANModules][Acme::CPANModules]] modules, which are just glorified lists. You can help people
+find related modules by publishing such lists on CPAN, but actually publishing
+any module or POD which mention related modules together will work equally well.

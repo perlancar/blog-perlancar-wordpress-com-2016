@@ -1,0 +1,71 @@
+#+POSTID: 1829
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,lcpan-tips,cli
+#+TAGS: perl,lcpan-tips,cli
+#+DESCRIPTION:
+#+TITLE: lcpan tips 022: Testing all dependents
+
+*About this series:* A collection of short blog posts about [[https://metacpan.org/pod/lcpan][lcpan]] tips/recipes.
+Some posts will also end up in the upcoming [[https://metacpan.org/pod/App::lcpan::Manual::Cookbook][App::lcpan::Manual::Cookbook]] POD to
+be included in the [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution. [[https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/][First article is here]]. [[https://perlancar.wordpress.com/tag/lcpan-tips/][See the whole
+series]].
+
+*About lcpan:* an application to download and index a mini CPAN mirror on your
+local filesystem, so in effect you will have something like your own CPAN with a
+command-line tool (or perl API) to query and extract information from your
+mirror.
+
+When you release a new version of a module, [[http://cpantesters.org/][CPAN Testers]] will test your module
+on a variety of platforms. Sometimes, when they happen to test other modules
+that depend on your module, they will also uncover problems that is caused by
+your new version breaking your dependents. However, this is not done
+systematically or completely. If you want to make sure your changes do not break
+your dependents, you can test for yourself.
+
+Suppose I'm making some changes to [[https://metacpan.org/pod/Regexp::Pattern][Regexp::Pattern]]. Let's see who depends on
+this module:
+
+: % lcpan rdeps Regexp::Pattern -R --phase runtime --rel requires
+: +----------------------------------+-----------+--------------+-------------+
+: | dist                             | author    | dist_version | req_version |
+: +----------------------------------+-----------+--------------+-------------+
+: | App-Licensecheck                 | JONASS    | v3.0.36      | 0           |
+: | App-RegexpPatternUtils           | PERLANCAR | 0.003        | 0           |
+: | Bencher-Scenarios-RegexpPattern  | PERLANCAR | 0.003        | 0           |
+: | Regexp-Common-RegexpPattern      | PERLANCAR | 0.001        | 0           |
+: |   Bencher-Scenarios-RegexpCommon | PERLANCAR | 0.02         | 0           |
+: | Test-Regexp-Pattern              | PERLANCAR | 0.004        | v0.2.7      |
+: +----------------------------------+-----------+--------------+-------------+
+
+** Force reinstalling all dependents
+
+One way to run tests for all dependents is by force-(re)installing all those
+distributions. One way to do that:
+
+: % for mod in `lcpan rdeps Regexp::Pattern -R | td select dist | perl -pe's/^\s+//' | dist2mod`; do
+:     echo "Installing $mod ..."
+:     lcpanm --force $mod
+:   done
+
+[[https://metacpan.org/pod/dist2mod][dist2mod]] is provided by [[https://metacpan.org/pod/App::DistUtils][App::DistUtils]].
+
+** Extracting tarballs
+
+Another way to test all dependents is to extract them to a temporary directory
+then run [[https://metacpan.org/pod/prove][prove]] on each. lcpan provides the handy subcommand ~extract-dist~ to do
+this. But you might want to install the dependents all first to pull their
+dependencies.
+
+: % mkdir test-deps
+: % cd test-deps
+: % for dist in `lcpan rdeps Regexp::Pattern -R | td select dist`; do
+:     mkdir $dist && cd $dist && lcpan extract-dist $dist && cd ..
+: done
+
+We can now test each dependent distro one by one, or all in one go:
+
+: % for dist in *; do
+:     echo "Testing $dist ..."
+:     cd $dist/*; prove -lr; cd ../..
+: done

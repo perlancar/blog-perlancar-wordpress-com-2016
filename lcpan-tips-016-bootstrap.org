@@ -1,0 +1,35 @@
+#+POSTID: 1810
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,lcpan-tips
+#+TAGS: perl,lcpan-tips
+#+DESCRIPTION:
+#+TITLE: lcpan tips 016: Bootstrap database
+
+*About this series:* A collection of short blog posts about [[https://metacpan.org/pod/lcpan][lcpan]] tips/recipes.
+Some posts will also end up in the upcoming [[https://metacpan.org/pod/App::lcpan::Manual::Cookbook][App::lcpan::Manual::Cookbook]] POD to
+be included in the [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution. [[https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/][First article is here]]. [[https://perlancar.wordpress.com/tag/lcpan-tips/][See the whole
+series]].
+
+*About lcpan:* an application to download and index a mini CPAN mirror on your
+local filesystem, so in effect you will have something like your own CPAN with a
+command-line tool (or perl API) to query and extract information from your
+mirror. I find it perfect for my own personal use when working offline.
+
+One of the annoying things about using lcpan is how long it takes to create the
+index the first time (between 5 to 7 hours, depending on your computer's disk
+and CPU speed). Compared to [[https://metacpan.org/pod/CPAN::SQLite][CPAN::SQLite]] which only needs about a minute to
+create its SQLite database, lcpan takes significantly longer time because in
+addition to parsing ~authors/01mailrc.txt.gz~ and
+~modules/02packages.details.txt.gz~ text files, it also extracts all release
+tarballs to get the distribution metadata as well as list of files. It also
+parses each module source code to extract mentions and list of subroutine names.
+But for that price, you also get more querying capabilities: dependencies,
+mentions, files inside tarballs, subroutines names, ...
+
+To cut down the time and encourage more people to try lcpan out, I've released
+[[https://metacpan.org/pod/App::lcpan::Bootstrap][App::lcpan::Bootstrap]], which is just a packaging of a snapshot of the SQLite
+database. Creating your local index will now just take a few minutes. You need
+lcpan 1.029 or later to utilize the bootstrap automatically, or you can just
+decompress the ~share/db/index.db.xz~ as your ~index.db~ in the CPAN mirror
+top-level directory.

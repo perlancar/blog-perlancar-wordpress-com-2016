@@ -1,0 +1,56 @@
+#+POSTID: 1823
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,lcpan-tips
+#+TAGS: perl,lcpan-tips
+#+DESCRIPTION:
+#+TITLE: lcpan tips 020: Finding circular dependency
+
+*About this series:* A collection of short blog posts about [[https://metacpan.org/pod/lcpan][lcpan]] tips/recipes.
+Some posts will also end up in the upcoming [[https://metacpan.org/pod/App::lcpan::Manual::Cookbook][App::lcpan::Manual::Cookbook]] POD to
+be included in the [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution. [[https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/][First article is here]]. [[https://perlancar.wordpress.com/tag/lcpan-tips/][See the whole
+series]].
+
+*About lcpan:* an application to download and index a mini CPAN mirror on your
+local filesystem, so in effect you will have something like your own CPAN with a
+command-line tool (or perl API) to query and extract information from your
+mirror. I find it perfect for my own personal use when working offline.
+
+Before writing [[https://metacpan.org/pod/Dist::Zilla::Plugin::Prereqs::CheckCircular][Dist::Zilla::Plugin::Prereqs::CheckCircular]], from time to time I
+would end up with circular dependencies in my distributions. For example, I have
+module A, then write B which depends on A, then write C which depends on B.
+Later after some hacking I would add C as a dependency to A. Boom, circularity.
+Installing A becomes impossible because to install A it needs C, which needs B,
+which needs A... This is usually reported to me by the relentless [[https://metacpan.org/author/SREZIC][SREZIC]] via
+https://rt.cpan.org, but after a few times I thought it might be a good idea to
+prevent this from happening in the first place.
+
+The CheckCircular plugin utilizes lcpan to accomplish its goal. First, it
+gathers the list of modules in the current distribution. Let's say we're
+building distribution A which contains just a single module A.
+
+Then, the plugin gathers the list of distribution RuntimeRequires prereqs (let's
+say C D E), then feeds it to ~lcpan mods --or -x~:
+
+: % lcpan mods --or -x C D E
+
+This basically filters out modules that do not exist on CPAN because the above
+commands finds any (~--or~) module with names exactly matching (~-x~) the given
+names. Suppose E is unindexed on CPAN, then the above command will simply
+output:
+
+: C
+: D
+
+The output of the above command is then fed to ~lcpan deps -R~, which will list
+all dependencies recursively. Let's say D depends on F and nothing else, while C
+as we know depends on B, which depends on A. The output of the above command
+will be:
+
+: F
+: B
+:   A
+
+The plugin now checks whether in the above list of dependencies, there is any of
+the current distributions' modules among them. In this case, there is (A). Thus,
+there is circular dependency and the build is aborted by the plugin.

@@ -1,0 +1,66 @@
+#+POSTID: 1815
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,lcpan-tips
+#+TAGS: perl,lcpan-tips
+#+DESCRIPTION:
+#+TITLE: lcpan tips 017: Indexing DarkPANs
+
+*About this series:* A collection of short blog posts about [[https://metacpan.org/pod/lcpan][lcpan]] tips/recipes.
+Some posts will also end up in the upcoming [[https://metacpan.org/pod/App::lcpan::Manual::Cookbook][App::lcpan::Manual::Cookbook]] POD to
+be included in the [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution. [[https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/][First article is here]]. [[https://perlancar.wordpress.com/tag/lcpan-tips/][See the whole
+series]].
+
+*About lcpan:* an application to download and index a mini CPAN mirror on your
+local filesystem, so in effect you will have something like your own CPAN with a
+command-line tool (or perl API) to query and extract information from your
+mirror. I find it perfect for my own personal use when working offline.
+
+*** About DarkPAN
+
+DarkPAN is a term (bonus points for reader who can point out who coined this
+term) for CPAN-like repository which contains private Perl modules/distributions
+(or a mix of regular, public CPAN distributions with modified and private ones).
+Like a CPAN mirror, it is just a hierarchy of files with the main content being
+Perl distributions put under ~authors/id/X/XX/~ directories, plus a couple of
+gzip-compressed plaintext indexes in ~authors/01mailrc.txt.gz~ (list of author
+ID's with their names and emails) or ~authors/00whois.xml~ and
+~modules/02packages.deails.txt.gz~ (list of packages found in the distribution
+files, along with their versions and the files it is found in).
+
+A DarkPAN repository can be created from scratch, or from an existing local mini
+CPAN mirror. You then "inject" (add) your distribution files to it, not
+forgetting to update the two abovementioned plaintext index files. I've not kept
+up-to-date on which tool is now the best to do this, but I still find the good
+old [[https://metacpan.org/pod/OrePAN][OrePAN]] (version 1, last released in 2013 by [[https://metacpan.org/author/TOKUHIROM][TOKUHIROM]]) up to the task. I've
+tried using the second generation [[https://metacpan.org/pod/OrePAN2][OrePAN2]] in the past, but at the time found it
+to be slow and often reindexing from scratch unnecessarily. I expect things to
+be better now, but anyway I'll just show you here how to create a DarkPAN using
+OrePAN:
+
+First you pick a directory name, e.g. ~/home/perlancar/mypan~ then just start
+adding your distribution files to it:
+
+: % mkdir /home/perlancar/mypan
+: % orepan.pl --destination=/home/perlancar/mypan --pause=PERLANCAR Foo-0.001.tar.gz
+
+You need to assign your distribution to an author, which can be whatever (it
+does not have to be an actual [[https://pause.perl.org/pause/query?ACTION=request_id][PAUSE ID]]).
+
+That's it.
+
+*** Indexing your DarkPAN with lcpan
+
+lcpan can be used to index any CPAN-like repository, so to index your DarkPAN:
+
+: % lcpan update --no-use-bootstrap --no-update-files --cpan /home/perlancar/mypan --trace
+
+The ~--no-use-bootstrap~ option prevents bootstrapping with the CPAN database
+index, and ~--no-update-files~ prevents downloading files from a CPAN mirror.
+
+To query your DarkPAN, e.g. see list of modules:
+
+: % lcpan --cpan /home/perlancar/mypan mods -l
+
+You might want to alias ~lcpan --cpan /home/perlancar/mypan mods~ to something
+shorter, if you type it often enough.

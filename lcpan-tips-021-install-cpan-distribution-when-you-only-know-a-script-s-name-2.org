@@ -1,0 +1,44 @@
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,lcpan-tips,cli
+#+TAGS: perl,lcpan-tips,cli
+#+DESCRIPTION:
+#+TITLE: lcpan tips 021: Install CPAN distribution when you only know a script’s name (2: cpanm-script and lcpanm-script)
+
+*About this series:* A collection of short blog posts about [[https://metacpan.org/pod/lcpan][lcpan]] tips/recipes.
+Some posts will also end up in the upcoming [[https://metacpan.org/pod/App::lcpan::Manual::Cookbook][App::lcpan::Manual::Cookbook]] POD to
+be included in the [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution. [[https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/][First article is here]]. [[https://perlancar.wordpress.com/tag/lcpan-tips/][See the whole
+series]].
+
+*About lcpan:* an application to download and index a mini CPAN mirror on your
+local filesystem, so in effect you will have something like your own CPAN with a
+command-line tool (or perl API) to query and extract information from your
+mirror. I find it perfect for my own personal use when working offline.
+
+A [[https://perlancar.wordpress.com/2016/02/15/lcpan-tips-002-install-cpan-distribution-when-you-only-know-a-scripts-name/][previous tip]] shares this recipe to install a CPAN distribution by mentioning
+its script name:
+
+: % cpanm -n `lcpan script2mod pm-uninstall`
+
+Since then, two convenient utilities have been added: [[https://metacpan.org/pod/cpanm-script][cpanm-script]] and
+[[https://metacpan.org/pod/lcpanm-script][lcpanm-script]]. The first one is a thin wrapper over [[https://metacpan.org/pod/cpanm][cpanm]], while the second one
+is a thin wrapper over [[https://metacpan.org/pod/lcpanm][lcpanm]] (which is itself a thin wrapper over cpanm). They
+basically work the same as the above recipe: given a script name, look up the
+distribution name the script is included in then convert it to module name, and
+then pass it to cpanm.
+
+Being simple thin wrappers, {,l}cpanm-script do not add command-line options of
+their own but simply convert the script name to module name and pass the rest of
+the options. For example, when a script with the same name exists in multiple
+distributions (e.g. ~hangman~) only the first one is chosen to be installed. If
+you want to install all of them, you can use:
+
+: % cpanm -n `lcpan script2mod pm-uninstall`
+
+However, these scripts offer another convenience: tab completion.
+
+: % lcpanm-script -<Tab>
+: % lcpanm-script hang<Tab>
+
+It's better to enter a few characters first to prevent the completion routine
+from trying to retrieve the whole list of scripts on CPAN.
