@@ -4,7 +4,7 @@
 #+CATEGORY: org,org-mode,emacs,addressbook-with-org
 #+TAGS: org,org-mode,emacs,addressbook-with-org
 #+DESCRIPTION:
-#+TITLE: Maintaining Address Book In Org 01: Introduction
+#+TITLE: Maintaining Addressbook In Org 01: Introduction
 
 *About this series:* A collection of short blog posts about my experience
 maintaining addressbook (contactbook) in [[https://orgmode.org][Org format]]. I keep each post short so I
@@ -14,23 +14,15 @@ Despite having used [[https://www.gnu.org/s/emacs/][Emacs]] since 2004, I didn't
 late 2010. As with many others, I was first drawn to org-mode because I was
 searching for a better Todo list system, having tried, among others:
 
-Not one, but a few personally-made-up formats and conventions over plaintext.
-
-Some CGI application which I access from the desktop as well as phone browser.
-
-Some kind of Wiki system.
-
-Databases.
-
-Physical notebook.
-
-Various text editors and todo applications, on various platforms.
-
-[[https://todotxt.org][todo.txt]].
-
-Gadget apps, from Nokia, BlackBerry, to the various Androids.
-
-Even YAML at one point, when I was obsessed to some degree with it.
+- not one, but a few personally-made-up formats and conventions over plaintext;
+- some CGI application which I access from the desktop as well as phone browser;
+- some kind of Wiki system;
+- databases;
+- physical notebook;
+- various text editors and todo applications, on various platforms;
+- [[https://todotxt.org][todo.txt]];
+- gadget apps, from Nokia, BlackBerry, to the various Androids;
+- even YAML at one point, when I was obsessed to some degree with it.
 
 I've always hated, and still hate typing on a smartphone, so even though now I
 use a combination of smartphones and PC/laptop and paper/notebook, my main mode
