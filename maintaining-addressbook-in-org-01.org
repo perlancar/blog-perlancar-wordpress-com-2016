@@ -1,0 +1,48 @@
+#+POSTID: 1838
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: org,org-mode,emacs,addressbook-with-org
+#+TAGS: org,org-mode,emacs,addressbook-with-org
+#+DESCRIPTION:
+#+TITLE: Maintaining Addressbook In Org 01: Introduction
+
+*About this series:* A collection of short blog posts about my experience
+maintaining addressbook (contactbook) in [[https://orgmode.org][Org format]]. I keep each post short so I
+need to spend only ~30 minutes creating each.
+
+Despite having used [[https://www.gnu.org/s/emacs/][Emacs]] since 2004, I didn't discover org-mode until
+late 2010. As with many others, I was first drawn to org-mode because I was
+searching for a better Todo list system, having tried, among others:
+
+- not one, but a few personally-made-up formats and conventions over plaintext;
+- some CGI application which I access from the desktop as well as phone browser;
+- some kind of Wiki system;
+- databases;
+- physical notebook;
+- various text editors and todo applications, on various platforms;
+- [[https://todotxt.org][todo.txt]];
+- gadget apps, from Nokia, BlackBerry, to the various Androids;
+- even YAML at one point, when I was obsessed to some degree with it.
+
+I've always hated, and still hate typing on a smartphone, so even though now I
+use a combination of smartphones and PC/laptop and paper/notebook, my main mode
+of entry is still through a proper keyboard using Emacs on a Linux. When I tried
+org-mode for the first time, the outline feature was enough to draw me in and
+make me start creating some notes. Soon, more and more things got (re)written in
+Org format, including my master addressbook.
+
+If you're anything like me, you'll right away feel that the addressbook or
+contacts app on the smartphone is too restrictive. It's just a linear list of
+contacts, where each contact is given the standard fields of mobile number, work
+number, work fax, home number, and a few others. Adding note is sometimes not
+even possible, let alone structured notes. So I soon decided to have my master
+addressbook on a computer in Org format. I fill and sync my phone contacts using
+the phone-provided apps, and most of the time enter each contact manually and
+separately into my Org addressbook, but the most detailed and complete data will
+be in my Org addressbook. When I get tired of my phone or Google account, I just
+ditched it and buy another phone or create a new Google account with its blank
+contacts database to start over, but I keep maintaining the same master
+addressbook in Org.
+
+The next posts of this series will share how I ended up with the current
+layout/system for my Org addressbook. Stay tuned.
