@@ -1,0 +1,33 @@
+#+POSTID: 1855
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cpan
+#+TAGS: perl,cpan
+#+DESCRIPTION:
+#+TITLE: Dwindling CPAN releases
+
+This couple of months I've been casually looking at daily CPAN uploads, because
+I entered the [[http://cpan.io/board/once-a/][Once-a-day-releases]] game. I notice that the uploads are getting
+scarcer and scarcer. So today I decided to take a look at monthly upload
+statistics. The result is summarized in the chart below which shows the number
+of monthly CPAN releases, unique distributions, and unique authors up to
+July 2019.
+
+#+BEGIN_SRC html
+<img src="/2019/08/cpan-releases-monthly-2019-07.png">
+#+END_SRC html
+
+Indeed, the uploads have been diminishing recently, from 1215 in Apr, to 980 in
+May, 886 in Jun, and 944 in Jul. Not counting my own releases, it's 1076 in Apr,
+888 in May, 793 in Jun, and 753 in Jul. It's sad to see that I affect the stats
+so significantly. I can't be the only one still using Perl that much or actively
+in the whole wide world, am I?
+
+One thing I want to point out is that, ironically, the tipping point is Aug
+2014, when [[http://blogs.perl.org/users/neilb/2014/08/cpan-day---start-your-engines.html][the first CPAN Day]] was organized. The number of releases peaked that
+month, but then have been steadily dwindling ever since.
+
+Nowadays, CPAN gets 20-30 daily uploads on average; it was around 60-100
+in 2014. Meanwhile Python’s PyPI page indicates that it gets at least 700-800
+daily uploads. Interpret that as you wish, but Python is clearly eating
+everybody’s lunch. First it was Perl, then Ruby, then R.
