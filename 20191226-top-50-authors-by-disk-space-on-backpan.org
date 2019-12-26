@@ -1,0 +1,75 @@
+#+POSTID: 1871
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cpan,backpan
+#+TAGS: perl,cpan,backpan
+#+DESCRIPTION:
+#+TITLE: Top 50 authors by disk space on BackPAN
+
+Result:
+
+:  REEDFISH 8140.7MB (11.1%)
+:      SHAY 2275.4MB ( 3.1%)
+:      RJBS 1757.1MB ( 2.4%)
+:       ZDM 1688.2MB ( 2.3%)
+:    LSKATZ 1673.5MB ( 2.3%)
+:    AJPAGE 1218.4MB ( 1.7%)
+: TIEDEMANN 1090.0MB ( 1.5%)
+:       KAL  957.1MB ( 1.3%)
+: PERLANCAR  871.2MB ( 1.2%)
+:  XSAWYERX  804.0MB ( 1.1%)
+:       LDS  766.9MB ( 1.0%)
+:    BINGOS  722.1MB ( 1.0%)
+:     JKEGL  692.0MB ( 0.9%)
+: DCANTRELL  677.9MB ( 0.9%)
+:     JESSE  625.6MB ( 0.9%)
+:       INA  625.0MB ( 0.9%)
+: BTMCINNES  615.8MB ( 0.8%)
+:    DGINEV  575.2MB ( 0.8%)
+:   DROLSKY  518.8MB ( 0.7%)
+:       CHM  495.5MB ( 0.7%)
+:  PAWAPAWA  474.2MB ( 0.6%)
+:  AREIBENS  470.2MB ( 0.6%)
+:     GIBUS  459.5MB ( 0.6%)
+:   RKELSCH  449.1MB ( 0.6%)
+:   NWCLARK  435.4MB ( 0.6%)
+:  JDDPAUSE  435.2MB ( 0.6%)
+:   TMILLER  433.5MB ( 0.6%)
+:    STEVEB  425.5MB ( 0.6%)
+:  CJFIELDS  419.5MB ( 0.6%)
+:       SRI  407.6MB ( 0.6%)
+:      AMBS  396.3MB ( 0.5%)
+:     ADAMK  374.4MB ( 0.5%)
+: EARONESTY  370.6MB ( 0.5%)
+:      JGNI  353.6MB ( 0.5%)
+:  MLEHMANN  351.6MB ( 0.5%)
+:  DANKOGAI  335.2MB ( 0.5%)
+:    NHORNE  332.9MB ( 0.5%)
+:   ABIGAIL  327.2MB ( 0.4%)
+:    OLIVER  310.9MB ( 0.4%)
+:   GRAHAMC  295.0MB ( 0.4%)
+:     ETHER  292.5MB ( 0.4%)
+:  MIYAGAWA  290.3MB ( 0.4%)
+:     HISSO  276.6MB ( 0.4%)
+:  KTHAKORE  267.4MB ( 0.4%)
+:   ASLEWIS  260.9MB ( 0.4%)
+:      TIMB  253.7MB ( 0.3%)
+:   VANSTYN  253.2MB ( 0.3%)
+:    RURBAN  252.7MB ( 0.3%)
+:  AGRUNDMA  242.5MB ( 0.3%)
+:  WOLFSAGE  238.7MB ( 0.3%)
+
+Source:
+
+http://backpan.cpantesters.org/backpan-full-index.txt.gz (~12MB as of this writing)
+
+Total size of files on BackPAN:
+
+: % zcat backpan-full-index.txt.gz | perl -lnE'/.+ \d+ (\d+)$/ or next; $size+=$1; END { printf "%.1fMB\n", $size/1024/1024 }'
+: 73445.3MB
+
+One-liner to generate the above result:
+
+: % zcat backpan-full-index.txt.gz | perl -lnE'm!authors/id/./../(\w+)/.+ (\d+) (\d+)$! or next; $size{$1}+=$3;
+:     END { printf "%9s %6.1fMB (%4.1f%%)\n", $_, $size{$_}/1024/1024, $size{$_}/1024/1024/73445.3*100
+:         for sort { $size{$b}<=>$size{$a} } keys %size }' | head -n50
