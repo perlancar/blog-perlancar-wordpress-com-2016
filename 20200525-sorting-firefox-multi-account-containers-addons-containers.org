@@ -1,0 +1,62 @@
+#+POSTID: 1887
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,firefox
+#+TAGS: perl,firefox
+#+DESCRIPTION:
+#+TITLE: Sorting Containers of Firefox Multi-Account Containers Add-on, using Perl
+
+Do you use Firefox [[https://addons.mozilla.org/en-US/firefox/addon/multi-account-containers/][Multi-Account Containers]] add-on? If you do, do you create
+lots of containers and wish you could reorder the list of containers? Then this
+short post might be of interest to you.
+
+As of this writing, the add-on does not provide a UI to do so ([[https://github.com/mozilla/multi-account-containers/issues/1208][GitHub issue #1208]]).
+Google search landed me on the issue page and I saw a rather interesting
+PowerShell snippet to accomplish what I want. Basically to sort the containers
+you just need to sort the identity records in the ~containers.json~ file. Since
+I already wrote a couple of Firefox modules like [[https://metacpan.org/pod/Firefox::Util::Profile][Firefox::Util::Profile]] and
+[[https://metacpan.org/pod/App::FirefoxUtils][App::FirefoxUtils]], I thought I'd write the equivalent of the script in Perl.
+
+The result: [[https://metacpan.org/pod/firefox-mua-sort-containers][firefox-mua-sort-containers]] ([[https://metacpan.org/release/App-FirefoxMultiAccountContainersUtils/source/lib/App/FirefoxMultiAccountContainersUtils.pm][source code]]). I believe the core logic
+of the code is as straightforward as the PowerShell version, with a few
+additional niceties:
+
+It does not close Firefox automatically but just politely tells you that Firefox
+needs to stop running.
+
+It backs up ~containers.json~ first.
+
+It sports a ~--dry-run~ (~-n~) option to show you how the containers will be
+sorted, without actually modifying the file.
+
+It allows easy sort specification using [[https://metacpan.org/pod/Sort::Sub][Sort::Sub]].
+
+Tab completion (activate using ~complete -C firefox-mua-sort-containers
+firefox-mua-sort-containers~ first; or see the documentation for more details).
+
+*** Installation
+
+To install the script:
+
+: % cpanm -n App::FirefoxMultiAccountContainersUtils
+
+Please wait a few moment while the installer downloads and installs all the
+requirements.
+
+*** Some examples
+
+Sort by name:
+
+: % firefox-mua-sort-containers myprofile -n  ;# just show the sorted list, don't actually sort yet
+: % firefox-mua-sort-containers myprofile     ;# now sort it for real
+
+Sort by length then name (yeah, just a useless example):
+
+: % firefox-mua-sort-containers myprofile --sort-sub by_several --first by_length --second by_name
+
+Sort by name, but keep some containers I often use at the top:
+
+: % firefox-mua-sort-containers myprofile
+: % firefox-mua-sort-containers myprofile --sort-sub by_example --sort-arg example='container1,container2,container3'
+
+Enjoy.
