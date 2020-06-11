@@ -1,0 +1,115 @@
+#+POSTID: 1901
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli
+#+TAGS: perl,cli
+#+DESCRIPTION:
+#+TITLE: The joy of piping tables on the command line
+
+Staying home a lot lately has given me the chance, among other things, to
+organize my personal media files (photos, videos, audios) and update my remote
+backups on Google Photos and other cloud services.
+
+To work with these files, I've updated some of my CLI scripts like [[https://metacpan.org/pod/media-info][media-info]]
+and [[https://metacpan.org/pod/td][td]], as well as created a few others like [[https://metacpan.org/pod/delete-all-empty-dirs][delete-all-empty-dirs]],
+[[https://metacpan.org/pod/show-duplicate-files][show-duplicate-files]], and [[https://metacpan.org/pod/reencode-videos][reencode-videos]].
+
+I just want to show again (I've [[https://perlancar.wordpress.com/2016/03/04/lcpan-tips-015-munging-lcpan-text-output-with-td/][blogged]] about this once before) that it's
+absolutely wonderful piping tables on the command-line. While piping bytes on
+Unix remains as one of the simplest yet most powerful and flexible interprocess
+communications, to increase the convenience, one can put a layer of
+encoding/decoding on top of this to pass around higher-level entities.
+PowerShell, for example, goes full-blown objects. Which can be very convenient
+sometimes. I choose to output and pipe plain data structures in most of my CLI
+scripts, particularly table data. With this, I can do things like:
+
+Show a table of data for my videos:
+
+: % media-info *
+: +---------------+--------------+------------+---------+----------+-------------------------+--------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+: | audio_bitrate | audio_format | audio_rate | backend | duration | media                   | rotate | type_from_name | video_bitrate | video_dar | video_format | video_fps | video_height | video_longest_side | video_orientation | video_sar | video_shortest_side | video_width |
+: +---------------+--------------+------------+---------+----------+-------------------------+--------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+: | 59392         | AAC          | 44100      | Ffmpeg  | 59.81    | 2019-08-27 14.40.38.mp4 |        | video          | 1245184       |           | H264         | 59.67     | 848          | 848                | portrait          |           | 400                 | 400         |
+: | 262144        | AAC          | 48000      | Ffmpeg  | 97.56    | 2019-08-27 19.06.06.mp4 | 180    | video          | 964608        |           | H264         | 30.03     | 352          | 640                | landscape         |           | 352                 | 640         |
+: | 262144        | AAC          | 48000      | Ffmpeg  | 91.16    | 2019-08-27 19.08.59.mp4 | 180    | video          | 1012736       |           | H264         | 30.04     | 352          | 640                | landscape         |           | 352                 | 640         |
+: | 262144        | AAC          | 48000      | Ffmpeg  | 91.93    | 2019-08-27 19.10.07.mp4 | 180    | video          | 1006592       |           | H264         | 30.04     | 352          | 640                | landscape         |           | 352                 | 640         |
+: | 262144        | AAC          | 48000      | Ffmpeg  | 89.58    | 2019-08-27 19.11.24.mp4 | 90     | video          | 1025024       |           | H264         | 30.04     | 352          | 640                | landscape         |           | 352                 | 640         |
+: | 262144        | AAC          | 48000      | Ffmpeg  | 318.36   | 2019-08-27 19.22.55.mp4 | 180    | video          | 705536        |           | H264         | 29.96     | 352          | 640                | landscape         |           | 352                 | 640         |
+: | 261120        | AAC          | 48000      | Ffmpeg  | 46.88    | 2019-08-27 19.23.28.mp4 | 180    | video          | 1451008       |           | H264         | 30.06     | 352          | 640                | landscape         |           | 352                 | 640         |
+: |               |              |            | Ffmpeg  | 5.67     | 2019-08-29 11.01.11.mp4 |        | video          | 3174400       | 9:16      | H264         | 19.94     | 1280         | 1280               | portrait          | 1:1       | 720                 | 720         |
+: | 131072        | AAC          | 48000      | Ffmpeg  | 18.07    | 2019-08-29 13.56.10.mp4 | 90     | video          | 1851392       |           | H264         | 29.95     | 352          | 640                | landscape         |           | 352                 | 640         |
+: | 63488         | AAC          | 44100      | Ffmpeg  | 28.89    | 2019-08-29 17.04.49.mp4 | 90     | video          | 1520640       |           | H264         | 29.97     | 480          | 848                | landscape         |           | 480                 | 848         |
+: | 63488         | AAC          | 44100      | Ffmpeg  | 14.97    | 2019-08-29 17.04.56.mp4 |        | video          | 3277824       | 9:16      | H264         | 29.93     | 1280         | 1280               | portrait          | 1:1       | 720                 | 720         |
+: | 63488         | AAC          | 44100      | Ffmpeg  | 73.87    | 2019-08-29 17.05.10.mp4 | 90     | video          | 1303552       |           | H264         | 29.97     | 480          | 848                | landscape         |           | 480                 | 848         |
+: | 64512         | AAC          | 44100      | Ffmpeg  | 51.24    | 2019-08-29 17.05.30.mp4 | 90     | video          | 1374208       |           | H264         | 29.98     | 480          | 848                | landscape         |           | 480                 | 848         |
+: | 262144        | AAC          | 48000      | Ffmpeg  | 9.11     | 2019-08-30 07.16.24.mp4 |        | video          | 1959936       |           | H264         | 30.22     | 352          | 640                | landscape         |           | 352                 | 640         |
+: +---------------+--------------+------------+---------+----------+-------------------------+--------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+
+Show the total duration:
+
+: % media-info * | td sum
+: +---------------------+----------+
+: | key                 | value    |
+: +---------------------+----------+
+: | audio_bitrate       | 2279424  |
+: | audio_format        | 0        |
+: | audio_rate          | 604500   |
+: | backend             | 0        |
+: | duration            | 997.1    |
+: | media               | 0        |
+: | rotate              | 1350     |
+: | type_from_name      | 0        |
+: | video_bitrate       | 21872640 |
+: | video_dar           | 0        |
+: | video_format        | 0        |
+: | video_fps           | 439.8    |
+: | video_height        | 7664     |
+: | video_longest_side  | 11072    |
+: | video_orientation   | 0        |
+: | video_sar           | 0        |
+: | video_shortest_side | 6096     |
+: | video_width         | 9504     |
+: +---------------------+----------+
+
+Only select videos that have bitrates higher than 3MiB/s:
+
+: % media-info * | td grep '$_->{video_bitrate} > 3_000_000'
+: +---------------+--------------+------------+---------+----------+-------------------------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+: | audio_bitrate | audio_format | audio_rate | backend | duration | media                   | type_from_name | video_bitrate | video_dar | video_format | video_fps | video_height | video_longest_side | video_orientation | video_sar | video_shortest_side | video_width |
+: +---------------+--------------+------------+---------+----------+-------------------------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+: |               |              |            | Ffmpeg  | 5.67     | 2019-08-29 11.01.11.mp4 | video          | 3174400       | 9:16      | H264         | 19.94     | 1280         | 1280               | portrait          | 1:1       | 720                 | 720         |
+: | 63488         | AAC          | 44100      | Ffmpeg  | 14.97    | 2019-08-29 17.04.56.mp4 | video          | 3277824       | 9:16      | H264         | 29.93     | 1280         | 1280               | portrait          | 1:1       | 720                 | 720         |
+: +---------------+--------------+------------+---------+----------+-------------------------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+
+Re-encode those high-bitrate videos:
+: % media-info * | td grep '$_->{video_bitrate} > 3_000_000' | while read f; do reencode-videos "$f"; done
+
+Show portrait videos:
+: % media-info * | td grep '$_->{video_height} > $_->{video_width}'
++---------------+--------------+------------+---------+----------+-------------------------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+| audio_bitrate | audio_format | audio_rate | backend | duration | media                   | type_from_name | video_bitrate | video_dar | video_format | video_fps | video_height | video_longest_side | video_orientation | video_sar | video_shortest_side | video_width |
++---------------+--------------+------------+---------+----------+-------------------------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+| 59392         | AAC          | 44100      | Ffmpeg  | 59.81    | 2019-08-27 14.40.38.mp4 | video          | 1245184       |           | H264         | 59.67     | 848          | 848                | portrait          |           | 400                 | 400         |
+|               |              |            | Ffmpeg  | 5.67     | 2019-08-29 11.01.11.mp4 | video          | 3174400       | 9:16      | H264         | 19.94     | 1280         | 1280               | portrait          | 1:1       | 720                 | 720         |
+| 63488         | AAC          | 44100      | Ffmpeg  | 14.97    | 2019-08-29 17.04.56.mp4 | video          | 3277824       | 9:16      | H264         | 29.93     | 1280         | 1280               | portrait          | 1:1       | 720                 | 720         |
++---------------+--------------+------------+---------+----------+-------------------------+----------------+---------------+-----------+--------------+-----------+--------------+--------------------+-------------------+-----------+---------------------+-------------+
+
+If I want to meticulously edit the filenames, I can convert the table as CSV:
+
+: % media-info * --format csv > media.csv
+
+or:
+
+: % media-info * | td2csv > media.csv
+
+Edit the CSV in a spreadsheet, add the column name *new_filename*, and rename the files again on the CLI:
+
+: % csv2td media.csv | td as-aohos | td map 'qq(mv -i "$_->{media}" "$_->{new_filename}")'
+mv -i "2019-08-27 14.40.38.mp4" "2019-08-27 14.40.38 - blah blah.mp4"
+mv -i "2019-08-27 19.06.06.mp4" "2019-08-27 19.06.06 - some description.mp4"
+mv -i "2019-08-27 19.08.59.mp4" "2019-08-27 19.08.59 - some other description.mp4"
+...
+
+And pipe it to bash if you have verified the output:
+
+: % csv2td media.csv | td as-aohos | td map 'qq(mv -i "$_->{media}" "$_->{new_filename}")' | bash

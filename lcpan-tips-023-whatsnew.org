@@ -1,0 +1,88 @@
+#+POSTID: 1897
+#+BLOG: perlancar
+#+CATEGORY: perl,lcpan-tips,cli
+#+TAGS: perl,lcpan-tips,cli
+#+DESCRIPTION:
+#+TITLE: lcpan tips 023: What's new (including whatsnew)
+
+*About this series:* A collection of short blog posts about [[https://metacpan.org/pod/lcpan][lcpan]] tips/recipes.
+Some posts will also end up in the upcoming [[https://metacpan.org/pod/App::lcpan::Manual::Cookbook][App::lcpan::Manual::Cookbook]] POD to
+be included in the [[https://metacpan.org/pod/App::lcpan][App::lcpan]] distribution. [[https://perlancar.wordpress.com/2016/02/14/lcpan-tips-001-doc/][First article is here]].
+[[https://perlancar.wordpress.com/tag/lcpan-tips/][See the whole series]].
+
+*About lcpan:* an application to download and index a mini CPAN mirror on your
+local filesystem, so in effect you will have something like your own CPAN with a
+command-line tool (or perl API) to query and extract information from your
+mirror.
+
+The [[https://perlancar.wordpress.com/2019/01/09/lcpan-tips-022-testing-all-dependents/][previous tip]] was posted in January 2019. I thought I'd post a status update
+of what has been added to lcpan since then.
+
+** New subcommands
+
+As usual, a bunch of subcommands have been added, most of them for convenience,
+can be composed from existing subcommands, and not that groundbreaking. For
+example, the *extract-dist* subcommand extracts a distro tarball. lcpan already
+has *extract-mod*, but sometimes we want to specify a distro name instead of a
+module. This could almost as easily be expressed using *lcpan extract-mod* and
+*lcpan dist-mods*. This:
+
+: % lcpan extract-dist libwww-perl
+
+can also be written as:
+
+: % lcpan extract-mod `lcpan dist-mods libwww-perl | head -n1`
+
+lcpan now also has the *author*, *dist*, *module*, *release*, *script*
+subcommands, which are the singular versions for *authors*, *dists* et al, that
+are slightly more convenient if you want to retrieve only a single entity with
+an exact name search.
+
+The following subcommands have also added: *rdeps-scripts*, *dist-rdeps*,
+*heaviest-dists*, *most-depended-authors*, *most-mentioned-mods*,
+*most-mentioned-scripts*, and *whatsnew* (more on this one below).
+
+** Recording of creation and last modification times
+
+One of the most important new features is that lcpan now stores creation time
+and last modification time of most entities, like authors, modules,
+dependencies, as well as mentions. Everytime you update the index using *lcpan
+update*, when a database record is added or updated, the *rec_ctime* and
+*rec_mtime* columns are set respectively. This means you can query whether a
+distribution, or author, or dependency is new or recently added. Along with
+this, many subcommands now sport the filtering options like *--added-since*,
+*--updated-since*, *--added-or-updated-since*, or the more convenient options
+like *--added-since-last-index-update* or *--update-since-last-n-index-updates*.
+
+For example, to see what modules are added in the last index update:
+
+: % lcpan mods -l --added-since-last-index-update
+
+Or, to see what authors are added or updated after Jun 1, 2020 (assuming this
+year is 2020):
+
+: % lcpan authors -l --added-or-updated-since 'jun 1'
+
+Of course, the creation and update times are based on the time you perform
+*lcpan update*, since PAUSE itself does not record creation/modification times
+on the CPAN index files. So if your local CPAN index is only created from
+scratch today, everything will be new.
+
+** Whatsnew
+
+One new subcommand is particularly convenient: *whatsnew*. It will display
+modules, distributions, and authors that are recently added/updated, by default
+since the last index update. And if you specify the *--my-author* option, or put
+it in your *lcpan.conf*:
+
+: [subcommand=whatsnew]
+: my_author=PERLANCAR
+
+then *whatsnew* will also display new reverse dependencies and new mentions to
+one of your modules. The output is in the form of [[https://orgmode.org][Org]] document, which you can
+view as-is using a pager, or view using Emacs, directly from the command-line:
+
+: % lcpan whatsnew --pager
+: % lcpan whatsnew --view
+
+There's a [[https://youtu.be/_QUmIZgpkX4][demo video]] for this.
