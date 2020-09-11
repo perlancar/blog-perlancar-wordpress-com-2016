@@ -1,0 +1,83 @@
+#+POSTID: 1912
+#+BLOG: perlancar
+#+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil
+#+CATEGORY: perl,cli,getopt
+#+TAGS: perl,cli
+#+DESCRIPTION:
+#+TITLE: CLI programs and scripts I use daily 1: net{on,off}, bt{on,off}, {,un}pause-browsers
+
+Hey, another mini-article series! Since I use the CLI a lot and also [[https://metacpan.org/author/PERLANCAR][publish]] a
+bunch of CLI scripts on CPAN, this series will serve mainly as a list of
+mentions for my scripts, as well as for other CLI programs and scripts I use
+daily.
+
+Let's start with browsing and power-saving.
+
+Browsing is one of everybody's main activities nowadays. Unless you browse using
+text-based browsers like [[https://lynx.invisible-island.net/][lynx]] and [[http://links.twibright.com/][links]], you'll invariably run into the [[https://idlewords.com/talks/website_obesity.htm][web
+obesity crisis]] (a.k.a. web bloat problem) affecting your battery life. Even if
+you only open a news article, your laptop may still issue [[https://www.forbes.com/sites/kalevleetaru/2016/02/06/why-the-web-is-so-slow-and-what-it-tells-us-about-the-future-of-online-journalism/][thousands]] of requests
+to hundreds of domains to the various analytic tracking beacons, repeatedly
+every second or so for as long as the tab exists. Multiply that with 5, 10, or
+50 tabs. (I seem to have a problem, er, work best, when I keep lots of tabs for
+various purposes open. You might also correctly guess that my desk is [[https://www.businessnewsdaily.com/4882-messy-desk-personality.html][messy]].)
+The result, your browser processes are eating between 20% to 50% or more CPU
+even when you are not focused on any of browser windows. I often find myself
+just typing on a terminal emulator and seeing that my system load is 0.75 or
+even greater thatn 1.00, only because I have Firefox open. Linux desktop often
+not being the most power-efficient environment, this certainly does not help.
+
+I try to actively conserve power whenever I am not close to an available power
+outlet. So whenever I am coding or writing and not needing the Internet, I issue
+this:
+
+: % netoff; pause-browsers
+
+[[https://metacpan.org/pod/netoff][netoff]] (and its counterpart [[https://metacpan.org/pod/neton][neton]]) will use NetworkMonitor to turn off (or on)
+networking. [[https://metacpan.org/pod/pause-browsers][pause-browsers]] will ~kill -STOP~ browser processes, which I find,
+though relatively blunt, is convenient to save power. There doesn't seem an
+addon or menu setting to let you freeze one or more tabs or globally disable and
+re-enable JavaScript instantly. The various ways to disable Javascript
+(including ~javascript.enabled~ Firefox config, or uMatrix or uBlock addon)
+usually require you to refresh the page, and/or only work for a single site or
+tab. Other ways to freeze tabs will simply clear the tab content and require you
+to reload, which for me defeat the purpose of having many tabs open.
+
+When you want to browse again, you can issue:
+
+: % neton; btoff; unpause-browsers
+
+[[https://metacpan.org/pod/btoff][btoff]] is for turning Bluetooth back off, because NetworkMonitor always wants to
+turn my bluetooth on when I turn my networking on, regardless of the previous
+bluetotoh state. Aside from {pause,unpause}-browsers, I also made scripts for
+specific browsers: [[https://metacpan.org/pod/pause-firefox][pause-firefox]], [[https://metacpan.org/pod/pause-chrome][pause-chrome]], [[https://metacpan.org/pod/pause-vivaldi][pause-vivaldi]], [[https://metacpan.org/pod/pause-opera][pause-opera]]. You
+can also only pause/unpause (as well as kill) processes of certain Unix users,
+if you happen to run several in a single system (which I often do, before using
+[[https://addons.mozilla.org/en-US/firefox/addon/multi-account-containers/][Multi-Account Containers]] addon).
+
+** Multi-Account Containers Firefox addon
+
+I made a [[https://perlancar.wordpress.com/2020/05/25/sorting-containers-of-firefox-multi-account-containers-add-on-using-perl/][separate blog post]] for this. Basically I use this addon and have lots
+of containers created. I write scripts to [[https://metacpan.org/pod/firefox-mua-sort-containers][sort]], [[https://metacpan.org/pod/firefox-mua-list-containers][list]], or [[https://metacpan.org/pod/firefox-mua-modify-containers][modify/delete]] them from
+the CLI.
+
+** Suspending
+
+As any Linux laptop user experience, automatic suspending by closing the lid is
+randomly screwy, some brands more so than the others. I find this invocation
+more reliable (oh it still randomly fails too from time to time, but much less
+often):
+
+: # sleep 3; pm-suspend
+
+The sleep part is to give me time to lock the screen (e.g. press Ctrl-Alt-L),
+because otherwise your laptop will wake up unlocked.
+** Checking the battery
+
+I find:
+
+: % acpi
+
+often faster than moving my graphical pointer to the battery widget on the
+desktop tray. As a bonus, there's ~acpi -V~ which will give you lots more
+information.
