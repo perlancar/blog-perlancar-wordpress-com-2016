@@ -1,0 +1,110 @@
+#+POSTID: 1922
+#+POSTTIME: 2020-10-14 Wed 18:15
+#+BLOG: perlancar
+#+CATEGORY: perl,cli,org-mode,emacs,org-stuffs-series
+#+TAGS: perl,cli,org-mode,emacs,org-stuffs-series
+#+DESCRIPTION:
+#+TITLE: Org stuffs: 001: Moving/removing done todo items
+
+*About this series:* A collection of short blog posts related to manipulating
+[[https://orgmode.org][Org]] documents using Perl. This is the first article. See [[https://perlancar.wordpress.com/tag/org-stuffs-series/][the whole series]].
+
+A bit of history. I started using org-mode in 2011. Emacs I had been using much
+earlier, but as also happened with many others, org-mode really clinched the
+deal. Slowly but sure, I migrated my notes, and later on, my todo list, into
+this format. Also in that year I started the [[https://metacpan.org/pod/Org::Parser][Org::Parser]] project. It's not
+perfect, and at one point [[https://www.perlmonks.org/?node=educated_foo][educated_foo]] said it was pointless because just like
+only perl can parse Perl, only emacs' org-mode can truly parse Org. However, I
+manage to do some useful tricks with the module. (BTW, I missed the guy.)
+
+Being a heavily procrastinating and utterly lazy person, with lots of ideas and
+abandoned projects, my todo file grew to thousands of items (last count,
+4600+ undone todo items and 1900+ done dones).
+
+I currently organize my ~todo.org~ like the following: there are hierarchical
+categories which I write strictly as level-1 headings, with subcategories
+written inline in the heading using "cat > subcat > subsubcat" notation. I keep
+these level-1 headings sorted. Example:
+
+: * 00unorganized [0/0]
+: * finance [0/0]
+: * health [0/0]
+: * leisure > vacation [0/0]
+: * pet [0/0]
+: * person > kid 1 > education [0/0]
+: * person > kid 1 > health [0/0]
+: * person > kid 2 > health [0/0]
+: * person > kid 2 > health [0/0]
+: * person > kids > education [0/0]
+: * person > kids > health [0/0]
+: * person > mom > health [0/0]
+: * proj > blog > blog title 1 [0/0]
+: * proj > blog > blog title 2 [0/0]
+: * proj > book > working title 1 [0/0]
+: * proj > book > working title 2 [0/0]
+: * proj > perl [0/0]
+: * proj > perl > ansitable [0/0]
+: * proj > perl > debian [0/0]
+: * proj > perl > lcpan [0/0]
+: * proj > perl > perinci [0/0]
+: * proj > perl > wordlist [0/0]
+: * reading > books to read [0/0]
+: * watching > movies to watch [0/0]
+: * watching > tv series to watch [0/0]
+
+Actual todo items are always written as level-2 headings under one of these
+level-1 categories. This way, I always know that todo items are at level-2,
+which makes some things easier to find and manipulate. For example:
+
+: * proj > perl > lcpan [0/0]
+: ** IDEA [2020-10-04 Sun] lcpan: subcommand to star/favorite modules/dists/authors
+: ** IDEA [2020-10-04 Sun] lcpan: subcommand to show whether our favorite modules/dists/authors have a release in the past week/month/etc
+: ** WISHLIST [2020-10-04 Sun] lcpan: subcommand to retrieve number of ++ from metacpan
+: ** IDEA [2020-02-24 Mon] lcpan: subcommand to check circular dependency
+: ** TODO [2020-05-10 Sun] lcpan: replace Archive::Tar with Archive::Tar::Wrapper
+
+If you're wondering about the timestamps, my habit is to put a creation date at
+the beginning of each headline's title. I myself feel it's rather unclean and
+have tried to put "logs" inside the entries, but it's nice being able to quickly
+see how old a todo item is, so I've kept the habit alive.
+
+The actual "proj > perl" category itself is quite large (currently 3000+), as I
+put todo items for various smaller projects there and only create a subcategory
+for a few notable projects.
+
+Over time, I collect hundreds of done todo items in various categories,
+including in this large "proj > perl" category. I want to remove the done items,
+but archive it in other file (~done.org~), *under the same category headlines*.
+
+Emacs offers [[https://orgmode.org/manual/Moving-subtrees.html][some archiving functions]] for this, and I'm sure with some elisp
+code it can be instructed to do the above, but with my very limited eslip-fu I
+shuddered at how much time I have to spend to produce such code. Thus,
+Org::Parser to the rescue. The result is [[https://metacpan.org/pod/move-done-todos][move-done-todos]]. It's not as concise as
+I like it to be, because the Org::Parser's API still stinks and lacking when it
+comes to building node objects or doing some basic manipulation. But at least it
+works.
+
+To use it:
+
+: % move-done-todos todo.org done.org
+
+By default, the script operates in dry-run (simulation) mode, for safety. If you
+are sure with the results, you add the ~--no-dry-run~ option:
+
+: % move-done-todos todo.org done.org --no-dry-run
+
+The nice thing about this script is that it can auto-create the categories in
+~done.org~, so moving is only a single command-line invocation process. I do
+strive to make everything in the world a single command-line invocation process.
+
+If you want to *remove* done todo items and not store them in another file, as
+you might want to do so because the items are already recorded in your
+repository, you can omit the done filename:
+
+: % move-done-todos todo.org --no-dry-run
+
+and the done todo items are output to stdout only.
+
+There are things that I want the script to be able to do, but not yet, like
+updating the counter cookies. That, for now, is currently still noted as an
+undone item in my ~todo.org~.
