@@ -1,0 +1,23 @@
+#+POSTID: 1979
+#+POSTTIME: 2022-01-21 Fri 11:46
+#+CATEGORY: perl,cpan
+#+TAGS: perl,cpan
+#+DESCRIPTION:
+#+TITLE: CPAN vs Hackage releases, Part 2
+
+Continuing from the [[https://perlancar.wordpress.com/2021/01/03/cpan-vs-hackage-releases-part-1/][first part]], I managed to collect data from Jan to Jul 2021
+but unfortunately in the middle of August my VM got rebooted and I forgot to
+re-run the collecting script so these are all the full months 2021 data that I
+have.
+
+| Period   | CPAN releases | CPAN authors | Hackage releases | Hackage authors |
+|----------+---------------+--------------+------------------+-----------------|
+| Jan 2021 |          1184 |          229 |              574 |             229 |
+| Feb 2021 |          1016 |          223 |              737 |             220 |
+| Mar 2021 |          1001 |          229 |              783 |             258 |
+| Apr 2021 |           979 |          230 |              540 |             193 |
+| Jun 2021 |           982 |          220 |              491 |             170 |
+| Jul 2021 |           951 |          187 |              562 |             195 |
+
+Draw the conclusion yourself. I end my curiosity here, but might compare again
+in the future.
